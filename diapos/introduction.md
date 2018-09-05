@@ -1,5 +1,12 @@
-# Introduction
+# Qu'est ce qu'un web service ?
 
 ----
 
-à faire plus tard
+## Exemple
+
+- [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
+- [World Population API](http://api.population.io/)
+
+----
+
+## Le protocole HTTP
