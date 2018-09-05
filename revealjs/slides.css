@@ -1,0 +1,102 @@
+.reveal .main-title {
+    /* Empty */
+}
+
+.reveal .chapter {
+    /* Empty */
+}
+
+.reveal .center {
+    text-align: center;
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+    text-transform: none;
+}
+
+.reveal .chapter h2 {
+    font-size: 5em;
+}
+
+.reveal .tp h2 {
+    font-size: 5em;
+}
+
+.reveal .exercice h2 {
+    font-size: 5em;
+}
+
+.reveal .slides img {
+    border: none;
+    background: none;
+    box-shadow: none;
+    height: auto;
+}
+
+.reveal .slides {
+    font-size: 30px;
+}
+
+.reveal .chapter.slide-background.present  {
+    opacity: 0.2;
+}
+
+.reveal .tp.slide-background.present  {
+    opacity: 0.2;
+}
+
+.reveal .exercice.slide-background.present  {
+    opacity: 0.3;
+}
+
+.reveal .slide {
+    text-align: left;
+}
+
+.reveal pre {
+    width: 100%;
+}
+
+.reveal code {
+    font-size: 90%;
+    line-height: 22px;
+}
+
+.reveal pre code {
+    max-height: none;
+}
+
+.reveal ul {
+    list-style-type: none;
+}
+
+.reveal ul ul {
+    list-style-type: none;
+}
+
+.reveal ul li:before {
+    content: '–';
+    margin-right: 7px;
+}
+
+.reveal ul li {
+    font-size: 80%;
+    color: #1a53a1;
+}
+
+.reveal li li {
+    color: #657b83;
+}
+
+.reveal .small {
+    font-size: 0.7em;
+}
+
+.reveal label {
+    font-size: medium;
+}
