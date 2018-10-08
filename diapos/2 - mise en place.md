@@ -85,7 +85,7 @@ public class CalculAvecJspServlet extends HttpServlet {
 </html>
 ```
 
-- déployez le projet à la racine de votre Tomcat 8 et appellez l'URL (http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4)[http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4]
+- déployez le projet à la racine de votre Tomcat 8 et appellez l'URL [http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4](http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4)
 
 ----
 
