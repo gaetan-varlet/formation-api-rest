@@ -5,7 +5,7 @@
 ## Création d'une application web classique avec Maven
 
 - créez un nouveau projet maven en choisissant l'option "skip archetype" et packaging "war"
-- créez un fichier **web.xml** dans le dossier *src/main/webapp/WEB-INF/* :
+- créez un fichier **web.xml** dans le dossier *src/main/webapp/WEB-INF/*
 ```xml
 <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -17,7 +17,7 @@
 
 ----
 
-- passez en Java 8 et ajoutez l'API Servlet dans le **pom.xml** :
+- passez en Java 8 et ajoutez l'API Servlet dans le **pom.xml**
 
 ```xml
 	<properties>
@@ -89,7 +89,7 @@ public class CalculAvecJspServlet extends HttpServlet {
 
 ### Création d'une seconde servlet sans JSP
 
-- créez la servlet **CalculServlet.java** dans le dossier *src/main/java*, dans le package *servlet* :
+- créez la servlet **CalculServlet.java** dans le dossier *src/main/java*, dans le package *servlet*
 
 ```java
 package servlet;
@@ -158,6 +158,8 @@ public class CalculTextPlainServlet extends HttpServlet {
 	}
 }
 ```
+
+----
 
 - relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul-text-plain?nombre1=3&nombre2=4](http://localhost:8080/calcul-text-plain?nombre1=3&nombre2=4)
 
@@ -293,7 +295,7 @@ public class CalculJacksonServlet extends HttpServlet {
 ## JAX-RS
 
 - JAX-RS, pour *Java API for RESTful Web Services* est une spécification de Java EE.
-- il faut utiliser une implémentation : Jersey est l'implémentation de référence fournie par Oracle 
+- il faut utiliser une implémentation : **Jersey** est l'implémentation de référence fournie par Oracle 
     - la première dépendance est la bibliothèque Jersey
     - la deuxième dépendance est Jackon pour Jersey, pour convertir les objets en Json
 
@@ -313,6 +315,7 @@ public class CalculJacksonServlet extends HttpServlet {
 ----
 
 - il faut ajouter dans le *web.xml* la servlet qui va jouer le rôle de contrôleur frontal
+
 ```xml
 <servlet>
 	<servlet-name>javax.ws.rs.core.Application</servlet-name>
@@ -341,7 +344,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
 import model.Calcul;
 
 @Path("/calcul-jersey")
@@ -349,8 +351,7 @@ public class CalculResource {
 	
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	@GET
-	public Calcul calcul(@QueryParam("nombre1") Integer nombre1,
-			@QueryParam("nombre2") Integer nombre2){
+	public Calcul calcul(@QueryParam("nombre1") Integer nombre1, @QueryParam("nombre2") Integer nombre2){
 		Calcul calcul = new Calcul();
 		calcul.setSomme(nombre1+nombre2);
 		calcul.setProduit(nombre1*nombre2);
