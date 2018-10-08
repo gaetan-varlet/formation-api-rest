@@ -4,8 +4,8 @@
 
 ## Création d'une application web classique avec Maven
 
-- créer un nouveau projet maven en choisissant l'option "skip archetype" et packaging "war"
-- créer un fichier **web.xml** dans le dossier *src/main/webapp/WEB-INF/* :
+- créez un nouveau projet maven en choisissant l'option "skip archetype" et packaging "war"
+- créez un fichier **web.xml** dans le dossier *src/main/webapp/WEB-INF/* :
 ```xml
 <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -17,7 +17,7 @@
 
 ----
 
-- passer en Java 8 et ajoutez l'API Servlet dans le **pom.xml** :
+- passez en Java 8 et ajoutez l'API Servlet dans le **pom.xml** :
 
 ```xml
 	<properties>
@@ -37,20 +37,11 @@
 
 ----
 
-- créer la servlet **CalculAvecJspServlet.java** dans le dossier *src/main/java*, dans le package *servlet* par exemple :
+- créez la servlet **CalculAvecJspServlet.java** dans le dossier *src/main/java*, dans le package *servlet* par exemple :
 
 ```java
 package servlet;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-@SuppressWarnings("serial")
 @WebServlet("/calcul-avec-jsp")
 public class CalculAvecJspServlet extends HttpServlet {
 	
@@ -75,9 +66,9 @@ public class CalculAvecJspServlet extends HttpServlet {
 
 ----
 
-- créer la JSP **reponse-calcul.jsp** dans le dossier */WEB-INF/jsp/*
+- créez la JSP **reponse-calcul.jsp** dans le dossier */WEB-INF/jsp/*
 
-```java
+```jsp
 <!DOCTYPE html>
 <html>
     <head>
@@ -90,5 +81,7 @@ public class CalculAvecJspServlet extends HttpServlet {
     	<p>Le produit de ${param.nombre1} et ${param.nombre2} est égal à ${requestScope.produit}.</p>
     </body>
 </html>
+
+- déployez le projet à la racine de votre Tomcat 8 et appellez l'URL (http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4)[http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4]
 
 ```
