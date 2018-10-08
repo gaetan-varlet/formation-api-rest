@@ -90,3 +90,38 @@ public class CalculAvecJspServlet extends HttpServlet {
 ----
 
 ### Création d'une seconde servlet sans JSP
+
+- créez la servlet **CalculServlet.java** dans le dossier *src/main/java*, dans le package *servlet* :
+
+```java
+package servlet;
+
+@WebServlet("/calcul")
+public class CalculServlet extends HttpServlet {
+	
+	public void doGet( HttpServletRequest request, HttpServletResponse response )
+			throws ServletException, IOException{
+		String nb1 = request.getParameter("nombre1");
+		String nb2 = request.getParameter("nombre2");
+		int nombre1 = Integer.parseInt(nb1);
+		int nombre2 = Integer.parseInt(nb2);
+		int somme = nombre1+nombre2;
+		int produit = nombre1*nombre2;
+
+		response.setContentType("text/html");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		out.println("<!DOCTYPE html>");
+		out.println("<html>");
+		out.println("<head>");
+		out.println("<meta charset=\"utf-8\" />");
+		out.println("<title>Calcul</title>");
+		out.println("</head>");
+		out.println("<body>");
+		out.println("<p>La somme de "+nombre1+" et "+nombre2+" est égale à "+somme+".</p>");
+		out.println("<p>Le produit de "+nombre1+" et "+nombre2+" est égal à "+produit+".</p>");
+		out.println("</body>");
+		out.println("</html>");
+	}
+}
+```
