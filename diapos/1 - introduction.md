@@ -8,11 +8,11 @@ Un service web est une technologie permettant à des applications de dialoguer �
 
 Une **API REST**, pour *REpresentational State Transfer*,  est une API basé sur le protocole **HTTP**, où chaque ressource est accessible via un identifiant unique (URI).
 
-- Exemples :
-    - [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
-         - obtenir la liste des utilisateurs : [https://jsonplaceholder.typicode.com/users](https://jsonplaceholder.typicode.com/users)
-    - [World Population API](http://api.population.io/)
-        - obtenir la liste des pays : [http://api.population.io:80/1.0/countries](http://api.population.io:80/1.0/countries)
+Exemples :
+- [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
+     - obtenir la liste des utilisateurs : [https://jsonplaceholder.typicode.com/users](https://jsonplaceholder.typicode.com/users)
+- [World Population API](http://api.population.io/)
+    - obtenir la liste des pays : [http://api.population.io:80/1.0/countries](http://api.population.io:80/1.0/countries)
 
 ----
 
@@ -34,9 +34,11 @@ Une **API REST**, pour *REpresentational State Transfer*,  est une API basé sur
 
 ## L'architecture classique d'une application web à l'Insee
 
+
 ---- 
 
-## La nouvelle architecture avec un 'front-ent' JavaScript et une API en Java pour le 'back-end'
+
+## La nouvelle architecture avec un 'front-ent' JavaScript et une API  Java pour le 'back-end'
 
 ----
 
