@@ -49,10 +49,8 @@ public class CalculAvecJspServlet extends HttpServlet {
 	
 	public void doGet( HttpServletRequest request, HttpServletResponse response )
 			throws ServletException, IOException{
-		String nb1 = request.getParameter("nombre1");
-		String nb2 = request.getParameter("nombre2");
-		int nombre1 = Integer.parseInt(nb1);
-		int nombre2 = Integer.parseInt(nb2);
+		int nombre1 = Integer.parseInt(request.getParameter("nombre1"));
+		int nombre2 = Integer.parseInt(request.getParameter("nombre2"));
 		int somme = nombre1+nombre2;
 		int produit = nombre1*nombre2;
 		request.setAttribute( "somme", somme );
@@ -101,10 +99,8 @@ public class CalculServlet extends HttpServlet {
 	
 	public void doGet( HttpServletRequest request, HttpServletResponse response )
 			throws ServletException, IOException{
-		String nb1 = request.getParameter("nombre1");
-		String nb2 = request.getParameter("nombre2");
-		int nombre1 = Integer.parseInt(nb1);
-		int nombre2 = Integer.parseInt(nb2);
+		int nombre1 = Integer.parseInt(request.getParameter("nombre1"));
+		int nombre2 = Integer.parseInt(request.getParameter("nombre2"));
 		int somme = nombre1+nombre2;
 		int produit = nombre1*nombre2;
         ...
@@ -134,7 +130,7 @@ public class CalculServlet extends HttpServlet {
 }
 ```
 
-- relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul?nombre1=3&nombre2=4](http://localhost:8080/calcul?nombre1=7&nombre2=8)
+- relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul?nombre1=3&nombre2=4](http://localhost:8080/calcul?nombre1=3&nombre2=4)
 
 ----
 
@@ -150,10 +146,8 @@ public class CalculTextPlainServlet extends HttpServlet {
 	
 	public void doGet( HttpServletRequest request, HttpServletResponse response )
 			throws ServletException, IOException{
-		String nb1 = request.getParameter("nombre1");
-		String nb2 = request.getParameter("nombre2");
-		int nombre1 = Integer.parseInt(nb1);
-		int nombre2 = Integer.parseInt(nb2);
+		int nombre1 = Integer.parseInt(request.getParameter("nombre1"));
+		int nombre2 = Integer.parseInt(request.getParameter("nombre2"));
 		int somme = nombre1+nombre2;
 		int produit = nombre1*nombre2;
 
@@ -165,7 +159,7 @@ public class CalculTextPlainServlet extends HttpServlet {
 }
 ```
 
-- relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul-text-plain?nombre1=3&nombre2=4](http://localhost:8080/calcul-text-plain?nombre1=7&nombre2=8)
+- relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul-text-plain?nombre1=3&nombre2=4](http://localhost:8080/calcul-text-plain?nombre1=3&nombre2=4)
 
 - compliqué à lire de manière automatique, on va plutôt utiliser un format tel que le XML ou le JSON
 
@@ -181,10 +175,8 @@ public class CalculJsonServlet extends HttpServlet {
 	
 	public void doGet( HttpServletRequest request, HttpServletResponse response )
 			throws ServletException, IOException{
-		String nb1 = request.getParameter("nombre1");
-		String nb2 = request.getParameter("nombre2");
-		int nombre1 = Integer.parseInt(nb1);
-		int nombre2 = Integer.parseInt(nb2);
+		int nombre1 = Integer.parseInt(request.getParameter("nombre1"));
+		int nombre2 = Integer.parseInt(request.getParameter("nombre2"));
 		int somme = nombre1+nombre2;
 		int produit = nombre1*nombre2;
 
@@ -196,7 +188,7 @@ public class CalculJsonServlet extends HttpServlet {
 }
 ```
 
-- relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul-json?nombre1=3&nombre2=4](http://localhost:8080/calcul-json?nombre1=7&nombre2=8)
+- relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul-json?nombre1=3&nombre2=4](http://localhost:8080/calcul-json?nombre1=3&nombre2=4)
 
 ----
 
@@ -224,7 +216,7 @@ public class CalculJsonServlet extends HttpServlet {
 ```js
 const req = new XMLHttpRequest()
 const method = 'GET'
-const url = 'http://localhost:8080/calcul-json?nombre1=7&nombre2=8'
+const url = 'http://localhost:8080/calcul-json?nombre1=3&nombre2=4'
 
 req.onreadystatechange = function(event){
     if(this.readyState === XMLHttpRequest.DONE){// on aurait pu écrire 4 à la place, c'est pareil
@@ -279,10 +271,8 @@ public class CalculJacksonServlet extends HttpServlet {
 	
     public void doGet( HttpServletRequest request, HttpServletResponse response )
 			throws ServletException, IOException{
-		String nb1 = request.getParameter("nombre1");
-		String nb2 = request.getParameter("nombre2");
-		int nombre1 = Integer.parseInt(nb1);
-		int nombre2 = Integer.parseInt(nb2);
+		int nombre1 = Integer.parseInt(request.getParameter("nombre1"));
+		int nombre2 = Integer.parseInt(request.getParameter("nombre2"));
 		Calcul calcul = new Calcul();
 		calcul.setSomme(nombre1+nombre2);
 		calcul.setProduit(nombre1*nombre2);
@@ -296,8 +286,10 @@ public class CalculJacksonServlet extends HttpServlet {
 }
 ```
 
-- relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul-jackson?nombre1=3&nombre2=4](http://localhost:8080/calcul-json?nombre1=7&nombre2=8)
+- relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul-jackson?nombre1=3&nombre2=4](http://localhost:8080/calcul-jackson?nombre1=3&nombre2=4)
 
 ----
 
 ## JAX-RS
+
+- Java API for RESTful Web Services est une spécification
