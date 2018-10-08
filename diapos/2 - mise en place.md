@@ -113,6 +113,7 @@ public class CalculServlet extends HttpServlet {
 ----
 
 - suite de la servlet **CalculServlet.java**
+
 ```java
 		response.setContentType("text/html");
 		response.setCharacterEncoding("UTF-8");
@@ -124,6 +125,7 @@ public class CalculServlet extends HttpServlet {
 		out.println("<title>Calcul</title>");
 		out.println("</head>");
 		out.println("<body>");
+        out.println("<p>Calcul avec affichage de la réponse dans la servlet :</p>");
 		out.println("<p>La somme de "+nombre1+" et "+nombre2+" est égale à "+somme+".</p>");
 		out.println("<p>Le produit de "+nombre1+" et "+nombre2+" est égal à "+produit+".</p>");
 		out.println("</body>");
@@ -132,4 +134,170 @@ public class CalculServlet extends HttpServlet {
 }
 ```
 
-- relancez le Tomcat appellez l'URL [http://localhost:8080/calcul?nombre1=3&nombre2=4](http://localhost:8080/calcul?nombre1=7&nombre2=8) 
+- relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul?nombre1=3&nombre2=4](http://localhost:8080/calcul?nombre1=7&nombre2=8)
+
+----
+
+### Création d'une troisième servlet sous forme d'API
+
+- créez la servlet **CalculTextPlainServlet.java** dans le dossier *src/main/java*, dans le package *servlet* :
+
+```java
+package servlet;
+
+@WebServlet("/calcul-text-plain")
+public class CalculTextPlainServlet extends HttpServlet {
+	
+	public void doGet( HttpServletRequest request, HttpServletResponse response )
+			throws ServletException, IOException{
+		String nb1 = request.getParameter("nombre1");
+		String nb2 = request.getParameter("nombre2");
+		int nombre1 = Integer.parseInt(nb1);
+		int nombre2 = Integer.parseInt(nb2);
+		int somme = nombre1+nombre2;
+		int produit = nombre1*nombre2;
+
+		response.setContentType("text/plain");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		out.println("somme:"+somme+", produit:"+produit);
+	}
+}
+```
+
+- relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul-text-plain?nombre1=3&nombre2=4](http://localhost:8080/calcul-text-plain?nombre1=7&nombre2=8)
+
+- compliqué à lire de manière automatique, on va plutôt utiliser un format tel que le XML ou le JSON
+
+----
+
+### Création d'une quatrième servlet sous forme d'API
+
+- créez la servlet **CalculJsonServlet.java** dans le dossier *src/main/java*, dans le package *servlet* :
+
+```java
+@WebServlet("/calcul-json")
+public class CalculJsonServlet extends HttpServlet {
+	
+	public void doGet( HttpServletRequest request, HttpServletResponse response )
+			throws ServletException, IOException{
+		String nb1 = request.getParameter("nombre1");
+		String nb2 = request.getParameter("nombre2");
+		int nombre1 = Integer.parseInt(nb1);
+		int nombre2 = Integer.parseInt(nb2);
+		int somme = nombre1+nombre2;
+		int produit = nombre1*nombre2;
+
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		out.println("{\"somme\":"+somme+", \"produit\":"+produit+"}");
+	}
+}
+```
+
+- relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul-json?nombre1=3&nombre2=4](http://localhost:8080/calcul-json?nombre1=7&nombre2=8)
+
+----
+
+- créer un fichier **index.html** sur votre bureau
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exercice JS</title>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <div id="myDiv"></div>
+    <script src="script.js"></script>
+</body>
+</html>
+```
+
+----
+
+- créer un fichier **script.js** également sur votre bureau
+
+```js
+const req = new XMLHttpRequest()
+const method = 'GET'
+const url = 'http://localhost:8080/calcul-json?nombre1=7&nombre2=8'
+
+req.onreadystatechange = function(event){
+    if(this.readyState === XMLHttpRequest.DONE){// on aurait pu écrire 4 à la place, c'est pareil
+        if(this.status === 200){
+        document.getElementById('myDiv').innerHTML =
+        '<p>La somme vaut '+JSON.parse(this.responseText).somme+'</p>'
+        +'<p>Le produit vaut '+JSON.parse(this.responseText).produit+'</p>';
+            console.log(
+                JSON.parse(this.responseText)
+            )
+        } else {
+            console.log("Statut Erreur : "+this.status)
+        }
+    }
+}
+
+req.open(method, url)
+req.send()
+```
+
+- lancez dans votre navigateur le fichier *index.html*
+
+----
+
+### Création d'une servlet avec conversion automatique au format JSON
+
+- transformer les objets Java en chaîne de caractères au format Json est fastidieux et source d'erreur. On peut utiliser une bibliothèque qui le fait pour nous : Jackson
+
+```xml
+<dependency>
+	<groupId>com.fasterxml.jackson.core</groupId>
+	<artifactId>jackson-databind</artifactId>
+	<version>2.9.7</version>
+</dependency>
+```
+
+- Jackson va transformer un objet au format JavaBean au format JSON. Il peut aussi transformer les collections :
+```json
+{"somme":15,"produit":56} // objet Java
+[{"somme":15,"produit":56},{"somme":15,"produit":56}] // liste de 2 objets Java
+```
+
+----
+
+- créez la servlet **CalculJacksonServlet.java** dans le dossier *src/main/java*, dans le package *servlet* :
+
+```java
+package servlet;
+
+@WebServlet("/calcul-jackson")
+public class CalculJacksonServlet extends HttpServlet {
+	
+    public void doGet( HttpServletRequest request, HttpServletResponse response )
+			throws ServletException, IOException{
+		String nb1 = request.getParameter("nombre1");
+		String nb2 = request.getParameter("nombre2");
+		int nombre1 = Integer.parseInt(nb1);
+		int nombre2 = Integer.parseInt(nb2);
+		Calcul calcul = new Calcul();
+		calcul.setSomme(nombre1+nombre2);
+		calcul.setProduit(nombre1*nombre2);
+
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");	
+		PrintWriter out = response.getWriter();
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.writeValue(out, calcul);
+	}
+}
+```
+
+- relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul-jackson?nombre1=3&nombre2=4](http://localhost:8080/calcul-json?nombre1=7&nombre2=8)
+
+----
+
+## JAX-RS
