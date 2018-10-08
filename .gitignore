@@ -11,3 +11,7 @@ node_modules/
 .sass-cache
 css/reveal.min.css
 js/reveal.min.js
+
+appli-java-jersey/target
+appli-java-jersey/settings
+cave/target
