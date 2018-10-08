@@ -13,5 +13,7 @@ css/reveal.min.css
 js/reveal.min.js
 
 appli-java-jersey/target
-appli-java-jersey/settings
+appli-java-jersey/.settings
+appli-java-jersey/.project
+appli-java-jersey/.classpath
 cave/target
