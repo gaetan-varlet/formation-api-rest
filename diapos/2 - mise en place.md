@@ -33,9 +33,11 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
-    ```
+```
 
 ----
+
+### Création d'une première servlet avec JSP
 
 - créez la servlet **CalculAvecJspServlet.java** dans le dossier *src/main/java*, dans le package *servlet* par exemple :
 
@@ -81,7 +83,10 @@ public class CalculAvecJspServlet extends HttpServlet {
     	<p>Le produit de ${param.nombre1} et ${param.nombre2} est égal à ${requestScope.produit}.</p>
     </body>
 </html>
+```
 
 - déployez le projet à la racine de votre Tomcat 8 et appellez l'URL (http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4)[http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4]
 
-```
+----
+
+### Création d'une seconde servlet sans JSP
