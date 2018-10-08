@@ -292,4 +292,72 @@ public class CalculJacksonServlet extends HttpServlet {
 
 ## JAX-RS
 
-- Java API for RESTful Web Services est une spécification
+- JAX-RS, pour *Java API for RESTful Web Services* est une spécification de Java EE.
+- il faut utiliser une implémentation : Jersey est l'implémentation de référence fournie par Oracle 
+    - la première dépendance est la bibliothèque Jersey
+    - la deuxième dépendance est Jackon pour Jersey, pour convertir les objets en Json
+
+```xml
+<dependency>
+    <groupId>org.glassfish.jersey.containers</groupId>
+    <artifactId>jersey-container-servlet</artifactId>
+    <version>2.25.1</version>
+</dependency>
+<dependency>
+	<groupId>org.glassfish.jersey.media</groupId>
+	<artifactId>jersey-media-json-jackson</artifactId>
+	<version>2.25.1</version>
+</dependency>
+```
+
+----
+
+- il faut ajouter dans le *web.xml* la servlet qui va jouer le rôle de contrôleur frontal
+```xml
+<servlet>
+	<servlet-name>javax.ws.rs.core.Application</servlet-name>
+</servlet>
+<servlet-mapping>
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <url-pattern>/rest/*</url-pattern>
+</servlet-mapping>
+```
+
+- pas besoin d'écrire la réponse avec `PrintWriter`, le contrôleur s'en charge
+- récupération des paramètres de requêtes avec `@QueryParam`
+- `@Produces(MediaType.APPLICATION_JSON)` permet de transformer l'objet Java en JSON et de d'écrire dans la réponse que l'on produit du JSON
+- `@GET` permet de dire que la ressource est accessible en GET
+- **QUID DE L'UTF-8 ?**
+
+----
+
+- créez la ressource **CalculResource.java** dans le dossier *src/main/java*, dans le package *resource* :
+
+```java
+package resources;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
+import model.Calcul;
+
+@Path("/calcul-jersey")
+public class CalculResource {
+	
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@GET
+	public Calcul calcul(@QueryParam("nombre1") Integer nombre1,
+			@QueryParam("nombre2") Integer nombre2){
+		Calcul calcul = new Calcul();
+		calcul.setSomme(nombre1+nombre2);
+		calcul.setProduit(nombre1*nombre2);
+		calcul.setNom("Gaëtan");
+		return calcul;
+	}
+}
+```
+
+- relancez le Tomcat et appellez l'URL [http://localhost:8080/rest/calcul-jersey?nombre1=3&nombre2=4](http://localhost:8080/rest/calcul-jersey/calcul-jackson?nombre1=3&nombre2=4)
