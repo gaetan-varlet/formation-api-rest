@@ -107,7 +107,13 @@ public class CalculServlet extends HttpServlet {
 		int nombre2 = Integer.parseInt(nb2);
 		int somme = nombre1+nombre2;
 		int produit = nombre1*nombre2;
+        ...
+```
 
+----
+
+- suite de la servlet **CalculServlet.java**
+```java
 		response.setContentType("text/html");
 		response.setCharacterEncoding("UTF-8");
 		PrintWriter out = response.getWriter();
@@ -125,3 +131,5 @@ public class CalculServlet extends HttpServlet {
 	}
 }
 ```
+
+- relancez le Tomcat appellez l'URL [http://localhost:8080/calcul?nombre1=3&nombre2=4](http://localhost:8080/calcul?nombre1=7&nombre2=8) 
