@@ -4,47 +4,48 @@
 
 ## Plan
 
-1. Qu'est ce que c'est ?
-	- exemple
-    - le protocole HTTP (requête/réponse, code retour HTTP)
-    - les formats de données XML et JSON
-    - différence avec une application web classique
-    - l'architecture REST
-    - l'architecture classique d'une application web à l'Insee
-    - la nouvelle architecture Insee avec une application JavaScript et une API en Java
-    - les verbes HTTP [descriptif MDN](https://developer.mozilla.org/fr/docs/Web/HTTP/M%C3%A9thode)
-
+1. Introduction ?
+	- Qu'est ce qu'un web service ? (définition et exemple)
+    - Les formats de données XML et JSON
+    - Le protocole HTTP (requête/réponse, code retour HTTP)
+    - Les verbes HTTP [descriptif MDN](https://developer.mozilla.org/fr/docs/Web/HTTP/M%C3%A9thode)
+    - L'architecture REST (et différences avec une application web classique)
+    - L'architecture classique d'une application web à l'Insee
+    - La nouvelle architecture avec un 'front-ent' JavaScript et une API en Java pour le 'back-end'
+    - Intérêts : rapidité (démo avec mode ralenti dans Chrome), partage d'informations instantané entre applications
+    
 2. Un premier exemple de mise en place d'une API
-    - un premier exemple en Java EE (TP)
-    - présentation de la norme JAX-RS
-    - utilisation de frameworks :
-        - mise en place d'un projet avec Jersey 2 (TP)
-        - mise en place d'un projet avec Spring Boot (TP)
+    - Création d'une application web classique avec Maven (TP)
+    - Présentation de la norme JAX-RS
+    - Transformation de l'applicaation web en API (TP)
+    - Utilisation de frameworks :
+        - Mise en place d'un projet avec Jersey 2 (TP)
+        - Mise en place d'un projet avec Spring Boot (TP)
 
 3. Consommation de webservices
-    - utilisation de [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
-    - installation d'un plugin JsonViewer
-    - via le navigateur (démo)
-    - en utilisant postman (démo)
-    - en Java sans bibliothèque (TP)
-    - en Java avec des bibliothèques (exemple avec Unirest et OkHTTP) (TP)
-    - en JavaScript avec XMLHttpRequest, JQuery, Fetch, Axios (TP)
+    - Utilisation de [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
+    - Installation d'un plugin JsonViewer
+    - Via le navigateur (démo)
+    - En utilisant postman (démo)
+    - En Java sans bibliothèque (TP)
+    - En Java avec des bibliothèques (exemple avec Unirest et OkHTTP) (TP)
+    - En JavaScript avec XMLHttpRequest, JQuery, Fetch, Axios (TP)
 
 4. Aller plus loin dans la mise en place de webservice
-    - structure d'une requête HTTP (pathparam, queryparam, avec les ? et &)
-    - les paramètres de requête, le corps de la requête (TP)
-    - personnalisation de la réponse (TP)
+    - Structure d'une requête HTTP (pathparam, queryparam, avec les ? et &)
+    - Les paramètres de requête, le corps de la requête (TP)
+    - Personnalisation de la réponse (TP)
 
 5. Sécurité
-    - https
-    - authentification basique
-    - keyclock
-    - cors
+    - Https
+    - Authentification basique
+    - Keyclock
+    - Cors
 
 6. Intégration au SI
-    - les tests (TP)
-    - documenter l'API avec Swagger (TP)
-    - note de la cellule archi
-        - utilisation des verbes
-        - singulier / pluriel
-        - numéro de version
+    - Les tests (TP)
+    - Documenter l'API avec Swagger (TP)
+    - Note de la cellule archi
+        - Utilisation des verbes
+        - Singulier / Pluriel
+        - Numéro de version
