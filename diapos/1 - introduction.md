@@ -6,7 +6,7 @@
 
 Un service web est une technologie permettant à des applications de dialoguer à distance via Internet. On parle d'interface de programmation applicative, souvent désignée par le terme **API** pour *application programming interface*. L'application **offre des services** à d'autres logiciels.
 
-Une **API REST**, pour *REpresentational State Transfer*,  est une API basé sur le protocole **HTTP**, où chaque ressource est accessible via un identifiant unique (URI).
+Une **API REST**, pour *REpresentational State Transfer*,  est une API basée sur le protocole **HTTP**, où chaque ressource est accessible via un identifiant unique (URI).
 
 Exemples :
 - [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
@@ -17,29 +17,3 @@ Exemples :
 ----
 
 ## Les formats de données XML et JSON
-
-----
-
-## Le protocole HTTP
-
-----
-
-## Les verbes HTTP
-
-----
-
-## L'architecture REST
-
-----
-
-## L'architecture classique d'une application web à l'Insee
-
-
----- 
-
-
-## La nouvelle architecture avec un 'front-ent' JavaScript et une API  Java pour le 'back-end'
-
-----
-
-## Intérêts : rapidité, partage d'informations instantané entre applications

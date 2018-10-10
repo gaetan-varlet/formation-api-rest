@@ -7,8 +7,16 @@
 1. Introduction ?
 	- Qu'est ce qu'un web service ? (définition et exemple)
     - Les formats de données XML et JSON
-    - Le protocole HTTP (requête/réponse, code retour HTTP)
-    - Les verbes HTTP [descriptif MDN](https://developer.mozilla.org/fr/docs/Web/HTTP/M%C3%A9thode)
+
+2. Le protocole HTTP
+    - définition
+    - les méthodes de requêtes (verbes)
+    - La requête
+    - La réponse
+    - les codes de statut de réponse
+    - l'en-tête content-type
+
+3. Architecture 
     - L'architecture REST (et différences avec une application web classique)
     - L'architecture classique d'une application web à l'Insee
     - La nouvelle architecture avec un 'front-ent' JavaScript et une API en Java pour le 'back-end'
