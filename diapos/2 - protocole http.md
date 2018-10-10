@@ -36,16 +36,17 @@ En-têtes de requête
 
 Corps de requête
 ```
+
 - Méthode : précise le type de requête (HEAD, GET, POST...)
 - URL : adresse de la page sur le serveur
-- Version du protocole HTTP, 1.1
-- il y a plusieurs en-tête sous la forme `clé: valeur` [liste des headers](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers)
+- Version du protocole HTTP
+- il y a plusieurs en-tête sous la forme `clé: valeur` 
+    - [liste des headers](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers)
     - **Host** spéficie le nom de domaine du site
     - **Cookie** permet d'envoyer au serveur les cookies qui ont été enregistrés sur l'ordinateur du client à la demande du serveur. Les cookies sont des fichiers textes contenant des informations sur la navigation effectuée sur les pages du site.
     - **Content-Type** spécifie le type MIME du corps de la requête
     - **Content-Length** spécifie la longueur du corps de la requête
-    - **Accept** spécifie le type de contenu accepté par le browser (par exemple text/html)
-
+    - **Accept** spécifie le type de contenu accepté par le client (par exemple text/html)
 - le corps de la requête peut contenir le contenu d'un formulaire HTML passé en POST sous la forme `variable1=valeur1&variable2=valeur2`
 
 ----
@@ -87,7 +88,8 @@ Corps de réponse
     - **Date** : date de génération de la réponse
     - **Server** : spécifie le modèle du serveur HTTP
     - **Set-Cookie** : demande au navigateur d'enregistrer un cookie
-- le corps de la réponse contient le contenu du fichier, par exemple HTML 
+- le corps de la réponse contient le contenu du fichier, par exemple HTML
+
 ----
 
 ## Exemple de réponse HTTP
@@ -124,9 +126,7 @@ Content-Type: text/html
 - permet au client d'avoir plus d'informations sur ce qu'il reçoit, par exemple `text/html` pour du HTML, `text/plain` pour du texte brut, `application/pdf`pour du PDF, `application/json` pour des données au format JSON, `application/xml` pour des données au format XML. On parle de **type MIME** [liste des types MIME](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types)
 - permet aussi de préciser le jeu de caractères (**charset**) que le navigateur doit utiliser pour afficher le contenu. Par défaut, il s'agit du jeu de caractères *ISO-8859-1* nommé aussi *Latin-1*.
 
-La bonne pratique est d'utiliser l'UTF-8 comme encodage des fichiers contenant le code source et comme jeu de caractères en-tête de la réponse HTTP.
-
-Exemple pour ajouter des en-têtes en Java :
+La bonne pratique est d'utiliser l'UTF-8 comme encodage des fichiers contenant le code source et comme jeu de caractères en-tête de la réponse HTTP. Exemple pour ajouter des en-têtes en Java :
 ```java
 response.setContentType("text/html");
 
