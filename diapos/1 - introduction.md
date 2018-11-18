@@ -17,3 +17,7 @@ Exemples :
 ----
 
 ## Les formats de données XML et JSON
+
+- petite définition en 2 mots
+- exemple avec un objet contenant un sous-objet
+- exemple d'une liste de 2 objets

@@ -25,6 +25,11 @@ public class VinController {
 		return vinDao.findAll();
 	}
 	
+	@RequestMapping(value = "/vin/{id}", method = RequestMethod.GET)
+	public Vin getVin(@PathVariable Integer id) {
+		return vinDao.findById(id).orElse(null);
+	}
+	
 	@RequestMapping(value = "/vin/add/{chateau}", method = RequestMethod.GET)
 	public void addVin(@PathVariable String chateau) {
 		Vin vin = Vin.builder().chateau(chateau).build();
