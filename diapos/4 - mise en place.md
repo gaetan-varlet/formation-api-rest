@@ -243,7 +243,7 @@ req.send()
 
 ----
 
-### Création d'une servlet avec conversion automatique au format JSON
+### Création d'une cinquième servlet avec conversion automatique au format JSON
 
 - transformer les objets Java en chaîne de caractères au format Json est fastidieux et source d'erreur. On peut utiliser une bibliothèque qui le fait pour nous : Jackson
 
@@ -293,9 +293,9 @@ public class CalculJacksonServlet extends HttpServlet {
 
 ----
 
-## JAX-RS
+## Présentation de la spécification JAX-RS et exemple d'utilisation de l'implémentation Jersey
 
-- JAX-RS, pour *Java API for RESTful Web Services* est une spécification de Java EE.
+- **JAX-RS**, pour *Java API for RESTful Web Services* est une spécification de Java EE.
 - il faut utiliser une implémentation : **Jersey** est l'implémentation de référence fournie par Oracle 
     - la première dépendance est la bibliothèque Jersey
     - la deuxième dépendance est Jackon pour Jersey, pour convertir les objets en Json

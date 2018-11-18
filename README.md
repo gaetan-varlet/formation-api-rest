@@ -5,6 +5,9 @@
 ## TODO
 
 - réponse en Jersey en UTF-8 : tester sur un poste Windows du texte avec accent avec et sans UTF-8 dans le `@Produces` (`@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")`) et voir si c'est propre
+- Jackson convertit que les objets Java dans l'exemple avec la servlet ?
+- on ne peut pas convertir une liste d'objet Java en XML ? il faut le wrapper dans un objet conteneur
+- choix dans la requête via un en-tête de la préférence entre XML et JSON pour la réponse
 
 ## Plan
 
@@ -26,15 +29,20 @@
     - La nouvelle architecture avec un 'front-ent' JavaScript et une API Java pour le 'back-end'
     - Intérêts : rapidité (démo avec mode ralenti dans Chrome), partage d'informations instantané entre applications
     
-2. Un premier exemple de mise en place d'une API
-    - Création d'une application web classique avec Maven (TP)
-    - Présentation de la norme JAX-RS
-    - Transformation de l'applicaation web en API (TP)
-    - Utilisation de frameworks :
-        - Mise en place d'un projet avec Jersey 2 (TP)
-        - Mise en place d'un projet avec Spring Boot (TP)
+4. Un premier exemple de mise en place d'une API en Java EE
+    - Création d'une application web classique avec Maven
+    - Création d'une première servlet avec JSP
+    - Création d'une seconde servlet sans JSP
+    - Création d'une troisième servlet sous forme d'API
+    - Création d'une quatrième servlet sous forme d'API
+    - Création d'une cinquième servlet avec conversion automatique au format JSON
+    - Présentation de la spécification JAX-RS et exemple d'utilisation de l'implémentation Jersey
 
-3. Consommation de webservices
+5. Création d'une API REST avec Jersey
+
+6. Création d'une API REST avec Spring Boot
+
+7. Consommation de webservices
     - Utilisation de [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
     - Installation d'un plugin JsonViewer
     - Via le navigateur (démo)
@@ -43,18 +51,18 @@
     - En Java avec des bibliothèques (exemple avec Unirest et OkHTTP) (TP)
     - En JavaScript avec XMLHttpRequest, JQuery, Fetch, Axios (TP)
 
-4. Aller plus loin dans la mise en place de webservice
+8. Aller plus loin dans la mise en place de webservice
     - Structure d'une requête HTTP (pathparam, queryparam, avec les ? et &)
     - Les paramètres de requête, le corps de la requête (TP)
     - Personnalisation de la réponse (TP)
 
-5. Sécurité
+9. Sécurité
     - Https
     - Authentification basique
     - Keyclock
     - Cors
 
-6. Intégration au SI
+10. Intégration au SI
     - Les tests (TP)
     - Documenter l'API avec Swagger (TP)
     - Note de la cellule archi
