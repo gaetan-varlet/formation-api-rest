@@ -1,4 +1,4 @@
-# Mise en place
+# Un premier exemple de mise en place d'une API en Java EE
 
 ----
 
