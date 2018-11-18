@@ -7,6 +7,7 @@
 - réponse en Jersey en UTF-8 : tester sur un poste Windows du texte avec accent avec et sans UTF-8 dans le `@Produces` (`@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")`) et voir si c'est propre
 - Jackson convertit que les objets Java dans l'exemple avec la servlet ?
 - on ne peut pas convertir une liste d'objet Java en XML ? il faut le wrapper dans un objet conteneur
+- blocage avec augmentation de la version de Jersey ?
 - choix dans la requête via un en-tête de la préférence entre XML et JSON pour la réponse
 
 ## Plan
