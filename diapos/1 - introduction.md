@@ -2,7 +2,7 @@
 
 ----
 
-## Qu'est ce qu'un web service ?
+## Qu'est ce qu'un service web ?
 
 Un service web est une technologie permettant à des applications de dialoguer à distance via Internet. On parle d'interface de programmation applicative, souvent désignée par le terme **API** pour *application programming interface*. L'application **offre des services** à d'autres logiciels.
 
