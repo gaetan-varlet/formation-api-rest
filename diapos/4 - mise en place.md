@@ -255,7 +255,7 @@ req.send()
 </dependency>
 ```
 
-- Jackson va transformer un objet au format JavaBean au format JSON. Il peut aussi transformer les collections :
+- Jackson va transformer un objet au format JavaBean en un objet au format JSON. Il peut aussi transformer les collections :
 ```json
 {"somme":15,"produit":56} // objet Java
 [{"somme":15,"produit":56},{"somme":15,"produit":56}] // liste de 2 objets Java
@@ -263,6 +263,7 @@ req.send()
 
 ----
 
+- créez la classe **Calcul.java** pour définir un objet	avec 2 attributs *somme* et *produit* de type *Integer*
 - créez la servlet **CalculJacksonServlet.java** dans le dossier *src/main/java*, dans le package *servlet* :
 
 ```java
@@ -330,7 +331,6 @@ public class CalculJacksonServlet extends HttpServlet {
 - récupération des paramètres de requêtes avec `@QueryParam`
 - `@Produces(MediaType.APPLICATION_JSON)` permet de transformer l'objet Java en JSON et de d'écrire dans la réponse que l'on produit du JSON
 - `@GET` permet de dire que la ressource est accessible en GET
-- **QUID DE L'UTF-8 ?**
 
 ----
 
@@ -355,7 +355,6 @@ public class CalculResource {
 		Calcul calcul = new Calcul();
 		calcul.setSomme(nombre1+nombre2);
 		calcul.setProduit(nombre1*nombre2);
-		calcul.setNom("Gaëtan");
 		return calcul;
 	}
 }

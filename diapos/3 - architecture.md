@@ -10,7 +10,7 @@
 
 ---- 
 
-## La nouvelle architecture avec un 'front-ent' JavaScript et une API  Java pour le 'back-end'
+## La nouvelle architecture avec un 'front-ent' JavaScript et une API Java pour le 'back-end'
 
 ----
 

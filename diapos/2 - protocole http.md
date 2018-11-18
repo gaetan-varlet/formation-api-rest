@@ -120,7 +120,7 @@ Content-Type: text/html
 
 ----
 
-## L'en-tête content-type
+## L'en-tête Content-Type
 
 - l'en-tête HTTP **content-type** :
 - permet au client d'avoir plus d'informations sur ce qu'il reçoit, par exemple `text/html` pour du HTML, `text/plain` pour du texte brut, `application/pdf`pour du PDF, `application/json` pour des données au format JSON, `application/xml` pour des données au format XML. On parle de **type MIME** [liste des types MIME](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types)

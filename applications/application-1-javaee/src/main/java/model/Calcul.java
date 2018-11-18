@@ -8,7 +8,6 @@ public class Calcul {
 	private Integer somme;
 	private Integer produit;
 
-	
 	public Integer getSomme() {
 		return somme;
 	}

@@ -5,11 +5,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>varlet.gaetan</groupId>
-	<artifactId>cave</artifactId>
+	<artifactId>application-3-spring-boot</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>cave</name>
+	<name>application-3-spring-boot</name>
 	<description>Demo project for Spring Boot</description>
 
 	<parent>

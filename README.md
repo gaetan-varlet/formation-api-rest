@@ -2,24 +2,28 @@
 
 :arrow_forward: [Diaporama](https://gaetan-varlet.github.io/formation-api-rest/)
 
+## TODO
+
+- réponse en Jersey en UTF-8 : tester sur un poste Windows du texte avec accent avec et sans UTF-8 dans le `@Produces` (`@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")`) et voir si c'est propre
+
 ## Plan
 
-1. Introduction ?
-	- Qu'est ce qu'un web service ? (définition et exemple)
+1. Introduction
+	- Qu'est ce qu'un service web ? (définition et exemple)
     - Les formats de données XML et JSON
 
 2. Le protocole HTTP
-    - définition
-    - les méthodes de requêtes (verbes)
+    - Définition
+    - Les méthodes de requêtes (ou verbes) HTTP
     - La requête
     - La réponse
-    - les codes de statut de réponse
-    - l'en-tête content-type
+    - Les codes de statut de réponse HTTP
+    - L'en-tête Content-Type
 
 3. Architecture 
     - L'architecture REST (et différences avec une application web classique)
     - L'architecture classique d'une application web à l'Insee
-    - La nouvelle architecture avec un 'front-ent' JavaScript et une API en Java pour le 'back-end'
+    - La nouvelle architecture avec un 'front-ent' JavaScript et une API Java pour le 'back-end'
     - Intérêts : rapidité (démo avec mode ralenti dans Chrome), partage d'informations instantané entre applications
     
 2. Un premier exemple de mise en place d'une API
