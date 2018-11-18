@@ -1,4 +1,4 @@
-# Formation WebServices
+# Formation API REST
 
 [Gaëtan Varlet](https://github.com/gaetan-varlet)
 
