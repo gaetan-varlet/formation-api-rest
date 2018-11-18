@@ -135,3 +135,10 @@ response.setContentType("text/html;charset=UTF-8");
 response.setContentType("text/html");
 response.setCharacterEncoding("UTF-8");
 ```
+
+----
+
+## Structure d'une requête HTTP
+
+TODO
+- pathparam, queryparam avec les ? et &

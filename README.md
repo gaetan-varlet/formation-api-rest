@@ -22,6 +22,7 @@
     - La réponse
     - Les codes de statut de réponse HTTP
     - L'en-tête Content-Type
+    - Structure d'une requête HTTP
 
 3. Architecture 
     - L'architecture REST (et différences avec une application web classique)
@@ -38,11 +39,7 @@
     - Création d'une cinquième servlet avec conversion automatique au format JSON
     - Présentation de la spécification JAX-RS et exemple d'utilisation de l'implémentation Jersey
 
-5. Création d'une API REST avec Jersey
-
-6. Création d'une API REST avec Spring Boot
-
-7. Consommation de webservices
+5. Consommation d'une API REST
     - Utilisation de [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
     - Installation d'un plugin JsonViewer
     - Via le navigateur (démo)
@@ -51,18 +48,19 @@
     - En Java avec des bibliothèques (exemple avec Unirest et OkHTTP) (TP)
     - En JavaScript avec XMLHttpRequest, JQuery, Fetch, Axios (TP)
 
-8. Aller plus loin dans la mise en place de webservice
-    - Structure d'une requête HTTP (pathparam, queryparam, avec les ? et &)
+6. Création d'une API REST avec Jersey
     - Les paramètres de requête, le corps de la requête (TP)
     - Personnalisation de la réponse (TP)
 
-9. Sécurité
+7. Création d'une API REST avec Spring Boot
+
+8. Sécurité
     - Https
     - Authentification basique
     - Keyclock
     - Cors
 
-10. Intégration au SI
+9. Intégration au SI
     - Les tests (TP)
     - Documenter l'API avec Swagger (TP)
     - Note de la cellule archi
