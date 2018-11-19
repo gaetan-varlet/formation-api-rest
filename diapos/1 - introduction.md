@@ -19,5 +19,94 @@ Exemples :
 ## Les formats de données XML et JSON
 
 - petite définition en 2 mots
-- exemple avec un objet contenant un sous-objet
-- exemple d'une liste de 2 objets
+
+----
+
+### Objet Java
+
+```java
+@XmlRootElement
+public class Personne {
+	private String prenom;
+	private Integer age;
+	private Adresse adresse;
+}
+
+@XmlRootElement
+public class Adresse {	
+	private String nomCommune;
+	private String codePostal;
+}
+```
+
+----
+
+#### Rendu en JSON
+
+```json
+{
+  "prenom": "Gaëtan",
+  "age": 30,
+  "adresse": {
+    "nomCommune": "Montrouge",
+    "codePostal": "92120"
+  }
+}
+```
+
+```json
+[
+  {
+    "prenom": "Gaëtan",
+    "age": 30,
+    "adresse": {
+      "nomCommune": "Montrouge",
+      "codePostal": "92120"
+    }
+  },
+  {
+    "prenom": "Thibaut",
+    "age": 23,
+    "adresse": {
+      "nomCommune": "Saint-Quentin",
+      "codePostal": "02100"
+    }
+  }
+]
+```
+
+----
+
+### Rendu en XML
+
+```xml
+<personne>
+    <adresse>
+        <codePostal>92120</codePostal>
+        <nomCommune>Montrouge</nomCommune>
+    </adresse>
+    <age>30</age>
+    <prenom>Gaëtan</prenom>
+</personne>
+```
+
+```xml
+<personnes>
+    <personne>
+        <adresse>
+            <codePostal>92120</codePostal>
+            <nomCommune>Montrouge</nomCommune>
+        </adresse>
+        <age>30</age>
+        <prenom>Gaëtan</prenom>
+    </personne>
+    <personne>
+        <adresse>
+            <codePostal>02100</codePostal>
+            <nomCommune>Saint-Quentin</nomCommune>
+        </adresse>
+        <age>23</age>
+        <prenom>Thibaut</prenom>
+    </personne>
+</personnes>
+```

@@ -311,4 +311,4 @@ public class CalculResource {
 }
 ```
 
-- relancez le Tomcat et appellez l'URL [http://localhost:8080/rest/calcul-jersey?nombre1=3&nombre2=4](http://localhost:8080/rest/calcul-jersey/calcul-jackson?nombre1=3&nombre2=4)
+- relancez le Tomcat et appellez l'URL [http://localhost:8080/rest/calcul-jersey?nombre1=3&nombre2=4](http://localhost:8080/rest/calcul-jersey?nombre1=3&nombre2=4)
