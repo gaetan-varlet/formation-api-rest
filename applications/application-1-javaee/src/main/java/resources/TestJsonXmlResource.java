@@ -12,9 +12,9 @@ import model.Adresse;
 import model.Personne;
 
 @Path("")
-public class CalculResource2 {
+public class TestJsonXmlResource {
 	
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	//@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	@GET
 	@Path("/test-json")
 	public Personne calcul(){

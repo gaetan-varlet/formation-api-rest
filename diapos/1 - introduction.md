@@ -18,7 +18,8 @@ Exemples :
 
 ## Les formats de données XML et JSON
 
-- petite définition en 2 mots
+- les formats JSON et XML  permettent de stocker des données textuelles de manière structurée.
+- le JSON est plus léger
 
 ----
 
