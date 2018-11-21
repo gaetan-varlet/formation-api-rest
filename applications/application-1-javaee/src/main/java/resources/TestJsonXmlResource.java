@@ -1,5 +1,6 @@
 package resources;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -9,12 +10,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import model.Adresse;
+import model.Ami;
 import model.Personne;
 
 @Path("")
 public class TestJsonXmlResource {
 	
-	//@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	@GET
 	@Path("/test-json")
 	public Personne calcul(){
@@ -25,6 +27,14 @@ public class TestJsonXmlResource {
 		adresse1.setNomCommune("Montrouge");
 		adresse1.setCodePostal("92120");
 		personne1.setAdresse(adresse1);
+		Ami ami1 = new Ami();
+		ami1.setNom("Toto");
+		Ami ami2 = new Ami();
+		ami2.setNom("Tata");
+		List<Ami> liste = new ArrayList<>();
+		liste.add(ami1);
+		liste.add(ami2);
+		personne1.setListeAmis(liste);
 		return personne1;
 	}
 	
@@ -63,6 +73,11 @@ public class TestJsonXmlResource {
 		adresse1.setNomCommune("Montrouge");
 		adresse1.setCodePostal("92120");
 		personne1.setAdresse(adresse1);
+		Ami ami1 = new Ami();
+		ami1.setNom("Toto");
+		Ami ami2 = new Ami();
+		ami2.setNom("Toto");
+		personne1.setListeAmis(Arrays.asList(ami1, ami2));
 		return personne1;
 	}
 	

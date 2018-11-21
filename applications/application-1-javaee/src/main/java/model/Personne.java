@@ -1,5 +1,7 @@
 package model;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -8,6 +10,7 @@ public class Personne {
 	private String prenom;
 	private Integer age;
 	private Adresse adresse;
+	private List<Ami> listeAmis;
 	
 	public String getPrenom() {
 		return prenom;
@@ -33,6 +36,12 @@ public class Personne {
 		this.adresse = adresse;
 	}
 	
+	public List<Ami> getListeAmis() {
+		return listeAmis;
+	}
 	
+	public void setListeAmis(List<Ami> listeAmis) {
+		this.listeAmis = listeAmis;
+	}
 	
 }
