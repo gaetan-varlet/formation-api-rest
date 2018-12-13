@@ -8,7 +8,7 @@ HTTP (Hypertext Transfer Protocol) est un protocole de communication client-serv
 
 Il s'agit d'un protocole **sans état**, ce qui signifie que le serveur ne conserve aucune donnée entre deux requêtes
 
-![Schéma illustrant les échanges entre le client et le serveur](./images/client-serveur.png "Schéma illustrant les échanges entre le client et le serveur")
+![Schéma illustrant les échanges entre le client et le serveur](diapos/images/client-serveur.png "Schéma illustrant les échanges entre le client et le serveur")
 
 ----
 

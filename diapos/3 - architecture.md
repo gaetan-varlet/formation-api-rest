@@ -11,7 +11,7 @@
 REST :
 - doit être sans état, ou **stateless** en anglais : aucune donnée n'est conservée par le serveur entre 2 requêtes. Cela peut permettre de traiter les requêtes via des instances de multiples serveurs
 
-![Le modèle de maturité de Richardson](./images/modele-maturite-richardson.jpg "Le modèle de maturité de Richardson")
+![Le modèle de maturité de Richardson](diapos/images/modele-maturite-richardson.jpg "Le modèle de maturité de Richardson")
 
 ----
 
