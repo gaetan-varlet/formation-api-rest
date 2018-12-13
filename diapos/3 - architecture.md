@@ -8,10 +8,21 @@
     - **SOAP** (Simple Object Access Protocol) dévelopé par Microsoft 
     - **REST** créé en 2000 par Roy Fielding dans sa thèse
 
-REST :
+API REST :
 - doit être sans état, ou **stateless** en anglais : aucune donnée n'est conservée par le serveur entre 2 requêtes. Cela peut permettre de traiter les requêtes via des instances de multiples serveurs
+- modèle de maturité de Richardson
+    - quatre grands niveaux d’évaluation d’une API (dernier niveau => API RESTful)
+
+----
 
 ![Le modèle de maturité de Richardson](diapos/images/modele-maturite-richardson.jpg "Le modèle de maturité de Richardson")
+
+----
+
+- **niveau 0** : API qu'on ne peut pas vraiment qualifié de REST, davantage proche de SOAP. Utilisation d'"HTTP" comme protocole d'échange. Un seul point d'entrée, comme `/api`, et une seule méthode HTTP, `POST`, pour toutes les requêtes
+- **niveau 1** : chaque ressource doit être distinguée par une URI distincte
+- **niveau 2** : utilisation des verbes HTTP et codes retours HTTP adéquats
+- **niveau 3** : notion d'HATEOAS (Hypertext As The Engine Of Application State) : ajout de liens dans les ressources retournées par l'API (par exemple pour mettre à jour la ressource, ou avoir l'URL d'un objet lié)
 
 ----
 
@@ -23,7 +34,7 @@ REST :
 
 ## L'architecture d'une application basée sur une API
 
-**JavaScript** pour le 'front-ent', **API Java** pour le 'back-end' 
+**JavaScript** pour le 'front-ent', **API Java** pour le 'back-end'
 
 ![Architecture API](diapos/images/archi-api.png "Architecture API")
 
