@@ -22,7 +22,7 @@ HTTP définit un [ensemble de méthodes](https://developer.mozilla.org/fr/docs/W
 - **PUT** : remplace toutes les représentations actuelles de la ressource visée par le contenu de la requête
 - **DELETE** : supprime la ressource indiquée
 - **CONNECT** : établit un tunnel vers le serveur identifié par la ressource cible
-- **OPTIONS** : est utilisée pour décrire les options de communications avec la ressource visée.
+- **OPTIONS** : est utilisée pour décrire les options de communications avec la ressource visée
 - **TRACE** : éalise un message de test aller/retour en suivant le chemin de la ressource visée
 - **PATCH** : est utilisée pour appliquer des modifications partielles à une ressource
 
@@ -149,5 +149,5 @@ https://mon-api/{variable-de-chemin}?parametre-de-requete-1=valeur&parametre-de-
     - souvent utilisé pour les variables non obligatoires notamment pour du filtrage
 
 Par exemple :
-- `https://api.insee.fr/entreprises/sirene/V3/siren` renvoi 20 entreprises
-- `https://api.insee.fr/entreprises/sirene/V3/siren?tri=true&nombre=5` renvoi les 5 premières entreprises triées par identifiant
+- **https://api.insee.fr/entreprises/sirene/V3/siren** renvoi 20 entreprises
+- **https://api.insee.fr/entreprises/sirene/V3/siren?tri=true&nombre=5** renvoi les 5 premières entreprises triées par identifiant
