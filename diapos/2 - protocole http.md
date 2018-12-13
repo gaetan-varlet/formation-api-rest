@@ -8,7 +8,7 @@ HTTP (Hypertext Transfer Protocol) est un protocole de communication client-serv
 
 Il s'agit d'un protocole **sans état**, ce qui signifie que le serveur ne conserve aucune donnée entre deux requêtes
 
-![Schéma illustrant les échanges entre le client et le serveur](images/client-serveur.png "Schéma illustrant les échanges entre le client et le serveur")
+![Schéma illustrant les échanges entre le client et le serveur](./images/client-serveur.png "Schéma illustrant les échanges entre le client et le serveur")
 
 ----
 
@@ -140,5 +140,14 @@ response.setCharacterEncoding("UTF-8");
 
 ## Structure d'une requête HTTP
 
-TODO
-- pathparam, queryparam avec les ? et &
+```http
+https://mon-api/{variable-de-chemin}?parametre-de-requete-1=valeur&parametre-de-requete-2=valeur
+```
+- **variables de chemin** : souvent utilisé pour les variables obligatoires
+- **paramètres de requête** :
+    - `?` à la fin de l'URL suivi de `clé=valeur`, puis `&` pour séparer les autres paramètres de requête
+    - souvent utilisé pour les variables non obligatoires notamment pour du filtrage
+
+Par exemple :
+- `https://api.insee.fr/entreprises/sirene/V3/siren` renvoi 20 entreprises
+- `https://api.insee.fr/entreprises/sirene/V3/siren?tri=true&nombre=5` renvoi les 5 premières entreprises triées par identifiant
