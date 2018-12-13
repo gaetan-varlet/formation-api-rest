@@ -49,21 +49,31 @@
     - En Java avec des bibliothèques (exemple avec Unirest et OkHTTP) (TP)
     - En JavaScript avec XMLHttpRequest, JQuery, Fetch, Axios (TP)
 
-6. Création d'une API REST avec Jersey
-    - Les paramètres de requête, le corps de la requête (TP)
-    - Personnalisation de la réponse (TP)
-
-7. Création d'une API REST avec Spring Boot
-
-8. Sécurité
-    - Https
-    - Authentification basique
-    - Keyclock
+6. Création d'une API REST avec Spring Boot
+    - découverte rapide de l'univers Spring, de Spring Core, Spring Data, Spring Security, Spring MVC, Spring Boot
+    - Spring Initializr
+    - création d'un jar vs war
+    - création d'un RestController HelloWorld
+    - présentation du projet et des ressources à créer : objet Vin, GET (avec filtre sur un attribut via param de requête), POST, PUT, DELETE
+    - produces / consumes
+    - reception de fichier dans un service
+    - mise en place de Spring Data JPA avec H2
+    - paging et sorting
+    - configuration de spring boot avec des profils
+    - injection des propriétés
+    - gestion des logs(à travailler)
+    - bannière ASCII
+    - gestion des erreurs avec exceptions et codes HTTP
+    - mise en place de Swagger
+    - les tests dans Spring Boot
+    - Spring Security : Authentification basique, Keycloak
     - Cors
+    - gestion du cache applicatif
 
-9. Intégration au SI
-    - Les tests (TP)
-    - Documenter l'API avec Swagger (TP)
+7. Création d'une API REST avec Jersey
+    - passage en revue rapide des différences avec Spring Boot
+
+8. Documentation
     - Note de la cellule archi
         - Utilisation des verbes
         - Singulier / Pluriel
