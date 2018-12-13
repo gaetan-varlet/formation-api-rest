@@ -26,10 +26,10 @@
     - Structure d'une requête HTTP
 
 3. Architecture 
-    - L'architecture REST (et différences avec une application web classique)
-    - L'architecture classique d'une application web à l'Insee
-    - La nouvelle architecture avec un 'front-ent' JavaScript et une API Java pour le 'back-end'
-    - Intérêts : rapidité (démo avec mode ralenti dans Chrome), partage d'informations instantané entre applications
+    - L'architecture REST
+    - L'architecture d'une application web classique à l'Insee
+    - L'architecture d'une application basée sur une API
+    - Intérêts : rapidité, partage d'informations instantané entre applications
     
 4. Un premier exemple de mise en place d'une API en Java EE
     - Création d'une application web classique avec Maven
