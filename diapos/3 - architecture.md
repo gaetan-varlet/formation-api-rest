@@ -23,10 +23,9 @@ REST :
 
 ## L'architecture d'une application basée sur une API
 
-![Architecture API](diapos/images/archi-api.png "Architecture API")
+**JavaScript** pour le 'front-ent', **API Java** pour le 'back-end' 
 
-- JavaScript pour le 'front-ent'
-- API Java pour le 'back-end' 
+![Architecture API](diapos/images/archi-api.png "Architecture API")
 
 ----
 
