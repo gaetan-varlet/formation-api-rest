@@ -10,8 +10,7 @@
 
 API REST :
 - doit être sans état, ou **stateless** en anglais : aucune donnée n'est conservée par le serveur entre 2 requêtes. Cela peut permettre de traiter les requêtes via des instances de multiples serveurs
-- modèle de maturité de Richardson
-    - quatre grands niveaux d’évaluation d’une API (dernier niveau => API RESTful)
+- **modèle de maturité de Richardson** : quatre grands niveaux d’évaluation d’une API (dernier niveau => API RESTful)
 
 ----
 
@@ -22,7 +21,7 @@ API REST :
 - **niveau 0** : API qu'on ne peut pas vraiment qualifié de REST, davantage proche de SOAP. Utilisation d'"HTTP" comme protocole d'échange. Un seul point d'entrée, comme `/api`, et une seule méthode HTTP, `POST`, pour toutes les requêtes
 - **niveau 1** : chaque ressource doit être distinguée par une URI distincte
 - **niveau 2** : utilisation des verbes HTTP et codes retours HTTP adéquats
-- **niveau 3** : notion d'HATEOAS (Hypertext As The Engine Of Application State) : ajout de liens dans les ressources retournées par l'API (par exemple pour mettre à jour la ressource, ou avoir l'URL d'un objet lié)
+- **niveau 3** : notion d'HATEOAS (Hypertext As The Engine Of Application State) : ajout de liens dans les ressources retournées par l'API (par exemple pour mettre à jour la ressource, ou avoir l'URI d'un objet lié)
 
 ----
 
@@ -42,4 +41,8 @@ API REST :
 
 ## Intérêts : rapidité, partage d'informations instantané entre applications
 
-- démo avec mode ralenti dans Chrome
+- rapidité : démo avec mode ralenti dans Chrome
+- partage d'informations : appel de l'API plutôt que des échanges de fichiers
+    - pas d'attente de recevoir un fichier pour avoir une information à jour
+    - pas besoin de gérer la lecture d'un fichier et l'import de données
+    - pas de redondance de données : économie de stockage et pas d'écarts entre les différentes sources
