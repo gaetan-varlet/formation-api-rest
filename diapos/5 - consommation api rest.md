@@ -22,6 +22,92 @@
 
 ----
 
+Lecture du service :
+```http
+http://fakerestapi.azurewebsites.net/api/Users/1
+```
+
+réponse en JSON :
+```json
+{
+    "ID": 1,
+    "UserName": "User 1",
+    "Password": "Password1"
+}
+```
+
+réponse en XML :
+```xml
+<User xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/FakeRestAPI.Web.Models">
+    <ID>1</ID>
+    <Password>Password1</Password>
+    <UserName>User 1</UserName>
+</User>
+```
+
+----
+
+Création d'un projet Maven en java 8 avec la dépendence **jackson-databind**, et création d'un Bean **User** :
+```java
+@XmlRootElement(name = "User")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class User {
+
+	@XmlElement(name = "ID")
+	@JsonProperty("ID")
+	private int id;
+	@XmlElement(name = "UserName")
+	@JsonProperty("UserName")
+	private String userName;
+	@XmlElement(name = "Password")
+	@JsonProperty("Password")
+	private String password;
+}
+```
+
+----
+
+Création dun **package-info.java** pour lire la réponse XML :
+```java
+@XmlSchema(
+    namespace="http://schemas.datacontract.org/2004/07/FakeRestAPI.Web.Models",
+    elementFormDefault=XmlNsForm.QUALIFIED
+)
+package test;
+ 
+import javax.xml.bind.annotation.XmlNsForm;
+import javax.xml.bind.annotation.XmlSchema;
+```
+
+----
+
+Requête HTTP sans bibliothèque :
+```java
+// requête en GET avec réponse en XML
+URL url = new URL("http://fakerestapi.azurewebsites.net/api/Users/1");
+HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+connection.setRequestMethod("GET");
+connection.setRequestProperty("Accept", "application/xml");
+InputStream response = connection.getInputStream();
+JAXBContext jc = JAXBContext.newInstance(User.class);
+User user = (User) jc.createUnmarshaller().unmarshal(response);
+connection.disconnect();
+System.out.println(user);
+
+// requête en GET avec réponse en JSON
+URL url = new URL("http://fakerestapi.azurewebsites.net/api/Users/1");
+HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+connection.setRequestMethod("GET");
+connection.setRequestProperty("Accept", "application/json");
+InputStream response = connection.getInputStream();
+ObjectMapper mapper = new ObjectMapper();
+User user = mapper.readValue(response, User.class);
+connection.disconnect();
+System.out.println(user);
+```
+
+----
+
 ## En JavaScript
 
 - XMLHttpRequest
