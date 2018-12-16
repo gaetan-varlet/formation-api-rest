@@ -41,13 +41,12 @@
     - Présentation de la spécification JAX-RS et exemple d'utilisation de l'implémentation Jersey
 
 5. Consommation d'une API REST
-    - Utilisation de [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
-    - Installation d'un plugin JsonViewer
-    - Via le navigateur (démo)
-    - En utilisant postman (démo)
-    - En Java sans bibliothèque (TP)
-    - En Java avec des bibliothèques (exemple avec Unirest et OkHTTP) (TP)
-    - En JavaScript avec XMLHttpRequest, JQuery, Fetch, Axios (TP)
+    - Faire une requête HTTP
+        - passage en revue des différentes manière de faire une requête HTTP
+    - En Java
+        - sans bibliothèque
+        - avec des bibliothèques
+    - En Javascript
 
 6. Création d'une API REST avec Spring Boot
     - découverte rapide de l'univers Spring, de Spring Core, Spring Data, Spring Security, Spring MVC, Spring Boot
