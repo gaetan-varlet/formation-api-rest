@@ -62,6 +62,8 @@ public class User {
 	@XmlElement(name = "Password")
 	@JsonProperty("Password")
 	private String password;
+
+    // getters, setters et méthode toString()
 }
 ```
 
