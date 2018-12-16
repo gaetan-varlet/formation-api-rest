@@ -166,7 +166,6 @@ response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 System.out.println(response.getStatusCode());
 System.out.println(response.getBody());
 System.out.println(response.getHeaders().getContentType());
-
 ...
 ```
 
@@ -174,7 +173,6 @@ System.out.println(response.getHeaders().getContentType());
 
 ```java
 ...
-
 System.out.println("Convertion du body en objet");
 ObjectMapper mapper = new ObjectMapper();
 User user = mapper.readValue(response.getBody(), User.class);
