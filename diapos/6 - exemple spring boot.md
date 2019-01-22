@@ -23,7 +23,7 @@ C'est un framework libre pour concevoir des applications Java. Spring s'occupe d
 - [Spring Initializr](https://start.spring.io/) permet de générer le squelette d'une application Spring.
 - **Création d'un projet Maven en java 8** :
   - sélectionner les dépendences _Web_, _JPA_ et _PostgreSQL_
-  - sélectionner Packaging WAR
+  - sélectionner Packaging JAR
 
 ----
 
@@ -47,7 +47,7 @@ spring.datasource.password=***
 Ajout dans le **pom.xml** d'une dépendence pour dire que l'on utilise Log4j2 plutôt que Logback (proposé par défaut)
 
 ```xml
-		<!-- Indique à Spring Boot que l'on utilise log4j2 et pas logback qui est proposé par défaut) -->
+		<!-- Indique à Spring Boot que l'on utilise log4j2 et pas logback qui est proposé par défaut -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
@@ -124,6 +124,28 @@ Fichier **log4j2-local.xml** à ajouter dans **src/main/resources**
 ----
 
 ## Création d'un HelloWorld
+
+- création d'un package **controller** : par exemple *fr.insee.formationapirest.controller* si le main de l'application est dans le package *fr.insee.formationapirest*
+- création d'une classe **TestController** dans ce package
+
+```java
+package fr.insee.formationapirest.controller;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class TestController {
+	
+	@RequestMapping(value="hello", method = RequestMethod.GET)
+	public String helloWorld() {
+		return "Hello World !";
+	}
+}
+```
+
+- lancer l'application et accéder à l'URL `http://localhost:8080/hello`
 
 ----
 
