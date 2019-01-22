@@ -89,7 +89,14 @@ Fichier **log4j2-local.xml** à ajouter dans **src/main/resources**
 				</pattern>
 
 			</PatternLayout>
-		</Console>
+```
+
+----
+
+## Configuration du projet (4)
+
+```xml
+        </Console>
 		<RollingFile name="File-Appender">
 			<FileName>${dossierLog}/${nomFichierLog}.log</FileName>
 			<FilePattern>${dossierLog}/%d{yyyy-MM-dd}-${nomFichierLog}.log</FilePattern>
@@ -116,4 +123,16 @@ Fichier **log4j2-local.xml** à ajouter dans **src/main/resources**
 
 ----
 
+## Création d'un HelloWorld
+
+----
+
+## Zipper la réponse
+
+----
+
 ## Création d'un WAR pour le déploiement au CEI
+
+- nommer le livrable ROOT
+- utiliser **maven-war-plugin** pour créer le war
+- utiliser **maven-assembly-plugin** pour créer un zip contenant le war, les properties, le fichier de config de log4j2, le changelog...
