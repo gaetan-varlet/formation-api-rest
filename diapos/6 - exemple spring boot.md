@@ -1,6 +1,6 @@
 # Création d'une API REST avec Spring Boot
 
----
+----
 
 ## L'univers Spring
 
@@ -13,7 +13,7 @@ C'est un framework libre pour concevoir des applications Java. Spring s'occupe d
 - **Spring Securiy** : fournit des fonctionnalités d'authentification, d'autorisation et de sécurité
 - **Spring Boot** : permet de créer facilement et rapidement des applications Spring avec un Tomcat embarqué
 
----
+----
 
 ## Spring Boot : initialisaiton du projet
 
@@ -25,7 +25,7 @@ C'est un framework libre pour concevoir des applications Java. Spring s'occupe d
   - sélectionner les dépendences _Web_, _JPA_ et _PostgreSQL_
   - sélectionner Packaging WAR
 
----
+----
 
 ## Configuration du projet (1)
 
@@ -40,7 +40,7 @@ spring.datasource.username=user_toucan01_loc
 spring.datasource.password=***
 ```
 
----
+----
 
 ## Configuration du projet (2)
 
@@ -65,7 +65,7 @@ Ajout dans le **pom.xml** d'une dépendence pour dire que l'on utilise Log4j2 pl
 		</dependency>
 ```
 
----
+----
 
 ## Configuration du projet (3)
 
@@ -114,7 +114,7 @@ Fichier log4j2.xml à ajouter dans **src/main/resources**
 </Configuration>
 ```xml
 
----
+----
 
 ## Création d'un WAR pour le déploiement au CEI
 ````
