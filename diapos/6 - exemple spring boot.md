@@ -77,8 +77,8 @@ Fichier **log4j2-local.xml** à ajouter dans **src/main/resources**
 
 	<!-- Propriétés surchargeables par le CEI indiquant le chemin vers le dossier contenant les logs et le nom du fichier de log -->
 	<Properties>
-		<property name="dossierLog">D:/logs/toucan</property>
-		<property name="nomFichierLog">toucan</property>
+		<property name="dossierLog">D:/logs/formation-api-rest</property>
+		<property name="nomFichierLog">formation-api-rest</property>
 	</Properties>
 
 	<Appenders>
@@ -115,6 +115,7 @@ Fichier **log4j2-local.xml** à ajouter dans **src/main/resources**
 			<AppenderRef ref="Console-Appender" level="info" />
 		</Logger>
 		<Root level="info">
+            <AppenderRef ref="File-Appender" />
 			<AppenderRef ref="Console-Appender" />
 		</Root>
 	</Loggers>
@@ -146,6 +147,17 @@ public class TestController {
 ```
 
 - lancer l'application et accéder à l'URL `http://localhost:8080/hello`
+
+----
+
+## Ajouter de la log
+
+```java
+// ajouter dans la classe **TestController**
+private static final Logger log = LogManager.getLogger();
+// ajouter dans la méthode `helloWorld`
+log.info("passage dans le controller helloWorld");
+```
 
 ----
 
