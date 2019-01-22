@@ -42,6 +42,51 @@ spring.datasource.password=***
 
 ----
 
+## Configuration du projet (Alt 1/2)
+
+
+- dans le **pom.xml**, remplacer la dépendence Maven *postgresql* par la dépendence *h2*
+```xml
+<dependency>
+	<groupId>com.h2database</groupId>
+	<artifactId>h2</artifactId>
+	<scope>runtime</scope>
+</dependency>
+```
+
+- dans les **properties** :
+```
+logging.config=classpath:log4j2-local.xml
+spring.h2.console.enabled=true
+# désactiver la création automatique des tables par Hibernate et utiliser les requêtes de schema.sql
+spring.jpa.hibernate.ddl-auto=none
+```
+
+- créer un fichier **data.sql** dans src/main/resources avec les 2 requêtes suivantes pour initialiser la base :
+```sql
+INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Margaux', 'Margaux', 500);
+INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Cantemerle', 'Haut-Médoc', 30);
+```
+
+----
+
+## Configuration du projet (Alt 2/2)
+
+- créer un fichier **schema.sql** dans src/main/resources
+```sql
+CREATE SCHEMA formation;
+
+CREATE TABLE formation.VIN (
+	id serial PRIMARY KEY,
+	chateau VARCHAR(100) NOT NULL,
+	appellation VARCHAR(100),
+	prix DECIMAL);
+
+CREATE SEQUENCE formation.vin_id_seq start 1 increment 1;
+```
+
+----
+
 ## Configuration du projet (2)
 
 Ajout dans le **pom.xml** d'une dépendence pour dire que l'on utilise Log4j2 plutôt que Logback (proposé par défaut)
@@ -153,11 +198,267 @@ public class TestController {
 ## Ajouter de la log
 
 ```java
-// ajouter dans la classe **TestController**
+// ajouter dans la classe TestController
 private static final Logger log = LogManager.getLogger();
-// ajouter dans la méthode `helloWorld`
+// ajouter dans la méthode helloWorld
 log.info("passage dans le controller helloWorld");
 ```
+
+----
+
+## Création de données en base
+
+```sql
+CREATE SCHEMA formation;
+
+CREATE TABLE formation.vin (
+	id serial PRIMARY KEY,
+	chateau VARCHAR(100) NOT NULL,
+	appellation VARCHAR(100),
+	prix DECIMAL
+);
+
+INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Margaux', 'Margaux', 500);
+INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Cantemerle', 'Haut-Médoc', 30.5);
+
+SELECT * FROM formation.vin; -- penser à commiter si l'autocommit n'est pas mis à true
+```
+
+----
+
+## Création de l'objet Java correspondant (package model)
+
+```java
+package fr.insee.formationapirest.model;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "vin", schema = "formation")
+public class Vin {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_vin")
+	@SequenceGenerator(name = "seq_vin", sequenceName = "formation.vin_id_seq", allocationSize = 1)
+	private Integer id;
+	
+	private String chateau;
+	private String appellation;
+	private Double prix;
+
+    // ajouter les getters et setters	
+}
+```
+
+----
+
+## Création du DAO (package repository)
+
+- JpaRepository est une interface de Spring utilisant Hibernate qui donne accès à plein de méthodes nativement
+- en implémentant l'interface, il faut préciser le type d'objet correspondant ainsi que le type de la clé primaire
+
+```java
+package fr.insee.formationapirest.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import fr.insee.formationapirest.model.Vin;
+
+@Repository
+public interface VinRepository extends JpaRepository<Vin, Integer> {
+	
+}
+```
+
+----
+
+## Création du controller VinController pour récupérer tous les vins
+
+- création d'un controller permettant de récupérer tous les vins en base
+
+```java
+package fr.insee.formationapirest.controller;
+
+@RestController
+@RequestMapping("/vin")
+public class VinController {
+	
+	@Autowired
+	VinRepository vinRepository;
+
+	@RequestMapping(method = RequestMethod.GET)
+	public List<Vin> getAll(){
+		return vinRepository.findAll();
+	}
+	
+}
+```
+
+- appeler l'URL `http://localhost:8080/vin` pour obtenir tous les vins
+
+----
+
+## Ajout d'une méthode pour obtenir un vin par son id
+
+```java
+@RequestMapping(value= "/{id}", method = RequestMethod.GET)
+public Vin getById(@PathVariable Integer id){
+	return vinRepository.findById(id).orElse(null);
+}
+```
+
+- appeler l'URL `http://localhost:8080/vin/1` pour obtenir le vin avec l'id 1
+
+----
+
+## Supprimer un vin par son id
+
+```java
+@RequestMapping(value= "/{id}", method = RequestMethod.DELETE)
+public void deleteById(@PathVariable Integer id){
+	vinRepository.deleteById(id);
+}
+```
+
+- tester avec un id existant (code 200)
+- tester avec un id qui n'existe pas (code 500)
+
+----
+
+## Faire un contrôle d'existence avant suppression
+
+- tester l'existence du vin avant de le supprimer
+
+```java
+@RequestMapping(value= "/{id}", method = RequestMethod.DELETE)
+public void deleteById(@PathVariable Integer id){
+	if(vinRepository.existsById(id)) { // renvoie un boolean (true si l'objet existe, false sinon)
+		vinRepository.deleteById(id);
+	}
+}
+```
+
+----
+
+## Création d'un nouveau vin
+
+```java
+@RequestMapping (method = RequestMethod.POST)
+public Vin add(@RequestBody Vin vin){
+    // ajouter un contrôle pour s'assurer que l'id n'est pas renseigné ou passer par un DTO
+	return vinRepository.save(vin);
+}
+```
+
+- faire une requête en post avec dans le body au format JSON :
+```json
+{
+"chateau":"Château Gloria",
+"appellation":"Saint-Julien",
+"prix":25
+}
+```
+
+----
+
+## Mise à jour d'un vin par son id
+
+```java
+@RequestMapping (method = RequestMethod.PUT)
+public Vin update(@RequestBody Vin vin){
+	if(vinRepository.existsById(vin.getId())) {
+		return vinRepository.save(vin);
+	}
+	return null;
+}
+```
+
+----
+
+## Refactor : mise en place d'une couche de service
+
+- objectif : plus de lien direct entre la couche controller et la couche repository. Tout doit passer par les services
+- exemple avec la méthode getAll() :
+
+```java
+@Service
+public class VinService {
+	
+	@Autowired
+	VinRepository vinRepository;
+	
+	public List<Vin> getAll(){
+		return vinRepository.findAll();
+	}
+	
+}
+```
+```java
+// dans le controller :
+@Autowired
+VinService vinService;
+
+@RequestMapping(method = RequestMethod.GET)
+public List<Vin> getAll(){
+    return vinService.getAll();
+}
+```
+
+----
+
+## Filtrage sur un attribut via paramètre de requête
+
+- exemple en filtrant sur l'appellation
+
+```java
+
+```
+
+----
+
+## @Produces et @Consumes
+
+
+----
+
+## Gestion des erreurs avec exceptions et codes HTTP
+
+----
+
+## Réception d'un fichier dans un controller
+
+----
+
+## Mise en place de Swagger
+
+----
+
+## Paging et sorting
+
+----
+
+## Configuration de Spring Boot avec des profils
+
+----
+
+## Injection de properties
+
+----
+
+## Spring Security
+
+----
+
+## Les tests dans Spring Boot
+
+----
+
+## CORS
 
 ----
 
@@ -170,3 +471,15 @@ log.info("passage dans le controller helloWorld");
 - nommer le livrable ROOT
 - utiliser **maven-war-plugin** pour créer le war
 - utiliser **maven-assembly-plugin** pour créer un zip contenant le war, les properties, le fichier de config de log4j2, le changelog...
+
+----
+
+## Bonus : Bannière ASCII
+
+----
+
+## Bonus : Gestion du cache applicatif
+
+- définition
+
+- limites
