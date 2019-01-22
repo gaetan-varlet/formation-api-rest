@@ -1,3 +1,6 @@
+overflow-y: auto;
+overflow-x: hidden;
+
 .reveal .main-title {
     /* Empty */
 }
