@@ -69,9 +69,9 @@ Ajout dans le **pom.xml** d'une dépendence pour dire que l'on utilise Log4j2 pl
 
 ## Configuration du projet (3)
 
-Fichier log4j2.xml à ajouter dans **src/main/resources**
+Fichier **log4j2-local.xml** à ajouter dans **src/main/resources**
 
-````xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration monitorInterval="60">
 
@@ -112,9 +112,8 @@ Fichier log4j2.xml à ajouter dans **src/main/resources**
 		</Root>
 	</Loggers>
 </Configuration>
-```xml
+```
 
 ----
 
 ## Création d'un WAR pour le déploiement au CEI
-````
