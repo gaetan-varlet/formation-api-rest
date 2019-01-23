@@ -23,7 +23,7 @@ HTTP définit un [ensemble de méthodes](https://developer.mozilla.org/fr/docs/W
 - **DELETE** : supprime la ressource indiquée
 - **CONNECT** : établit un tunnel vers le serveur identifié par la ressource cible
 - **OPTIONS** : est utilisée pour décrire les options de communications avec la ressource visée
-- **TRACE** : éalise un message de test aller/retour en suivant le chemin de la ressource visée
+- **TRACE** : réalise un message de test aller/retour en suivant le chemin de la ressource visée
 - **PATCH** : est utilisée pour appliquer des modifications partielles à une ressource
 
 ----
