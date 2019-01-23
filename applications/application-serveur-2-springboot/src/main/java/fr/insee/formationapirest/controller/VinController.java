@@ -10,44 +10,38 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.insee.formationapirest.model.Vin;
-import fr.insee.formationapirest.repository.VinRepository;
+import fr.insee.formationapirest.service.VinService;
 
 @RestController
 @RequestMapping("/vin")
 public class VinController {
 	
 	@Autowired
-	VinRepository vinRepository;
+	VinService vinService;
 
 	@RequestMapping(method = RequestMethod.GET)
 	public List<Vin> getAll(){
-		return vinRepository.findAll();
+		return vinService.getAll();
 	}
 	
 	@RequestMapping(value= "/{id}", method = RequestMethod.GET)
 	public Vin getById(@PathVariable Integer id){
-		return vinRepository.findById(id).orElse(null);
+		return vinService.getById(id);
 	}
 	
 	@RequestMapping(value= "/{id}", method = RequestMethod.DELETE)
 	public void deleteById(@PathVariable Integer id){
-		if(vinRepository.existsById(id)) { // renvoie un boolean (true si l'objet existe, false sinon)
-			vinRepository.deleteById(id);
-		}
+		vinService.deleteById(id);
 	}
 	
 	@RequestMapping (method = RequestMethod.POST)
 	public Vin add(@RequestBody Vin vin){
-	    // ajouter un contrôle pour s'assurer que l'id n'est pas renseigné ou passer par un DTO
-		return vinRepository.save(vin);
+		return vinService.add(vin);
 	}
 	
 	@RequestMapping (method = RequestMethod.PUT)
 	public Vin update(@RequestBody Vin vin){
-		if(vinRepository.existsById(vin.getId())) {
-			return vinRepository.save(vin);
-		}
-		return null;
+		return vinService.update(vin);
 	}
 	
 }
