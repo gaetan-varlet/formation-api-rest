@@ -15,7 +15,7 @@ C'est un framework libre pour concevoir des applications Java. Spring s'occupe d
 
 ----
 
-## Spring Boot : initialisaiton du projet
+## Spring Boot : initialisation du projet
 
 - le déploiement d'une application Web nécessite un livrable (war) et un serveur applicatif (Tomcat)
 - Spring Boot offre un déploiement incluant le conteneur applicatif
@@ -208,7 +208,6 @@ INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Canteme
 INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Lascombes', 'Margaux', 80);
 INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Domaine Lejeune', 'Pommard', 40);
 ```
-
 
 ----
 
