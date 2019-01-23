@@ -34,55 +34,33 @@ ajout de properties dans le fichier **application.properties** dans **src/main/r
 ```
 logging.config=classpath:log4j2-local.xml
 
-spring.datasource.driver-class-name=org.postgresql.Driver
-spring.datasource.url=jdbc:postgresql://dvtoucan01ldb01.ad.insee.intra:1983/di_pg_toucan01_dv01
-spring.datasource.username=user_toucan01_loc
-spring.datasource.password=***
-```
-
-----
-
-## Configuration du projet (Alt 1/2)
-
- dans le **pom.xml**, remplacer la dépendence Maven *postgresql* par la dépendence *h2*
-```xml
-<dependency>
-	<groupId>com.h2database</groupId>
-	<artifactId>h2</artifactId>
-	<scope>runtime</scope>
-</dependency>
-```
-
-dans les **properties** :
-```
-logging.config=classpath:log4j2-local.xml
+# active la console H2 à l'URL http://localhost:8080/h2-console/ et renseigner jdbc:h2:mem:testdb dabs JDBC URL
 spring.h2.console.enabled=true
 # désactiver la création automatique des tables par Hibernate et utiliser les requêtes de schema.sql
 spring.jpa.hibernate.ddl-auto=none
 ```
 
-créer un fichier **data.sql** dans src/main/resources avec les 2 requêtes suivantes pour initialiser la base :
-```sql
-INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Margaux', 'Margaux', 500);
-INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Cantemerle', 'Haut-Médoc', 30);
-```
-
 ----
 
-## Configuration du projet (Alt 2/2)
+## Configuration du projet (Alt PostGre)
 
-créer un fichier **schema.sql** dans src/main/resources :
+ dans le **pom.xml**, remplacer la dépendence Maven *h2* par la dépendence *postgresql*
+```xml
+<dependency>
+	<groupId>org.postgresql</groupId>
+	<artifactId>postgresql</artifactId>
+	<scope>runtime</scope>
+</dependency>
+```
 
-```sql
-CREATE SCHEMA formation;
+remplacer le fichier de **properties** par celui-là:
+```
+logging.config=classpath:log4j2-local.xml
 
-CREATE TABLE formation.VIN (
-	id serial PRIMARY KEY,
-	chateau VARCHAR(100) NOT NULL,
-	appellation VARCHAR(100),
-	prix DECIMAL);
-
-CREATE SEQUENCE formation.vin_id_seq start 1 increment 1;
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.url=jdbc:postgresql://dvtoucan01ldb01.ad.insee.intra:1983/di_pg_toucan01_dv01
+spring.datasource.username=user_toucan01_loc
+spring.datasource.password=***
 ```
 
 ----
@@ -92,22 +70,21 @@ CREATE SEQUENCE formation.vin_id_seq start 1 increment 1;
 ajout dans le **pom.xml** d'une dépendence pour dire que l'on utilise Log4j2 plutôt que Logback (proposé par défaut)
 
 ```xml
-		<!-- Indique à Spring Boot que l'on utilise log4j2 et pas logback qui est proposé par défaut -->
-		<dependency>
+<!-- Indique à Spring Boot que l'on utilise log4j2 et pas logback qui est proposé par défaut -->
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter</artifactId>
+	<exclusions>
+		<exclusion>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-log4j2</artifactId>
-		</dependency>
+			<artifactId>spring-boot-starter-logging</artifactId>
+		</exclusion>
+	</exclusions>
+</dependency>
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-log4j2</artifactId>
+</dependency>
 ```
 
 ----
@@ -198,6 +175,9 @@ lancer l'application et accéder à l'URL `http://localhost:8080/hello`
 ## Ajouter de la log
 
 ```java
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 // ajouter dans la classe TestController
 private static final Logger log = LogManager.getLogger();
 // ajouter dans la méthode helloWorld
@@ -208,21 +188,26 @@ log.info("passage dans le controller helloWorld");
 
 ## Création de données en base
 
+créer un fichier **schema.sql** dans src/main/resources :
+
 ```sql
 CREATE SCHEMA formation;
 
-CREATE TABLE formation.vin (
+CREATE TABLE formation.VIN (
 	id serial PRIMARY KEY,
 	chateau VARCHAR(100) NOT NULL,
 	appellation VARCHAR(100),
-	prix DECIMAL
-);
+	prix DECIMAL);
 
+CREATE SEQUENCE formation.vin_id_seq start 3 increment 1;
+```
+
+créer un fichier **data.sql** dans src/main/resources avec les 2 requêtes suivantes pour initialiser la base :
+```sql
 INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Margaux', 'Margaux', 500);
 INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Cantemerle', 'Haut-Médoc', 30.5);
-
-SELECT * FROM formation.vin; -- penser à commiter si l'autocommit n'est pas mis à true
 ```
+
 
 ----
 
@@ -235,6 +220,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
@@ -312,7 +298,7 @@ public Vin getById(@PathVariable Integer id){
 }
 ```
 
-- appeler l'URL `http://localhost:8080/vin/1` pour obtenir le vin avec l'id 1
+appeler l'URL `http://localhost:8080/vin/1` pour obtenir le vin avec l'id 1
 
 ----
 
@@ -332,7 +318,7 @@ public void deleteById(@PathVariable Integer id){
 
 ## Faire un contrôle d'existence avant suppression
 
-- tester l'existence du vin avant de le supprimer
+tester l'existence du vin avant de le supprimer
 
 ```java
 @RequestMapping(value= "/{id}", method = RequestMethod.DELETE)
@@ -355,7 +341,7 @@ public Vin add(@RequestBody Vin vin){
 }
 ```
 
-- faire une requête en post avec dans le body au format JSON :
+faire une requête en post avec dans le body au format JSON :
 ```json
 {
 "chateau":"Château Gloria",
