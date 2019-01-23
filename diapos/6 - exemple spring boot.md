@@ -263,9 +263,9 @@ public interface VinRepository extends JpaRepository<Vin, Integer> {
 
 ----
 
-## Création du controller VinController pour récupérer tous les vins
+## Création du controller VinController
 
-- création d'un controller permettant de récupérer tous les vins en base
+création d'une méthode permettant de récupérer tous les vins
 
 ```java
 package fr.insee.formationapirest.controller;
@@ -284,8 +284,7 @@ public class VinController {
 	
 }
 ```
-
-- appeler l'URL `http://localhost:8080/vin` pour obtenir tous les vins
+appeler l'URL `http://localhost:8080/vin` pour obtenir tous les vins
 
 ----
 
@@ -311,8 +310,8 @@ public void deleteById(@PathVariable Integer id){
 }
 ```
 
-- tester avec un id existant (code 200)
-- tester avec un id qui n'existe pas (code 500)
+- tester avec un id existant (code HTTP 200)
+- tester avec un id qui n'existe pas (code HTTP 500)
 
 ----
 
@@ -341,7 +340,7 @@ public Vin add(@RequestBody Vin vin){
 }
 ```
 
-faire une requête en post avec dans le body au format JSON :
+faire une requête en post avec un body au format JSON :
 ```json
 {
 "chateau":"Château Gloria",
@@ -369,23 +368,21 @@ public Vin update(@RequestBody Vin vin){
 ## Refactor : mise en place d'une couche de service
 
 - objectif : plus de lien direct entre la couche controller et la couche repository. Tout doit passer par les services
-- exemple avec la méthode getAll() :
+- exemple avec la méthode `getAll()` :
 
 ```java
 @Service
-public class VinService {
-	
+public class VinService {	
 	@Autowired
 	VinRepository vinRepository;
 	
 	public List<Vin> getAll(){
 		return vinRepository.findAll();
 	}
-	
 }
 ```
 ```java
-// dans le controller :
+// dans VinController :
 @Autowired
 VinService vinService;
 
