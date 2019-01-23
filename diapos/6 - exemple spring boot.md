@@ -22,7 +22,7 @@ C'est un framework libre pour concevoir des applications Java. Spring s'occupe d
 - on utilisera cette possiiblité en local mais on continuera de créer un WAR pour déployer au CEI
 - [Spring Initializr](https://start.spring.io/) permet de générer le squelette d'une application Spring.
 - **Création d'un projet Maven en java 8** :
-  - sélectionner les dépendences _Web_, _JPA_ et _PostgreSQL_
+  - sélectionner les dépendences *Web*, *JPA* et *H2*
   - sélectionner Packaging JAR
 
 ----
