@@ -9,9 +9,9 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>fr.insee</groupId>
-	<artifactId>application-2-springboot</artifactId>
+	<artifactId>application-serveur-2-springboot</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>application-2-springboot</name>
+	<name>application-serveur-2-springboot</name>
 	<description>Formation API Rest : API en Spring Boot</description>
 
 	<properties>
