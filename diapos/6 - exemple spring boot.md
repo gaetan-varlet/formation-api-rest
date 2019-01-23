@@ -188,9 +188,10 @@ log.info("passage dans le controller helloWorld");
 
 ## Création de données en base
 
-créer un fichier **schema.sql** dans src/main/resources :
+créer un fichier **schema.sql** et un fichier  **data.sql** dans src/main/resources pour initialiser la base :
 
 ```sql
+-- fichier schema.sql
 CREATE SCHEMA formation;
 
 CREATE TABLE formation.VIN (
@@ -199,19 +200,19 @@ CREATE TABLE formation.VIN (
 	appellation VARCHAR(100),
 	prix DECIMAL);
 
-CREATE SEQUENCE formation.vin_id_seq start 3 increment 1;
-```
+CREATE SEQUENCE formation.vin_id_seq start 5 increment 1;
 
-créer un fichier **data.sql** dans src/main/resources avec les 2 requêtes suivantes pour initialiser la base :
-```sql
+-- fichier data.sql
 INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Margaux', 'Margaux', 500);
 INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Cantemerle', 'Haut-Médoc', 30.5);
+INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Lascombes', 'Margaux', 80);
+INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Domaine Lejeune', 'Pommard', 40);
 ```
 
 
 ----
 
-## Création de l'objet Java correspondant (package model)
+## Création de l'objet Java correspondant
 
 ```java
 package fr.insee.formationapirest.model;
