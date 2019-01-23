@@ -29,7 +29,7 @@ C'est un framework libre pour concevoir des applications Java. Spring s'occupe d
 
 ## Configuration du projet (1)
 
-Ajout de properties dans le fichier **application.properties** dans **src/main/resources** pour la gestion de la log et de la base de données
+ajout de properties dans le fichier **application.properties** dans **src/main/resources** pour la gestion de la log et de la base de données
 
 ```
 logging.config=classpath:log4j2-local.xml
@@ -44,8 +44,7 @@ spring.datasource.password=***
 
 ## Configuration du projet (Alt 1/2)
 
-
-- dans le **pom.xml**, remplacer la dépendence Maven *postgresql* par la dépendence *h2*
+ dans le **pom.xml**, remplacer la dépendence Maven *postgresql* par la dépendence *h2*
 ```xml
 <dependency>
 	<groupId>com.h2database</groupId>
@@ -54,7 +53,7 @@ spring.datasource.password=***
 </dependency>
 ```
 
-- dans les **properties** :
+dans les **properties** :
 ```
 logging.config=classpath:log4j2-local.xml
 spring.h2.console.enabled=true
@@ -62,7 +61,7 @@ spring.h2.console.enabled=true
 spring.jpa.hibernate.ddl-auto=none
 ```
 
-- créer un fichier **data.sql** dans src/main/resources avec les 2 requêtes suivantes pour initialiser la base :
+créer un fichier **data.sql** dans src/main/resources avec les 2 requêtes suivantes pour initialiser la base :
 ```sql
 INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Margaux', 'Margaux', 500);
 INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Cantemerle', 'Haut-Médoc', 30);
@@ -72,7 +71,8 @@ INSERT INTO formation.vin (chateau, appellation, prix) VALUES ('Château Canteme
 
 ## Configuration du projet (Alt 2/2)
 
-- créer un fichier **schema.sql** dans src/main/resources
+créer un fichier **schema.sql** dans src/main/resources :
+
 ```sql
 CREATE SCHEMA formation;
 
@@ -89,7 +89,7 @@ CREATE SEQUENCE formation.vin_id_seq start 1 increment 1;
 
 ## Configuration du projet (2)
 
-Ajout dans le **pom.xml** d'une dépendence pour dire que l'on utilise Log4j2 plutôt que Logback (proposé par défaut)
+ajout dans le **pom.xml** d'une dépendence pour dire que l'on utilise Log4j2 plutôt que Logback (proposé par défaut)
 
 ```xml
 		<!-- Indique à Spring Boot que l'on utilise log4j2 et pas logback qui est proposé par défaut -->
@@ -114,7 +114,7 @@ Ajout dans le **pom.xml** d'une dépendence pour dire que l'on utilise Log4j2 pl
 
 ## Configuration du projet (3)
 
-Fichier **log4j2-local.xml** à ajouter dans **src/main/resources**
+fichier **log4j2-local.xml** à ajouter dans **src/main/resources**
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -191,7 +191,7 @@ public class TestController {
 }
 ```
 
-- lancer l'application et accéder à l'URL `http://localhost:8080/hello`
+lancer l'application et accéder à l'URL `http://localhost:8080/hello`
 
 ----
 
