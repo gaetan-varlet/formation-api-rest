@@ -242,7 +242,7 @@ public class Vin {
 
 ----
 
-## Création du DAO (package repository)
+## Création du DAO
 
 - JpaRepository est une interface de Spring utilisant Hibernate qui donne accès à plein de méthodes nativement
 - en implémentant l'interface, il faut préciser le type d'objet correspondant ainsi que le type de la clé primaire

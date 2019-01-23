@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="60">
+
+	<!-- Propriétés surchargeables par le CEI indiquant le chemin vers le dossier contenant les logs et le nom du fichier de log -->
+	<Properties>
+		<property name="dossierLog">D:/logs/formation-api-rest</property>
+		<property name="nomFichierLog">formation-api-rest</property>
+	</Properties>
+
+	<Appenders>
+		<Console name="Console-Appender" target="SYSTEM_OUT">
+			<PatternLayout>
+				<pattern>
+					[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n
+				</pattern>
+
+			</PatternLayout>
+		</Console>
+		<RollingFile name="File-Appender">
+			<FileName>${dossierLog}/${nomFichierLog}.log</FileName>
+			<FilePattern>${dossierLog}/%d{yyyy-MM-dd}-${nomFichierLog}.log</FilePattern>
+			<PatternLayout>
+				<Pattern>%d{yyyy-MMM-dd HH:mm:ss a} [%t] %-5level %logger{36} - %msg%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+			</Policies>
+			<DefaultRolloverStrategy max="90" />
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<Logger name="fr.insee.toucan" level="info" additivity="false">
+			<AppenderRef ref="File-Appender" level="info" />
+			<AppenderRef ref="Console-Appender" level="info" />
+		</Logger>
+		<Root level="info">
+			<AppenderRef ref="Console-Appender" />
+		</Root>
+	</Loggers>
+</Configuration>

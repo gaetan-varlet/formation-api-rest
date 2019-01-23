@@ -1,2 +1,0 @@
-INSERT INTO vin (id, chateau, appellation, prix) VALUES (10000, 'Château Margaux', 'Margaux', 500);
-INSERT INTO vin (id, chateau, appellation, prix) VALUES (10001, 'Château Cantemerle', 'Haut-Médoc', 30);
