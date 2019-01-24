@@ -396,11 +396,56 @@ public List<Vin> getAll(){
 
 ## Filtrage sur un attribut via paramètre de requête
 
-- exemple en filtrant sur l'appellation
+doc : `https://www.baeldung.com/spring-request-param`
+
+exemple en filtrant sur l'appellation : la requête `http://localhost:8080/vin` donne tous les vins alors que la requête `http://localhost:8080/vin?appellation=Margaux` ne donne que les Margaux
 
 ```java
+// Création dans le Repository d'une méthode filtrant sur l'appellation
+List<Vin> findByAppellation(String appellation);
 
+// Création d'un service
+public List<Vin> findByAppellation(String appellation){
+	return vinRepository.findByAppellation(appellation);
+}
+
+// Mise à jour du controller
+@RequestMapping(method = RequestMethod.GET)
+public List<Vin> getAll(@RequestParam(required=false) String appellation){
+	if(appellation != null) {
+		return vinService.findByAppellation(appellation);
+	}
+	return vinService.getAll();
+}
 ```
+
+----
+
+## Filtrage avancé avec Spring Data
+
+possibilité de faire du filtrage avancé avec **Querydsl**
+
+Par exemple, la requête `http://localhost:8080/vin?search=appellation:Margaux,prix>30` devrait renvoyer tous les vins à plus de 30€ et qui ont l'appellation Margaux
+
+----
+
+## Paging et sorting
+
+page, size et sort
+
+```java
+// service
+public Page<Vin> pageable(Pageable p) {
+	return vinRepository.findAll(p);
+}
+// controller
+@RequestMapping(value="/pageable", method = RequestMethod.GET)
+public Page<Vin> getAllPageable(Pageable p){
+	return vinService.pageable(p);
+}
+```
+
+`http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC` renvoie les données par page de 2 éléments triés de manière décroissante par appellation et prix
 
 ----
 
@@ -421,9 +466,6 @@ public List<Vin> getAll(){
 
 ----
 
-## Paging et sorting
-
-----
 
 ## Configuration de Spring Boot avec des profils
 

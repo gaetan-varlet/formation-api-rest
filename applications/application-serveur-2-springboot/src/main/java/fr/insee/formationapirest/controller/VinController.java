@@ -3,10 +3,13 @@ package fr.insee.formationapirest.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.insee.formationapirest.model.Vin;
@@ -20,8 +23,16 @@ public class VinController {
 	VinService vinService;
 
 	@RequestMapping(method = RequestMethod.GET)
-	public List<Vin> getAll(){
+	public List<Vin> getAll(@RequestParam(required=false) String appellation){
+		if(appellation != null) {
+			return vinService.findByAppellation(appellation);
+		}
 		return vinService.getAll();
+	}
+	
+	@RequestMapping(value="/pageable", method = RequestMethod.GET)
+	public Page<Vin> getAllPageable(Pageable p){
+		return vinService.pageable(p);
 	}
 	
 	@RequestMapping(value= "/{id}", method = RequestMethod.GET)

@@ -3,6 +3,8 @@ package fr.insee.formationapirest.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -17,6 +19,10 @@ public class VinService {
 	
 	public List<Vin> getAll(){
 		return vinRepository.findAll();
+	}
+	
+	public List<Vin> findByAppellation(String appellation){
+		return vinRepository.findByAppellation(appellation);
 	}
 	
 	public Vin getById(Integer id){
@@ -39,6 +45,10 @@ public class VinService {
 			return vinRepository.save(vin);
 		}
 		return null;
+	}
+	
+	public Page<Vin> pageable(Pageable p) {
+		return vinRepository.findAll(p);
 	}
 	
 }
