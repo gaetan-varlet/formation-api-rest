@@ -396,9 +396,7 @@ public List<Vin> getAll(){
 
 ## Filtrage sur un attribut via paramètre de requête
 
-doc : `https://www.baeldung.com/spring-request-param`
-
-exemple en filtrant sur l'appellation : la requête `http://localhost:8080/vin` donne tous les vins alors que la requête `http://localhost:8080/vin?appellation=Margaux` ne donne que les Margaux
+[documentation sur les paramètres de requêtes Spring](https://www.baeldung.com/spring-request-param)
 
 ```java
 // Création dans le Repository d'une méthode filtrant sur l'appellation
@@ -419,19 +417,28 @@ public List<Vin> getAll(@RequestParam(required=false) String appellation){
 }
 ```
 
+```bash
+http://localhost:8080/vin # donne tous les vins
+http://localhost:8080/vin?appellation=Margaux # ne donne que les Margaux
+```
+
 ----
 
 ## Filtrage avancé avec Spring Data
 
 possibilité de faire du filtrage avancé avec **Querydsl**
 
-Par exemple, la requête `http://localhost:8080/vin?search=appellation:Margaux,prix>30` devrait renvoyer tous les vins à plus de 30€ et qui ont l'appellation Margaux
+Par exemple, la requête suivante devrait renvoyer tous les vins à plus de 30€ et qui ont l'appellation Margaux
+
+```http
+http://localhost:8080/vin?search=appellation:Margaux,prix>30
+```
 
 ----
 
 ## Paging et sorting
 
-page, size et sort
+3 mots clés : **page**, **size** et **sort**
 
 ```java
 // service
@@ -445,7 +452,10 @@ public Page<Vin> getAllPageable(Pageable p){
 }
 ```
 
-`http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC` renvoie les données par page de 2 éléments triés de manière décroissante par appellation et prix
+La requête suivante renvoie les données par page de 2 éléments triés de manière décroissante par appellation et prix
+```http
+http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC
+```
 
 ----
 
