@@ -6,9 +6,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name = "vin", schema = "formation")
+@XmlRootElement
 public class Vin {
 	
 	@Id
