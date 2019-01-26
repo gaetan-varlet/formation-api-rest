@@ -472,11 +472,22 @@ http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC
 
 ----
 
-## Gestion des erreurs avec exceptions et codes HTTP
+## Réception d'un fichier dans un controller
+
+Création d'un controller en *POST* qui reçoit un fichier dans la requête grâce au paramètre **MultipartFile**
+```java
+// création d'un service qui attend un objet multipart/form-data avec comme nom de paramètre multipartfile
+// le service retourne ici le contenu du fichier
+@RequestMapping(value="/upload", method = RequestMethod.POST)
+public String upload (@RequestParam MultipartFile multipartfile) throws IOException {
+	return new String(multipartfile.getBytes());
+}
+```
+![Requête multipart/form-data](diapos/images/requete-multipart.png "Requête multipart/form-data")
 
 ----
 
-## Réception d'un fichier dans un controller
+## Gestion des erreurs avec exceptions et codes HTTP
 
 ----
 
