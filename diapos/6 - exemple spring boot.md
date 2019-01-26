@@ -6,7 +6,7 @@
 
 C'est un framework libre pour concevoir des applications Java. Spring s'occupe de l'exécution globale de l'application. Les développeurs peuvent se concentrer sur la configuration du projet et les traitements métiers.
 
-- **Spring Core** : coeur de Spring qui gère la création et le cycle de vie des objets qu'il gère
+- **Spring Core** : coeur de Spring qui gère la création et le cycle de vie des objets avec les annotations **@Autowired**, **@Controller**, **@Service**, **@Repository**, etc...
 - **Spring MVC** : permet de construire des applications web basé sur l'API Servlet
 - **Spring Data** : permet de gérer le mapping objet-relationnel (ORM)
 - **Spring Batch** : permet de gérer les traitements par lots
