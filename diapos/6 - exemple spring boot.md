@@ -365,6 +365,20 @@ public Vin update(@RequestBody Vin vin){
 
 ----
 
+## Raccourci pour le mapping des verbes HTTP dans les controllers
+
+```java
+@RequestMapping (method = RequestMethod.GET)
+@GetMapping
+
+@RequestMapping (method = RequestMethod.POST)
+@PostMapping
+
+// etc
+```
+
+----
+
 ## Refactor : mise en place d'une couche de service
 
 - objectif : plus de lien direct entre la couche controller et la couche repository. Tout doit passer par les services
