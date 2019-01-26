@@ -472,7 +472,7 @@ http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC
 
 ----
 
-## Réception d'un fichier dans un controller
+## Réception d'un fichier dans un controller (1)
 
 Création d'un controller en *POST* qui reçoit un fichier dans la requête grâce au paramètre **MultipartFile**
 ```java
@@ -483,6 +483,13 @@ public String upload (@RequestParam MultipartFile multipartfile) throws IOExcept
 	return new String(multipartfile.getBytes());
 }
 ```
+
+----
+
+## Réception d'un fichier dans un controller (2)
+
+Requête HTTP avec l'en-tête **Content-Type = multipart/form-data**
+
 ![Requête multipart/form-data](diapos/images/requete-multipart.png "Requête multipart/form-data")
 
 ----
