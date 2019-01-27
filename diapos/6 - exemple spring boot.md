@@ -589,7 +589,7 @@ Spring Boot permet la gestion de différents environnements avec les profils :
 
 ----
 
-## CORS
+## CORS : Cross-origin resource sharing
 
 ----
 
@@ -616,6 +616,5 @@ changer la bannière de démarrage de l'application :
 
 ## Bonus : Gestion du cache applicatif
 
-- définition
-
-- limites
+- permet à une application d'éviter de répéter des appels de méthodes coûteux en stockant le résultat d'un appel en mémoire
+- limites / risques : les données en cache ne sont plus valides à cause d'une mise à jour d'un autre module applicatif (par exemple un module batch) ou par le passage d'un script en base de données
