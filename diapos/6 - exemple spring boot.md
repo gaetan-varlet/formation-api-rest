@@ -18,7 +18,7 @@ C'est un framework libre pour concevoir des applications Java. Spring s'occupe d
 ## Spring Boot : initialisation du projet
 
 - le déploiement d'une application Web nécessite un livrable (war) et un serveur applicatif (Tomcat)
-- Spring Boot offre un déploiement incluant le conteneur applicatif
+- Spring Boot offre un déploiement incluant le conteneur applicatif (jar)
 - on utilisera cette possiiblité en local mais on continuera de créer un WAR pour déployer au CEI
 - [Spring Initializr](https://start.spring.io/) permet de générer le squelette d'une application Spring.
 - **Création d'un projet Maven en java 8** :
@@ -508,11 +508,34 @@ Requête HTTP avec l'en-tête **Content-Type = multipart/form-data**
 
 ----
 
-## Gestion des erreurs avec exceptions et codes HTTP
+## Mise en place de Swagger
+
+Swagger permet de générer une documentation standardisée de votre API répondant aux spécifications **OpenAPI** au format JSON, accessible avec l'URL **http://localhost:8080/v2/api-docs**, et également une documentation au format HTML permettant de tester ses services à l'URL **http://localhost:8080/swagger-ui.html**.  
+Il faut ajouter les 2 dépendances suivantes ainsi que l'annotation **@EnableSwagger2** sur la classe contenant la méthode main de l'application.
+
+```xml
+<dependency>
+    <groupId>io.springfox</groupId>
+    <artifactId>springfox-swagger2</artifactId>
+    <version>2.9.2</version>
+</dependency>
+
+<dependency>
+    <groupId>io.springfox</groupId>
+    <artifactId>springfox-swagger-ui</artifactId>
+    <version>2.9.2</version>
+</dependency>
+```
 
 ----
 
-## Mise en place de Swagger
+## Configuration plus fine de Swagger
+
+après la mise en place de Spring Security ?
+
+----
+
+## Gestion des erreurs avec exceptions et codes HTTP
 
 ----
 
