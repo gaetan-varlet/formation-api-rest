@@ -516,8 +516,8 @@ Requête HTTP avec l'en-tête **Content-Type = multipart/form-data**
 
 ## Mise en place de Swagger
 
-Swagger permet de générer une documentation standardisée de votre API répondant aux spécifications **OpenAPI** au format JSON, accessible avec l'URL **http://localhost:8080/v2/api-docs**, et également une documentation au format HTML permettant de tester ses services à l'URL **http://localhost:8080/swagger-ui.html**.  
-Il faut ajouter les 2 dépendances suivantes ainsi que l'annotation **@EnableSwagger2** sur la classe contenant la méthode main de l'application.
+- Swagger permet de générer une documentation standardisée de votre API répondant aux spécifications **OpenAPI** au format JSON, accessible avec l'URL **http://localhost:8080/v2/api-docs**, et également une documentation au format HTML permettant de tester ses services à l'URL **http://localhost:8080/swagger-ui.html**.  
+- il faut ajouter les 2 dépendances suivantes ainsi que l'annotation **@EnableSwagger2** sur la classe contenant la méthode main de l'application.
 
 ```xml
 <dependency>
