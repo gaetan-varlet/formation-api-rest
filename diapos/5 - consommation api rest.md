@@ -15,6 +15,15 @@
 
 ----
 
+## En JavaScript
+
+- XMLHttpRequest
+- Jquery
+- Axios
+- Fetch
+
+----
+
 ## En Java
 
 - sans bibliothèque en utilisant une **HttpURLConnection** et en lisant la réponse dans un **InputStream**, puis en utlisant **JAXB** pour lire les réponses XML et **Jackson** pour lire les réponses JSON
@@ -185,10 +194,3 @@ System.out.println(user);
 ```
 
 ----
-
-## En JavaScript
-
-- XMLHttpRequest
-- Jquery
-- Axios
-- Fetch
