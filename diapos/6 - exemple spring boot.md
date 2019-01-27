@@ -38,6 +38,12 @@ logging.config=classpath:log4j2-local.xml
 spring.h2.console.enabled=true
 # désactiver la création automatique des tables par Hibernate et utiliser les requêtes de schema.sql
 spring.jpa.hibernate.ddl-auto=none
+
+# OPTIONNEL : permet de voir la requête exécutée par Hibernate, ainsi que la valeur des paramètres
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
+#permet d'indenter la requête dans la log pour mieux la lire
+spring.jpa.properties.hibernate.format_sql=true
 ```
 
 ----
@@ -535,16 +541,20 @@ après la mise en place de Spring Security ?
 
 ----
 
-## Gestion des erreurs avec exceptions et codes HTTP
-
-----
-
-
 ## Configuration de Spring Boot avec des profils
+
+Spring Boot permet la gestion de différents environnements avec les profils :
+- plusieurs fichiers de properties : **application.proterties** pour les properties communes qui ne changent pas, **application-local.proterties** pour les properties spécifiques l'environnement local, **application-dev.proterties** pour les properties spécifiques l'environnement de dev
+- démarrer l'application avec un profil en ajoutant **-Dspring.profiles.active=local**
 
 ----
 
 ## Injection de properties
+
+----
+
+## Gestion des erreurs avec exceptions et codes HTTP
+
 
 ----
 
@@ -569,10 +579,15 @@ après la mise en place de Spring Security ?
 - nommer le livrable ROOT
 - utiliser **maven-war-plugin** pour créer le war
 - utiliser **maven-assembly-plugin** pour créer un zip contenant le war, les properties, le fichier de config de log4j2, le changelog...
+- properties pour la prod
 
 ----
 
 ## Bonus : Bannière ASCII
+
+changer la bannière de démarrage de l'application :
+- créer un fichier **banner.txt** dans *src/main/resources*
+- [http://patorjk.com/software/taag/#p=display&f=Graceful&t=Youpi](http://patorjk.com/software/taag/#p=display&f=Graceful&t=Youpi) permet de générer un texte avec des polices fantaisistes
 
 ----
 
