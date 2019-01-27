@@ -541,15 +541,38 @@ après la mise en place de Spring Security ?
 
 ----
 
+## Injection de properties
+
+possibilité d'injecter des properties dans des variables java
+
+```bash
+# dans les properties
+propertyNonSurchargee=coucou
+```
+
+```java
+// dans le controller Test
+import org.springframework.beans.factory.annotation.Value;
+
+@Value("${propertyNonSurchargee}")
+	private String propertyCoucou;
+
+@RequestMapping(value="propertyNonSurchargee", method = RequestMethod.GET)
+public String propertyNonSurchargee() {
+	return propertyCoucou;
+}
+```
+
+lancer l'application et accéder à l'URL `http://localhost:8080/propertyNonSurchargee`
+
+----
+
 ## Configuration de Spring Boot avec des profils
 
 Spring Boot permet la gestion de différents environnements avec les profils :
 - plusieurs fichiers de properties : **application.proterties** pour les properties communes qui ne changent pas, **application-local.proterties** pour les properties spécifiques l'environnement local, **application-dev.proterties** pour les properties spécifiques l'environnement de dev
+- création de profils dans le **pom.xml**
 - démarrer l'application avec un profil en ajoutant **-Dspring.profiles.active=local**
-
-----
-
-## Injection de properties
 
 ----
 
