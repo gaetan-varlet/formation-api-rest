@@ -2,6 +2,8 @@ package request;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -17,11 +19,12 @@ import model.User;
 public class HttpRequestJava {
 
 	public static void main(String[] args) throws Exception {
-		requeteXml();
-
+//		requeteGetXml();
+//		requeteGetJson();
+		requetePostJson();
 	}
 
-	public static void requeteXml() throws JAXBException, IOException {
+	public static void requeteGetXml() throws JAXBException, IOException {
 		// requête en GET avec réponse en XML
 		URL url = new URL("http://fakerestapi.azurewebsites.net/api/Users/1");
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -34,7 +37,7 @@ public class HttpRequestJava {
 		System.out.println(user);
 	}
 	
-	public static void requeteJson() throws JsonParseException, JsonMappingException, IOException {
+	public static void requeteGetJson() throws JsonParseException, JsonMappingException, IOException {
 		// requête en GET avec réponse en JSON
 		URL url = new URL("http://fakerestapi.azurewebsites.net/api/Users/1");
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -45,6 +48,31 @@ public class HttpRequestJava {
 		User user = mapper.readValue(response, User.class);
 		connection.disconnect();
 		System.out.println(user);
+	}
+	
+	public static void requetePostJson() throws JsonParseException, JsonMappingException, IOException {
+		// requête en GET avec réponse en JSON
+		User user = new User();
+		user.setUserName("toto");
+		user.setPassword("azerty");
+		ObjectMapper mapper = new ObjectMapper();
+		String jsonInString = mapper.writeValueAsString(user);
+		System.out.println(jsonInString);
+		
+		URL url = new URL("http://fakerestapi.azurewebsites.net/api/Users");
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.setRequestMethod("POST");
+		connection.setRequestProperty("Accept", "application/json");
+		connection.setDoOutput(true); //this is to enable writing
+		connection.setDoInput(true);  //this is to enable reading
+	    OutputStream out = new ObjectOutputStream(connection.getOutputStream());
+	    out.write(jsonInString.getBytes("UTF-8"));
+	    out.close();
+	    
+		
+		InputStream response = connection.getInputStream();
+		connection.disconnect();
+		System.out.println(response);
 	}
 
 }
