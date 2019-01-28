@@ -739,6 +739,7 @@ public class ZipletConfig {
 ```bash
 Authorization: Bearer <token>
 ```
+- possibilité de récupérer un jeton à l'URL suivante : https://outils-transverses.pages.innovation.insee.eu/documentation/
 - [tutoriel en français](https://blog.ineat-conseil.fr/2017/12/securisez-vos-apis-spring-avec-keycloak-3-utilisation-des-connecteurs-spring-de-keycloak/)
 - ajout de 2 dépendances Maven :
 ```xml
