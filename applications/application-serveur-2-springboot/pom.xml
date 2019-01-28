@@ -71,6 +71,18 @@
 			<artifactId>ziplet</artifactId>
 			<version>2.3.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-spring-boot-starter</artifactId>
+			<version>4.7.0.Final</version>
+		</dependency>
+
 	</dependencies>
 
 	<profiles>
@@ -89,9 +101,10 @@
 			</properties>
 		</profile>
 	</profiles>
-	
+
 	<build>
-		<!-- permet le filtrage des properties afin de sélectionner le bon suivant le profil -->
+		<!-- permet le filtrage des properties afin de sélectionner le bon suivant 
+			le profil -->
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -113,6 +126,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
 
 </project>
