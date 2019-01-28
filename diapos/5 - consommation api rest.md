@@ -86,7 +86,7 @@ Création dun **package-info.java** pour lire la réponse XML :
     namespace="http://schemas.datacontract.org/2004/07/FakeRestAPI.Web.Models",
     elementFormDefault=XmlNsForm.QUALIFIED
 )
-package test;
+package model;
  
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlSchema;
