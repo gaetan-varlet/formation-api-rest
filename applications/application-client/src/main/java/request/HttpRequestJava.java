@@ -21,7 +21,7 @@ public class HttpRequestJava {
 
 	public static void main(String[] args) throws Exception {
 		requeteGetXml();
-		requeteGetJson();
+//		requeteGetJson();
 //		requetePostJson();
 	}
 
@@ -36,8 +36,10 @@ public class HttpRequestJava {
 		InputStream response = connection.getInputStream();
 		JAXBContext jc = JAXBContext.newInstance(User.class);
 		User user = (User) jc.createUnmarshaller().unmarshal(response);
-		connection.disconnect();
 		System.out.println(user);
+		System.out.println(connection.getResponseCode()); // 200
+		System.out.println(connection.getContentType()); // application/xml; charset=utf-8
+		connection.disconnect();
 	}
 	
 	public static void requeteGetJson() throws JsonParseException, JsonMappingException, IOException {

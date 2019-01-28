@@ -110,6 +110,8 @@ JAXBContext jc = JAXBContext.newInstance(User.class);
 User user = (User) jc.createUnmarshaller().unmarshal(response);
 connection.disconnect();
 System.out.println(user);
+System.out.println(connection.getResponseCode()); // 200
+System.out.println(connection.getContentType()); // application/xml; charset=utf-8
 
 // requête en GET avec réponse en JSON
 URL url = new URL("http://fakerestapi.azurewebsites.net/api/Users/1");
