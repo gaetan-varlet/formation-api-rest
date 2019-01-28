@@ -175,10 +175,10 @@ System.out.println(response.getStatusCode()); // 200 OK
 System.out.println(response.getBody()); // {"ID":1,"UserName":"User 1","Password":"Password1"}
 System.out.println(response.getHeaders().getContentType()); // application/json;charset=utf-8
 
-System.out.println("Demande de la réponse sous forme de String au format XML"); // NE RENVOIE PAS DU XML !!!
+System.out.println("Demande de la réponse sous forme de String au format JSON");
 HttpHeaders headers = new HttpHeaders();
-headers.setContentType(org.springframework.http.MediaType.APPLICATION_XML);
-headers.set("my_other_key", "my_other_value");
+headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+headers.set("Accept", "application/json");
 HttpEntity<String> entity = new HttpEntity<String>(headers);
 restTemplate = new RestTemplate();
 response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);

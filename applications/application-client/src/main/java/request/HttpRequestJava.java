@@ -20,9 +20,9 @@ import model.User;
 public class HttpRequestJava {
 
 	public static void main(String[] args) throws Exception {
-		requeteGetXml();
+//		requeteGetXml();
 //		requeteGetJson();
-//		requetePostJson();
+		requetePostJson();
 	}
 
 	public static void requeteGetXml() throws JAXBException, IOException {
@@ -39,6 +39,7 @@ public class HttpRequestJava {
 		System.out.println(user);
 		System.out.println(connection.getResponseCode()); // 200
 		System.out.println(connection.getContentType()); // application/xml; charset=utf-8
+		
 		connection.disconnect();
 	}
 	
