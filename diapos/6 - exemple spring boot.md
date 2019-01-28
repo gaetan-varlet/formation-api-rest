@@ -535,12 +535,6 @@ Requête HTTP avec l'en-tête **Content-Type = multipart/form-data**
 
 ----
 
-## Configuration plus fine de Swagger
-
-après la mise en place de Spring Security ?
-
-----
-
 ## Injection de properties
 
 possibilité d'injecter des properties dans des variables java
@@ -838,7 +832,45 @@ public class SpringKeycloakSecurityConfiguration {
 
 ----
 
-## CORS : Cross-origin resource sharing
+## Configuration plus fine de Swagger
+
+pouvoir utiliser un jeton avec Swagger
+
+----
+
+## CORS : Cross-origin resource sharing (1)
+
+- contrainte de sécurité du navigateur
+- configuration côté serveur avec un filtre Java par exemple
+- headers de la requête **Access-Control-Request-Headers: authorization** et **Access-Control-Request-Method: GET**
+- headers dans la réponse : **Access-Control-Allow-Credentials: true**, **Access-Control-Allow-Headers: authorization**, **Access-Control-Allow-Methods: GET**, **Access-Control-Allow-Origin: url du serveur**, **Access-Control-Max-Age: 3600**
+
+----
+
+## CORS : Cross-origin resource sharing (2)
+
+```java
+package fr.insee.formationapirest.config;
+
+@Configuration
+public class CorsConfig {
+		
+	@Bean
+	public FilterRegistrationBean<CorsFilter> corsFilter() {
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		CorsConfiguration config = new CorsConfiguration();
+		config.setAllowCredentials(true);
+		config.addAllowedOrigin("*");
+		config.addAllowedHeader("*");
+		config.addAllowedMethod("*");
+		config.setMaxAge(3600L);
+		source.registerCorsConfiguration("/**", config);
+        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
+		bean.setOrder(0);
+		return bean;
+	}
+}
+```
 
 ----
 
