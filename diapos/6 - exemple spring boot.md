@@ -732,8 +732,33 @@ public class ZipletConfig {
 
 ----
 
-## Spring Security
+## Keycloak avec Spring Security (1)
 
+- sécuriser son API avec une couche d'authentification
+- fonctionne avec un jeton mis un header de la requête
+```bash
+Authorization: Bearer <token>
+```
+- [tutoriel en français](https://blog.ineat-conseil.fr/2017/12/securisez-vos-apis-spring-avec-keycloak-3-utilisation-des-connecteurs-spring-de-keycloak/)
+- ajout de 2 dépendances Maven
+```xml
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+
+<dependency>
+	<groupId>org.keycloak</groupId>
+	<artifactId>keycloak-spring-boot-starter</artifactId>
+	<version>4.7.0.Final</version>
+</dependency>
+```
+- création d'une classe **SpringKeycloakSecurityConfiguration** dans le package *config*
+- un peu de confi dans les properties
+
+----
+
+## Keycloak avec Spring Security (2)
 
 
 ----
