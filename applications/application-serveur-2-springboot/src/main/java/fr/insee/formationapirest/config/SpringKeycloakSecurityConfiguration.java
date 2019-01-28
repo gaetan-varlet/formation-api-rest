@@ -70,7 +70,8 @@ public class SpringKeycloakSecurityConfiguration {
 					.antMatchers("/url1", "/url2").permitAll()
 					.antMatchers("/url3").hasRole("ADMIN")
 					.antMatchers("url4").authenticated()
-					.anyRequest().denyAll();
+					//.anyRequest().denyAll()
+					;
 		}
 		
 	}
