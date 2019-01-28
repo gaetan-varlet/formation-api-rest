@@ -649,9 +649,8 @@ public String environnement() {
 
 ## Gestion des erreurs avec exceptions et codes HTTP
 
-L'objectif est de renvoyer les codes HTTP adéquat pour prévenir l'utilisateur qu'il a fait une erreur
-
-Création d'un package **exception** et de 2 classes :
+- l'objectif est de renvoyer les codes HTTP adéquat pour prévenir l'utilisateur s'il a fait une erreur
+- création d'un package **exception** et de 2 classes :
 ```java
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class VinInconnuException extends RuntimeException {
