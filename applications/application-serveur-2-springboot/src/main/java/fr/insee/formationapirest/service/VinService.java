@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import fr.insee.formationapirest.exception.VinInconnuException;
 import fr.insee.formationapirest.model.Vin;
 import fr.insee.formationapirest.repository.VinRepository;
 
@@ -32,6 +33,8 @@ public class VinService {
 	public void deleteById(@PathVariable Integer id){
 		if(vinRepository.existsById(id)) { // renvoie un boolean (true si l'objet existe, false sinon)
 			vinRepository.deleteById(id);
+		} else {
+			throw new VinInconnuException("le vin avec l'id "+ id + " n'existe pas");
 		}
 	}
 	

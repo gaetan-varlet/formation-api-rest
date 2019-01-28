@@ -647,7 +647,7 @@ public String environnement() {
 
 ----
 
-## Gestion des erreurs avec exceptions et codes HTTP
+## Gestion des erreurs avec exceptions et codes HTTP (1)
 
 - l'objectif est de renvoyer les codes HTTP adéquat pour prévenir l'utilisateur s'il a fait une erreur
 - création d'un package **exception** et de 2 classes :
@@ -675,6 +675,25 @@ public class VinInvalideException extends RuntimeException {
 }
 ```
 
+----
+
+## Gestion des erreurs avec exceptions et codes HTTP (2)
+
+Mise à jour des services avec ces exceptions
+- exemple avec le service de suppression d'un vin
+```java
+public void deleteById(@PathVariable Integer id){
+	if(vinRepository.existsById(id)) { // renvoie un boolean (true si l'objet existe, false sinon)
+		vinRepository.deleteById(id);
+	} else {
+		throw new VinInconnuException("le vin avec l'id "+ id + " n'existe pas");
+		}
+}
+```
+- **TP** :
+	- vérifier qu'un vin existe avant de le renvoyer sur le *getById(id)*, sinon dire que le vin est inconnu
+	- vérifier sur cette même méthode que l'id est positif, sinon dire que l'id du vin n'est pas valide
+	- lors de la création et de la mise à jour d'un vin, vérifier que le chateau et l'appellation font entre 1 et 50 caractères et que le prix est positif ou nul
 
 ----
 
