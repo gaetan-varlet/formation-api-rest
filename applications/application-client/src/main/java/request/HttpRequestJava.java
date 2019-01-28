@@ -51,7 +51,6 @@ public class HttpRequestJava {
 	}
 	
 	public static void requetePostJson() throws JsonParseException, JsonMappingException, IOException {
-		// requête en GET avec réponse en JSON
 		User user = new User();
 		user.setUserName("toto");
 		user.setPassword("azerty");
@@ -64,12 +63,10 @@ public class HttpRequestJava {
 		connection.setRequestMethod("POST");
 		connection.setRequestProperty("Accept", "application/json");
 		connection.setDoOutput(true); //this is to enable writing
-		connection.setDoInput(true);  //this is to enable reading
 	    OutputStream out = new ObjectOutputStream(connection.getOutputStream());
-	    out.write(jsonInString.getBytes("UTF-8"));
+	    out.write(jsonInString.getBytes());
 	    out.close();
 	    
-		
 		InputStream response = connection.getInputStream();
 		connection.disconnect();
 		System.out.println(response);

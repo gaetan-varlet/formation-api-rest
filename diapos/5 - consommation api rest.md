@@ -122,12 +122,37 @@ System.out.println(user);
 
 ----
 
-## Requêtes HTTP en POST sans bibliothèque
+## Requête HTTP en POST sans bibliothèque
+
+```java
+// ne fonctionne pas (code retour HTTP 415, format de requête non supporté)
+public static void requetePostJson() throws JsonParseException, JsonMappingException, IOException {
+	User user = new User();
+	user.setUserName("toto");
+	user.setPassword("azerty");
+	ObjectMapper mapper = new ObjectMapper();
+	String jsonInString = mapper.writeValueAsString(user);
+	System.out.println(jsonInString);
+		
+	URL url = new URL("http://fakerestapi.azurewebsites.net/api/Users");
+	HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	connection.setRequestMethod("POST");
+	connection.setRequestProperty("Accept", "application/json");
+	connection.setDoOutput(true); //this is to enable writing
+    OutputStream out = new ObjectOutputStream(connection.getOutputStream());
+    out.write(jsonInString.getBytes());
+    out.close();
+    
+	InputStream response = connection.getInputStream();
+	connection.disconnect();
+	System.out.println(response);
+}
+```
 
 
 ----
 
-### avec RestTemplate (Spring)
+### Requête HTTP GET avec RestTemplate (1)
 
 ```xml
 <dependency>
@@ -157,13 +182,13 @@ response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 System.out.println(response.getStatusCode());
 System.out.println(response.getBody());
 System.out.println(response.getHeaders().getContentType());
-...
 ```
 
 ----
 
+### Requête HTTP GET avec RestTemplate (2)
+
 ```java
-...
 System.out.println("Convertion du body en objet");
 ObjectMapper mapper = new ObjectMapper();
 User user = mapper.readValue(response.getBody(), User.class);
@@ -176,3 +201,19 @@ System.out.println(user);
 ```
 
 ----
+
+### Requête HTTP POST avec RestTemplate
+
+```java
+String url = "http://fakerestapi.azurewebsites.net/api/Users";
+
+User user = new User();
+user.setUserName("toto");
+user.setPassword("azerty");
+System.out.println(user);
+
+RestTemplate restTemplate = new RestTemplate();
+HttpEntity<User> request = new HttpEntity<>(user);
+User userResponse = restTemplate.postForObject(url, request, User.class);
+System.out.println(userResponse);
+```
