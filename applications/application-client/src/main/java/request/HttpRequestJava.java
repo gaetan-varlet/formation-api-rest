@@ -1,11 +1,12 @@
 package request;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -19,12 +20,14 @@ import model.User;
 public class HttpRequestJava {
 
 	public static void main(String[] args) throws Exception {
-//		requeteGetXml();
-//		requeteGetJson();
-		requetePostJson();
+		requeteGetXml();
+		requeteGetJson();
+//		requetePostJson();
 	}
 
 	public static void requeteGetXml() throws JAXBException, IOException {
+		System.setProperty("http.proxyHost", "proxy-rie.http.insee.fr");
+		System.setProperty("http.proxyPort", "8080");
 		// requête en GET avec réponse en XML
 		URL url = new URL("http://fakerestapi.azurewebsites.net/api/Users/1");
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -38,6 +41,8 @@ public class HttpRequestJava {
 	}
 	
 	public static void requeteGetJson() throws JsonParseException, JsonMappingException, IOException {
+		System.setProperty("http.proxyHost", "proxy-rie.http.insee.fr");
+		System.setProperty("http.proxyPort", "8080");
 		// requête en GET avec réponse en JSON
 		URL url = new URL("http://fakerestapi.azurewebsites.net/api/Users/1");
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -51,25 +56,26 @@ public class HttpRequestJava {
 	}
 	
 	public static void requetePostJson() throws JsonParseException, JsonMappingException, IOException {
-		User user = new User();
-		user.setUserName("toto");
-		user.setPassword("azerty");
-		ObjectMapper mapper = new ObjectMapper();
-		String jsonInString = mapper.writeValueAsString(user);
-		System.out.println(jsonInString);
+		System.setProperty("http.proxyHost", "proxy-rie.http.insee.fr");
+		System.setProperty("http.proxyPort", "8080");
 		
+		User user = new User(); user.setUserName("toto"); user.setPassword("azerty");
+		ObjectMapper mapper = new ObjectMapper();
 		URL url = new URL("http://fakerestapi.azurewebsites.net/api/Users");
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("POST");
 		connection.setRequestProperty("Accept", "application/json");
+		connection.setRequestProperty("Content-type", "application/json");
 		connection.setDoOutput(true); //this is to enable writing
-	    OutputStream out = new ObjectOutputStream(connection.getOutputStream());
-	    out.write(jsonInString.getBytes());
-	    out.close();
-	    
+		mapper.writeValue(connection.getOutputStream(), user);
+		
 		InputStream response = connection.getInputStream();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(response,Charset.defaultCharset()));
+		String line = null;
+		while ((line=reader.readLine()) != null) {
+			System.out.println(line);
+		}
 		connection.disconnect();
-		System.out.println(response);
 	}
 
 }
