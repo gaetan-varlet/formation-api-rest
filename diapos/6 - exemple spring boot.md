@@ -633,7 +633,7 @@ formationapirest.environnement=environnement local # dans le fichier application
 formationapirest.environnement=environnement de developpement # dans le fichier application-dev.properties
 ```
 
-Création d'un controller qui va renvoyer l'environnement sur lequel on est
+Création d'un controller qui va renvoyer l'environnement courant
 ```java
 @Value("${formationapirest.environnement}")
 private String environnement;
