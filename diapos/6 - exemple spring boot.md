@@ -42,7 +42,7 @@ spring.jpa.hibernate.ddl-auto=none
 # OPTIONNEL : permet de voir la requête exécutée par Hibernate, ainsi que la valeur des paramètres
 logging.level.org.hibernate.SQL=DEBUG
 logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
-#permet d'indenter la requête dans la log pour mieux la lire
+# permet d'indenter la requête dans la log pour mieux la lire
 spring.jpa.properties.hibernate.format_sql=true
 ```
 
@@ -570,9 +570,77 @@ lancer l'application et accéder à l'URL `http://localhost:8080/propertyNonSurc
 ## Configuration de Spring Boot avec des profils
 
 Spring Boot permet la gestion de différents environnements avec les profils :
-- plusieurs fichiers de properties : **application.proterties** pour les properties communes qui ne changent pas, **application-local.proterties** pour les properties spécifiques l'environnement local, **application-dev.proterties** pour les properties spécifiques l'environnement de dev
-- création de profils dans le **pom.xml**
-- démarrer l'application avec un profil en ajoutant **-Dspring.profiles.active=local**
+- plusieurs fichiers de properties :
+	- **application.proterties** pour les properties communes qui ne changent pas, ici **propertyNonSurchargee=coucou** qui sort donc des 2 fichiers suivants
+	- **application-local.proterties** pour les properties spécifiques l'environnement local
+	- **application-dev.proterties** pour les properties spécifiques l'environnement de dev
+- création de profils dans le **pom.xml** (cf diapo suivante)
+- démarrer l'application avec un profil en ajoutant dans *Program arguments* **--spring.profiles.active=local** puis **dev**
+
+----
+
+## Création des profils local et dev dans le POM
+
+ajouter les profils dans la balide `<project>` du pom.xml
+
+```xml
+<profiles>
+	<profile>
+		<id>local</id>
+		<properties>
+			<env>local</env>
+			<config.properties>local</config.properties>
+		</properties>
+	</profile>
+	<profile>
+		<id>dev</id>
+		<properties>
+			<env>dev</env>
+			<config.properties>dev</config.properties>
+		</properties>
+	</profile>
+</profiles>
+```
+
+----
+
+## Création d'un fichier de conf de log pour les plateformes du CEI
+
+Création d'un fichier **log4j2-cei.xml** pour préciser le chemin des logs sur les plateformes du CEI
+
+```xml
+<!-- Seule partie qui change par rapport au 1er fichier -->
+	<Properties>
+		<property name="dossierLog">/var/log/tomcat8</property>
+		<property name="nomFichierLog">formationapirest</property>
+	</Properties>
+```
+
+Dans le fichier de properties de dev *application-dev.properties*, il faut changer le chemin du fichier de log
+```bash
+logging.config=classpath:log4j2-cei.xml
+```
+
+----
+
+## Création d'une property environnement
+
+```bash
+formationapirest.environnement=environnement local # dans le fichier application-local.properties
+formationapirest.environnement=environnement de developpement # dans le fichier application-dev.properties
+```
+
+Création d'un controller qui va renvoyer l'environnement sur lequel on est
+```java
+@Value("${formationapirest.environnement}")
+private String environnement;
+
+@RequestMapping(value="environnement", method = RequestMethod.GET)
+public String environnement() {
+	return environnement;
+}
+```
+
 
 ----
 

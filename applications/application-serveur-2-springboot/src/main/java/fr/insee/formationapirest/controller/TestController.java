@@ -19,9 +19,17 @@ public class TestController {
 	@Value("${propertyNonSurchargee}")
 	private String propertyCoucou;
 	
+	@Value("${formationapirest.environnement}")
+	private String environnement;
+	
 	@RequestMapping(value="propertyNonSurchargee", method = RequestMethod.GET)
 	public String propertyNonSurchargee() {
 		return propertyCoucou;
+	}
+	
+	@RequestMapping(value="environnement", method = RequestMethod.GET)
+	public String environnement() {
+		return environnement;
 	}
 	
 	@RequestMapping(value="hello", method = RequestMethod.GET)
