@@ -693,23 +693,52 @@ public void deleteById(@PathVariable Integer id){
 - **TP** :
 	- vérifier qu'un vin existe avant de le renvoyer sur le *getById(id)*, sinon dire que le vin est inconnu
 	- vérifier sur cette même méthode que l'id est positif, sinon dire que l'id du vin n'est pas valide
-	- lors de la création et de la mise à jour d'un vin, vérifier que le chateau et l'appellation font entre 1 et 50 caractères et que le prix est positif ou nul
+	- lors de la création et de la mise à jour d'un vin, vérifier que le chateau et l'appellation font entre 1 et 50 caractères et que le prix n'est pas négatif
+
+----
+
+## Compresser la réponse (1)
+
+Lorsque la réponse HTTP est grosse, il est possible de compresser pour alléger le transfert sur réseau. Charge au client de la décompresser (le navigateur sait le faire tout seul)
+- pour compresser une réponse HTTP, il faut que le client soit d'accord et que le header **Accept-Encoding: gzip** soit présent dans la requête
+- si la réponse est compressée, il y aura le header **Content-Encoding: gzip**
+
+Utilisation d'une bibliothèque [Ziplet](https://github.com/ziplet/ziplet) qui créer un filtre pour zipper la réponse
+
+----
+
+## Compresser la réponse (2)
+
+Ajouter la dépendance suivante, et créer un package **config** et créer la classe ZipletConfig
+
+```xml
+<dependency>
+	<groupId>com.github.ziplet</groupId>
+	<artifactId>ziplet</artifactId>
+	<version>2.3.0</version>
+</dependency>
+```
+```java
+@Configuration
+public class ZipletConfig {
+	
+	@Bean
+	public Filter compressingFilter() {
+		return new CompressingFilter();
+	}
+	
+}
+```
 
 ----
 
 ## Spring Security
 
-----
 
-## Les tests dans Spring Boot
 
 ----
 
 ## CORS : Cross-origin resource sharing
-
-----
-
-## Zipper la réponse
 
 ----
 
@@ -719,6 +748,10 @@ public void deleteById(@PathVariable Integer id){
 - utiliser **maven-war-plugin** pour créer le war
 - utiliser **maven-assembly-plugin** pour créer un zip contenant le war, les properties, le fichier de config de log4j2, le changelog...
 - properties pour la prod
+
+----
+
+## Les tests dans Spring Boot
 
 ----
 
