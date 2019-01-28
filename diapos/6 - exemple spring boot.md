@@ -575,7 +575,10 @@ Spring Boot permet la gestion de différents environnements avec les profils :
 	- **application-local.proterties** pour les properties spécifiques l'environnement local
 	- **application-dev.proterties** pour les properties spécifiques l'environnement de dev
 - création de profils dans le **pom.xml** (cf diapo suivante)
-- démarrer l'application avec un profil en ajoutant dans *Program arguments* **--spring.profiles.active=local** puis **dev**
+- démarrer l'application avec un profil en ajoutant dans *Program arguments* la ocmmande suivante
+```bash
+--spring.profiles.active=local # ou avec dev pour la lancer en dev
+```
 
 ----
 
