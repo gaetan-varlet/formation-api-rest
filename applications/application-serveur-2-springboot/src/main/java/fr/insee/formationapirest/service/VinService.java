@@ -18,12 +18,11 @@ public class VinService {
 	@Autowired
 	VinRepository vinRepository;
 	
-	public List<Vin> getAll(){
+	public List<Vin> getAll(String appellation){
+		if(appellation != null) {
+			return vinRepository.findByAppellation(appellation);
+		}
 		return vinRepository.findAll();
-	}
-	
-	public List<Vin> findByAppellation(String appellation){
-		return vinRepository.findByAppellation(appellation);
 	}
 	
 	public Vin getById(Integer id){

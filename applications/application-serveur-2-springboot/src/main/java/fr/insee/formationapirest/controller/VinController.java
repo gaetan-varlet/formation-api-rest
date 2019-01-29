@@ -28,10 +28,7 @@ public class VinController {
 	@ApiOperation(value = "Obtenir tous les vins, ou éventuellement uniquement les vins d'une appellation avec le paramètre appellation")
 	@RequestMapping(method = RequestMethod.GET)
 	public List<Vin> getAll(@RequestParam(required=false) String appellation){
-		if(appellation != null) {
-			return vinService.findByAppellation(appellation);
-		}
-		return vinService.getAll();
+		return vinService.getAll(appellation);
 	}
 	
 	@RequestMapping(value="/pageable", method = RequestMethod.GET)

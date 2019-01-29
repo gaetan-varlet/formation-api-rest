@@ -422,18 +422,18 @@ public List<Vin> getAll(){
 // Création dans le Repository d'une méthode filtrant sur l'appellation
 List<Vin> findByAppellation(String appellation);
 
-// Création d'un service
-public List<Vin> findByAppellation(String appellation){
-	return vinRepository.findByAppellation(appellation);
+// Refactor du service getAll()
+public List<Vin> getAll(String appellation){
+	if(appellation != null) {
+		return vinRepository.findByAppellation(appellation);
+	}
+	return vinRepository.findAll();
 }
 
 // Mise à jour du controller
 @RequestMapping(method = RequestMethod.GET)
 public List<Vin> getAll(@RequestParam(required=false) String appellation){
-	if(appellation != null) {
-		return vinService.findByAppellation(appellation);
-	}
-	return vinService.getAll();
+	return vinService.getAll(appellation);
 }
 ```
 
