@@ -823,10 +823,14 @@ public class SpringKeycloakSecurityConfiguration {
 					.authenticationEntryPoint(authenticationEntryPoint()).and()
 					// manage routes securisation here
 					.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll()
+					// configuration pour Swagger
+					.antMatchers("/swagger-ui.html/**", "/v2/api-docs","/csrf", "/", "/webjars/**", "/swagger-resources/**").permitAll()
+					// configuration de nos URLS
 					.antMatchers("/url1", "/url2").permitAll()
-					.antMatchers("/url3").hasRole("ADMIN")
-					.antMatchers("/url4").authenticated()
-					.anyRequest().denyAll();
+					.antMatchers("/environnement").hasRole("TOUCAN_ADMIN")
+					.antMatchers("/mon-nom").authenticated()
+					.anyRequest().denyAll()
+					;
 		}
 		
 	}

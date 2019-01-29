@@ -26,7 +26,7 @@ import fr.insee.formationapirest.service.VinService;
 @RunWith(SpringRunner.class)
 //teste un seul controller sans à avoir à charger toute l’application Spring Boot et donc gagne en rapidité d’exécution
 @WebMvcTest(VinController.class)
-public class VinController {
+public class VinControllerTest {
 	
 	@Autowired
 	private MockMvc mvc;
