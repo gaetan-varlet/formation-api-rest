@@ -38,6 +38,7 @@ public class VinServiceTest {
 	public void recupererTousLesVins() {
 		List<Vin> vinRetournes = vinService.getAll();
 		assertEquals(2, vinRetournes.size());
+		assertEquals("Château 1", vinRetournes.get(0).getChateau());
 	}
 	
 }
