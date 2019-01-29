@@ -913,8 +913,19 @@ public class SwaggerConfig {
 ----
 
 ## Personnaliser la documentation des services avec Swagger
-- utilisation de l'annotation **@Api(tags = { "vin" })** sur le controller
-- utilisation de l'annotation **@ApiOperation(value = "documentation de ma méthode")** sur un service du controller
+- utilisation de l'annotation **@Api(tags = { "nom à afficher pour le controller" })** sur le controller
+- utilisation de l'annotation **@ApiOperation(value = "documentation de laa méthode")** sur un service du controller
+
+```java
+@Api(tags = { "vin" })
+public class VinController {
+
+	@ApiOperation(value = "Obtenir tous les vins, ou éventuellement uniquement les vins d'une appellation avec le paramètre appellation")
+	@RequestMapping(method = RequestMethod.GET)
+	public List<Vin> getAll(@RequestParam(required=false) String appellation){
+	}
+}
+```
 
 ----
 
