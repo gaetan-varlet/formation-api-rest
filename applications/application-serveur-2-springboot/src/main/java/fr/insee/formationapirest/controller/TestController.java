@@ -16,15 +16,15 @@ public class TestController {
 	
 	private static final Logger log = LogManager.getLogger();
 	
-	@Value("${propertyNonSurchargee}")
-	private String propertyCoucou;
+	@Value("${monNom}")
+	private String nom;
 	
 	@Value("${formationapirest.environnement}")
 	private String environnement;
 	
-	@RequestMapping(value="propertyNonSurchargee", method = RequestMethod.GET)
+	@RequestMapping(value="mon-nom", method = RequestMethod.GET)
 	public String propertyNonSurchargee() {
-		return propertyCoucou;
+		return nom;
 	}
 	
 	@RequestMapping(value="environnement", method = RequestMethod.GET)

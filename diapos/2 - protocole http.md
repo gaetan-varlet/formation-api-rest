@@ -67,7 +67,7 @@ say=Hi&to=Mom
 
 Dans une requête POST, il faut spécifier le type de données. Pour un formulaire HTML, il y a 2 valeurs possibles :
 - application/x-www-form-urlencoded (valeur par défaut)
-- multipart/form-data (utilisé pour le download de fichiers)
+- multipart/form-data (utilisé pour le upload de fichiers)
 
 Il faut également spécifier la longueur du corps.
 

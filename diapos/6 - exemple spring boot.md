@@ -485,7 +485,7 @@ http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC
 - l'annotation `@RequestMapping` contient des attributs **consumes** et **produces** permettant de spécifier ce que le service accepte et ce qu'il produit. Si une restriction n'est pas respectée, une erreur HTTP 406 est renvoyée (Not Acceptable)
 - sans précision, il n'y a pas de restriction. Exemple de restriction :
 ```java
-@RequestMapping(method = RequestMethod.GET, consumes = "application/json", produces = "application/json")
+@RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
 ```
 - pour transformer l'objet Java en XML, il faut ajouter l'annotation `@XmlRootElement` sur la classe de l'objet à transformer, dans notre cas, la classe Vin
 - il n'est pas possible de renvoyer une liste d'objets au format XML, il faut créer un objet contenant la liste d'objets à retourner
@@ -541,19 +541,19 @@ possibilité d'injecter des properties dans des variables java
 
 ```bash
 # dans les properties
-propertyNonSurchargee=coucou
+monNom=Gaetan
 ```
 
 ```java
 // dans le controller Test
 import org.springframework.beans.factory.annotation.Value;
 
-@Value("${propertyNonSurchargee}")
-	private String propertyCoucou;
+@Value("${monNom}")
+private String nom;
 
-@RequestMapping(value="propertyNonSurchargee", method = RequestMethod.GET)
+@RequestMapping(value="mon-nom", method = RequestMethod.GET)
 public String propertyNonSurchargee() {
-	return propertyCoucou;
+	return nom;
 }
 ```
 
