@@ -758,7 +758,7 @@ Authorization: Bearer <token>
 Configuration des properties
 ```bash
 keycloak.auth-server-url=https://auth.insee.test/auth
-toucan.keycloak.client.id=localhost-frontend
+formationapirest.keycloak.client.id=localhost-frontend
 keycloak.realm=agents-insee-interne
 keycloak.resource=client-test-web
 keycloak.bearer-only=true
@@ -832,9 +832,71 @@ public class SpringKeycloakSecurityConfiguration {
 
 ----
 
-## Configuration plus fine de Swagger
+## Configuration de Swagger (1)
 
-pouvoir utiliser un jeton avec Swagger
+pouvoir utiliser un jeton avec Swagger et personnaliser Swagger
+- supprimer l'annotation `@EnableSwagger2` sur le main de l'application
+- créer une classe **SwaggerConfig** dans le package *config*
+
+```java
+@Configuration
+@EnableSwagger2
+public class SwaggerConfig {
+	
+	@Value("${formationapirest.keycloak.client.id}")
+	private String clientId;
+	
+	private static final String AUTH_SERVER = "https://auth.insee.test/auth/realms/agents-insee-interne/protocol/openid-connect/auth";
+	private static final String AUTH_SERVER_TOKEN_ENDPOINT = "https://auth.insee.test/auth/realms/agents-insee-interne/protocol/openid-connect/token";
+	private static final String REALM = "agents-insee-interne";
+	
+	public static final String SECURITY_SCHEMA_OAUTH2 = "oauth2";
+	
+	@Bean
+	public Docket productApi() {
+		return new Docket(DocumentationType.SWAGGER_2).select()
+				.apis(RequestHandlerSelectors.basePackage("fr.insee.formationapirest.controller")).build().apiInfo(apiInfo)
+				.useDefaultResponseMessages(false)
+				.globalResponseMessage(RequestMethod.GET,
+						Lists.newArrayList(
+								new ResponseMessageBuilder().code(500).message("Erreur interne du côté serveur").build(),
+								new ResponseMessageBuilder().code(403).message("Interdit!").build()))
+				.securitySchemes(Arrays.asList(securitySchema())).securityContexts(Arrays.asList(securityContext()));
+	}
+	```
+
+----
+
+## Configuration de Swagger (2)
+```java	
+	private ApiInfo apiInfo = new ApiInfo("Formation API REST", "Documentation du webservice", "v1.0.0", "",
+			new Contact("équipe info", null, "gaetan.varlet@insee.fr"), "", "", Collections.emptyList());
+	
+	private OAuth securitySchema() {
+		final GrantType grantType = new AuthorizationCodeGrant(new TokenRequestEndpoint(AUTH_SERVER, clientId, null),
+				new TokenEndpoint(AUTH_SERVER_TOKEN_ENDPOINT, "access_token"));
+		final List<AuthorizationScope> scopes = new ArrayList<>();
+		scopes.add(new AuthorizationScope("sampleScope", "there must be at least one scope here"));
+		return new OAuth(SECURITY_SCHEMA_OAUTH2, scopes, Collections.singletonList(grantType));
+	}
+	
+	private SecurityContext securityContext() {
+		return SecurityContext.builder().securityReferences(defaultAuth()).forPaths(PathSelectors.any()).build();
+	}
+	
+	private List<SecurityReference> defaultAuth() {
+		final AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
+		final AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+		authorizationScopes[0] = authorizationScope;
+		return Collections.singletonList(new SecurityReference(SECURITY_SCHEMA_OAUTH2, authorizationScopes));
+	}
+	
+	@Bean
+	public SecurityConfiguration security() {
+		return SecurityConfigurationBuilder.builder().clientId(clientId).realm(REALM).scopeSeparator(",").build();
+	}
+}
+```
 
 ----
 

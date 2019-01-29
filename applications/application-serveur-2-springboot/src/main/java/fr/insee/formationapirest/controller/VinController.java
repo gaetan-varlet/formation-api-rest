@@ -21,7 +21,7 @@ public class VinController {
 	
 	@Autowired
 	VinService vinService;
-
+	
 	@RequestMapping(method = RequestMethod.GET)
 	public List<Vin> getAll(@RequestParam(required=false) String appellation){
 		if(appellation != null) {
