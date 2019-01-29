@@ -840,10 +840,18 @@ pouvoir utiliser un jeton avec Swagger
 
 ## CORS : Cross-origin resource sharing (1)
 
-- contrainte de sécurité du navigateur
+- contrainte de sécurité du navigateur qui empêche les requêtes HTTP provenant d'un domaine différent que celui dont vient le script
+- pour permettre les requêtes multi-origines, il faut ajouter des en-têtes CORS
 - configuration côté serveur avec un filtre Java par exemple
-- headers de la requête **Access-Control-Request-Headers: authorization** et **Access-Control-Request-Method: GET**
-- headers dans la réponse : **Access-Control-Allow-Credentials: true**, **Access-Control-Allow-Headers: authorization**, **Access-Control-Allow-Methods: GET**, **Access-Control-Allow-Origin: url du serveur**, **Access-Control-Max-Age: 3600**
+- headers de la requête
+	- **Access-Control-Request-Headers**: authorization
+	- **Access-Control-Request-Method**: GET
+- headers dans la réponse :
+	- **Access-Control-Allow-Credentials**: true
+	- **Access-Control-Allow-Headers**: authorization
+	- **Access-Control-Allow-Methods**: GET
+	- **Access-Control-Allow-Origin**: url du serveur
+	- **Access-Control-Max-Age**: 3600
 
 ----
 
