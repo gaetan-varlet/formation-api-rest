@@ -777,7 +777,6 @@ spring.main.allow-bean-definition-overriding=true
 
 ```java
 public class SpringKeycloakSecurityConfiguration {
-	
 	@Configuration
 	@EnableWebSecurity
 	@ConditionalOnProperty(name = "keycloak.enabled", havingValue = "true", matchIfMissing = true)
