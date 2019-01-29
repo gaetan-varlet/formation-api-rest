@@ -1004,6 +1004,36 @@ ajouter dans le pom.xml les éléments suivants :
 
 ## Les tests dans Spring Boot
 
+- création d'une classe **VinServiceTest** dans *src/test/java* dans le même package qui existe dans *src/main/java*
+
+```java
+@RunWith(MockitoJUnitRunner.class)
+public class VinServiceTest {
+	
+	@InjectMocks
+	private VinService vinService;
+	
+	@Mock
+	private VinRepository vinRepository;
+	
+	@Before
+	public void setUp() {
+		Vin vin1 = new Vin(); vin1.setId(1); vin1.setChateau("Château 1"); vin1.setAppellation("Saint-Julien"); vin1.setPrix(10.0);
+		Vin vin2 = new Vin(); vin2.setId(2); vin2.setChateau("Château 2"); vin2.setAppellation("Pomerol"); vin2.setPrix(25.0);
+		List<Vin> liste = Arrays.asList(vin1, vin2);
+		
+		Mockito.when(vinRepository.findAll()).thenReturn(liste);
+	}
+	
+	@Test
+	public void recupererTousLesVins() {
+		List<Vin> vinRetournes = vinService.getAll();
+		assertEquals(2, vinRetournes.size());
+	}
+	
+}
+```
+
 ----
 
 ## Bonus : Bannière ASCII
