@@ -851,7 +851,13 @@ public class SwaggerConfig {
 	private static final String REALM = "agents-insee-interne";
 	
 	public static final String SECURITY_SCHEMA_OAUTH2 = "oauth2";
-	
+```
+
+----
+
+## Configuration de Swagger (2)
+
+```java
 	@Bean
 	public Docket productApi() {
 		return new Docket(DocumentationType.SWAGGER_2).select()
@@ -863,14 +869,9 @@ public class SwaggerConfig {
 								new ResponseMessageBuilder().code(403).message("Interdit!").build()))
 				.securitySchemes(Arrays.asList(securitySchema())).securityContexts(Arrays.asList(securityContext()));
 	}
-	```
-
-----
-
-## Configuration de Swagger (2)
-```java	
+	
 	private ApiInfo apiInfo = new ApiInfo("Formation API REST", "Documentation du webservice", "v1.0.0", "",
-			new Contact("équipe info", null, "gaetan.varlet@insee.fr"), "", "", Collections.emptyList());
+		new Contact("équipe info", null, "gaetan.varlet@insee.fr"), "", "", Collections.emptyList());
 	
 	private OAuth securitySchema() {
 		final GrantType grantType = new AuthorizationCodeGrant(new TokenRequestEndpoint(AUTH_SERVER, clientId, null),
@@ -879,7 +880,12 @@ public class SwaggerConfig {
 		scopes.add(new AuthorizationScope("sampleScope", "there must be at least one scope here"));
 		return new OAuth(SECURITY_SCHEMA_OAUTH2, scopes, Collections.singletonList(grantType));
 	}
-	
+```
+
+----
+
+## Configuration de Swagger (3)
+```java	
 	private SecurityContext securityContext() {
 		return SecurityContext.builder().securityReferences(defaultAuth()).forPaths(PathSelectors.any()).build();
 	}
