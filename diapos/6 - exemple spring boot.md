@@ -714,6 +714,8 @@ Ajouter la dépendance suivante, et créer un package **config** et créer la cl
 </dependency>
 ```
 ```java
+import javax.servlet.Filter;
+
 @Configuration
 public class ZipletConfig {
 	
@@ -823,7 +825,7 @@ public class SpringKeycloakSecurityConfiguration {
 					.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll()
 					.antMatchers("/url1", "/url2").permitAll()
 					.antMatchers("/url3").hasRole("ADMIN")
-					.antMatchers("url4").authenticated()
+					.antMatchers("/url4").authenticated()
 					.anyRequest().denyAll();
 		}
 		
@@ -904,6 +906,12 @@ public class SwaggerConfig {
 	}
 }
 ```
+
+----
+
+## Personnaliser la documentation des services avec Swagger
+- utilisation de l'annotation **@Api(tags = { "vin" })** sur le controller
+- utilisation de l'annotation **@ApiOperation(value = "documentation de ma méthode")** sur un service du controller
 
 ----
 

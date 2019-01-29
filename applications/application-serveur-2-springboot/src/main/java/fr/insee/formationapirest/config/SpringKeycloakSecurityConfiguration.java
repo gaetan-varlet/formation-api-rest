@@ -68,9 +68,9 @@ public class SpringKeycloakSecurityConfiguration {
 					// manage routes securisation here
 					.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll()
 					.antMatchers("/url1", "/url2").permitAll()
-					.antMatchers("/url3").hasRole("ADMIN")
-					.antMatchers("url4").authenticated()
-					//.anyRequest().denyAll()
+					.antMatchers("/environnement").hasRole("TOUCAN_ADMIN")
+					.antMatchers("/mon-nom").authenticated()
+//					.anyRequest().denyAll()
 					;
 		}
 		

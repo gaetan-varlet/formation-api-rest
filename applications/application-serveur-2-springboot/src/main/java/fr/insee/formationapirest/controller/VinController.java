@@ -14,14 +14,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.insee.formationapirest.model.Vin;
 import fr.insee.formationapirest.service.VinService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping("/vin")
+@Api(tags = { "vin" })
 public class VinController {
 	
 	@Autowired
 	VinService vinService;
 	
+	@ApiOperation(value = "Obtenir tous les vins, ou éventuellement uniquement les vins d'une appellation avec le paramètre appellation")
 	@RequestMapping(method = RequestMethod.GET)
 	public List<Vin> getAll(@RequestParam(required=false) String appellation){
 		if(appellation != null) {
