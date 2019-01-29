@@ -53,7 +53,11 @@ public class Vin {
 	public void setPrix(Double prix) {
 		this.prix = prix;
 	}
+
+	@Override
+	public String toString() {
+		return "Vin [id=" + id + ", chateau=" + chateau + ", appellation=" + appellation + ", prix=" + prix + "]";
+	}
 	
-	// ajouter les getters et setters
 	
 }

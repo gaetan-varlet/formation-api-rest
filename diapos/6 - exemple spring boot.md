@@ -569,7 +569,7 @@ Spring Boot permet la gestion de différents environnements avec les profils :
 	- **application.proterties** pour les properties communes qui ne changent pas, ici **monNom=Gaetan** qui sort donc des 2 fichiers suivants
 	- **application-local.proterties** pour les properties spécifiques l'environnement local
 	- **application-dev.proterties** pour les properties spécifiques l'environnement de dev
-- démarrer l'application avec un profil en ajoutant dans *Program arguments* la ocmmande suivante
+- démarrer l'application avec un profil en ajoutant dans **Program arguments** la commande suivante
 ```bash
 --spring.profiles.active=local # ou avec dev pour la lancer en dev
 ```
@@ -627,7 +627,7 @@ formationapirest.environnement=environnement local # dans le fichier application
 formationapirest.environnement=environnement de developpement # dans le fichier application-dev.properties
 ```
 
-Création d'un controller qui va renvoyer l'environnement courant
+Création d'une méthode dans TestController qui va renvoyer l'environnement courant
 ```java
 @Value("${formationapirest.environnement}")
 private String environnement;
@@ -676,7 +676,7 @@ public class VinInvalideException extends RuntimeException {
 Mise à jour des services avec ces exceptions
 - exemple avec le service de suppression d'un vin
 ```java
-public void deleteById(@PathVariable Integer id){
+public void deleteById(Integer id){
 	if(vinRepository.existsById(id)) { // renvoie un boolean (true si l'objet existe, false sinon)
 		vinRepository.deleteById(id);
 	} else {
@@ -685,8 +685,9 @@ public void deleteById(@PathVariable Integer id){
 }
 ```
 - **TP** :
-	- vérifier qu'un vin existe avant de le renvoyer sur le *getById(id)*, sinon dire que le vin est inconnu
-	- vérifier sur cette même méthode que l'id est positif, sinon dire que l'id du vin n'est pas valide
+	- dans la méthode *getById(id)* :
+		- vérifier que l'id est positif, sinon dire que l'id du vin n'est pas valide
+		- vérifier qu'un vin existe avant de le renvoyer, sinon dire que le vin est inconnu
 	- lors de la création et de la mise à jour d'un vin, vérifier que le chateau et l'appellation font entre 1 et 50 caractères et que le prix n'est pas négatif
 
 ----
