@@ -44,7 +44,7 @@ public class VinControllerTest {
 		Vin vin2 = new Vin(); vin2.setId(2); vin2.setChateau("Château 2"); vin2.setAppellation("Pomerol"); vin2.setPrix(25.0);
 		List<Vin> liste = Arrays.asList(vin1, vin2);
 
-		given(vinService.getAll()).willReturn(liste);
+		given(vinService.getAll(null)).willReturn(liste);
 
 		mvc.perform(get("/vin"))
 		.andExpect(status().isOk())

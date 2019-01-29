@@ -15,7 +15,7 @@ C'est un framework libre pour concevoir des applications Java. Spring s'occupe d
 
 ----
 
-## Spring Boot : initialisation du projet
+## Spring Boot : initialisation du projet avec Spring Initializr
 
 - le déploiement d'une application Web nécessite un livrable (war) et un serveur applicatif (Tomcat)
 - Spring Boot offre un déploiement incluant le conteneur applicatif (jar)
@@ -27,7 +27,7 @@ C'est un framework libre pour concevoir des applications Java. Spring s'occupe d
 
 ----
 
-## Configuration du projet (1)
+## Configuration du projet : properties pour la BDD
 
 ajout de properties dans le fichier **application.properties** dans **src/main/resources** pour la gestion de la log et de la base de données
 
@@ -48,7 +48,7 @@ spring.jpa.properties.hibernate.format_sql=true
 
 ----
 
-## Configuration du projet (Alt PostGre)
+## Configuration du projet : properties pour la BDD (Alt PostGre)
 
  dans le **pom.xml**, remplacer la dépendence Maven *h2* par la dépendence *postgresql*
 ```xml
@@ -71,7 +71,7 @@ spring.datasource.password=***
 
 ----
 
-## Configuration du projet (2)
+## Configuration du projet : utilisation de Log4j2 (1)
 
 ajout dans le **pom.xml** d'une dépendence pour dire que l'on utilise Log4j2 plutôt que Logback (proposé par défaut)
 
@@ -95,7 +95,7 @@ ajout dans le **pom.xml** d'une dépendence pour dire que l'on utilise Log4j2 pl
 
 ----
 
-## Configuration du projet (3)
+## Configuration du projet : utilisation de Log4j2 (2)
 
 fichier **log4j2-local.xml** à ajouter dans **src/main/resources**
 
@@ -121,7 +121,7 @@ fichier **log4j2-local.xml** à ajouter dans **src/main/resources**
 
 ----
 
-## Configuration du projet (4)
+## Configuration du projet : utilisation de Log4j2 (3)
 
 ```xml
         </Console>
@@ -456,7 +456,7 @@ http://localhost:8080/vin?search=appellation:Margaux,prix>30
 
 ----
 
-## Paging et sorting
+## Paging et Sorting
 
 3 mots clés : **page**, **size** et **sort**
 
