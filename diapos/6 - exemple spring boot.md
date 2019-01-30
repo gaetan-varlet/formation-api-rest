@@ -511,9 +511,9 @@ http://localhost:8080/foos?id=ab+c # id=ab c
 
 ----
 
-### Filtrage avancé avec Querydsl : mise en place (1)
-
-ajout de deux dépendances et d'un plugin dans le POM
+### Filtrage avec Querydsl : mise en place (1)
+- permet de faire du filtrage avancé sur les données : [documentation](http://www.querydsl.com/)
+- ajout de deux dépendances et d'un plugin dans le POM
 
 ```xml
 <dependencies>
@@ -532,7 +532,7 @@ ajout de deux dépendances et d'un plugin dans le POM
 
 ----
 
-### Filtrage avancé avec Querydsl : mise en place (2)
+### Filtrage avec Querydsl : mise en place (2)
 
 ```xml
 <build>
@@ -560,7 +560,7 @@ ajout de deux dépendances et d'un plugin dans le POM
 
 ----
 
-### Filtrage avancé avec Querydsl : QuerydslPredicateExecutor (1)
+### Filtrage avec Querydsl : QuerydslPredicateExecutor (1)
 
 - notre repository doit étendre l'interface `QuerydslPredicateExecutor<T>`
 ```java
@@ -586,7 +586,7 @@ public Iterable<Vin> get(@QuerydslPredicate(root = Vin.class) Predicate predicat
 
 ----
 
-### Filtrage avancé avec Querydsl : QuerydslPredicateExecutor (2)
+### Filtrage avec Querydsl : QuerydslPredicateExecutor (2)
 
 - il faut ensuite compiler le projet pour que les classes `Q-classes` soient construites
 - on peut ensuite faire des requêtes pour filtrer les données que l'on souhaite récupérer
@@ -631,7 +631,7 @@ http://localhost:8080/vin?appellation=maR # ramène les vins d'appellation Marga
 ```
 - possibilité d'implémenter des filtres plus complexes comme **between**, **greater or equal**
 - exemple sur le prix du vin, qui sera interprêté comme un between s'il est renseigné deux fois, et en supérieur ou égal sinon
-- exclusion de l'id du predicate, ce qui veut dire que même si un filtrage est demandée sur cette variable dans la requête, il sera ignoré
+- exclusion de l'id du predicate, ce qui veut dire que même si un filtrage est demandée sur cette variable, il sera ignoré
 ```java
 bindings.bind(vin.prix).all((path, value) -> {
 	Iterator<? extends Double> it = value.iterator();
