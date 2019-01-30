@@ -511,7 +511,7 @@ http://localhost:8080/foos?id=ab+c # id=ab c
 
 ----
 
-### Filtrage avec Querydsl : mise en place (1)
+## Filtrage avec Querydsl : mise en place (1)
 - permet de faire du filtrage avancé sur les données : [documentation](http://www.querydsl.com/)
 - ajout de deux dépendances et d'un plugin dans le POM
 - il faut ensuite compiler le projet pour que les classes `Q-classes` soient construites
@@ -533,7 +533,7 @@ http://localhost:8080/foos?id=ab+c # id=ab c
 
 ----
 
-### Filtrage avec Querydsl : mise en place (2)
+## Filtrage avec Querydsl : mise en place (2)
 
 ```xml
 <build>
@@ -561,7 +561,7 @@ http://localhost:8080/foos?id=ab+c # id=ab c
 
 ----
 
-### Filtrage avec Querydsl : QuerydslPredicateExecutor (1)
+## Filtrage avec Querydsl : QuerydslPredicateExecutor (1)
 
 - notre repository doit étendre l'interface `QuerydslPredicateExecutor<T>`
 ```java
@@ -587,7 +587,7 @@ public Iterable<Vin> get(@QuerydslPredicate(root = Vin.class) Predicate predicat
 
 ----
 
-### Filtrage avec Querydsl : QuerydslPredicateExecutor (2)
+## Filtrage avec Querydsl : QuerydslPredicateExecutor (2)
 
 - on peut ensuite faire des requêtes pour filtrer les données que l'on souhaite récupérer
 	- par défaut, un attribut simple présent une seule fois fera un test d'égalité dans la clause where
@@ -601,7 +601,7 @@ http://localhost:8080/vin?appellation=Margaux&appellation=Pommard # from vin whe
 
 ----
 
-### Filtrage avancé avec Querydsl : QuerydslBinderCustomizer (1)
+## Filtrage avec Querydsl : QuerydslBinderCustomizer (1)
 
 - possibilité de personnaliser le comportement du filtrage sur les différents attributs en étendant l'interface `QuerydslBinderCustomizer<QT>` et en surchargeant la méthode **customize**
 ```java
@@ -624,7 +624,7 @@ public Iterable<Vin> get(@QuerydslPredicate(root = Vin.class, bindings = VinRepo
 
 ----
 
-### Filtrage avancé avec Querydsl : QuerydslBinderCustomizer (2)
+## Filtrage avec Querydsl : QuerydslBinderCustomizer (2)
 
 ```bash
 http://localhost:8080/vin?appellation=maR # ramène les vins d'appellation Margaux et Pommard
