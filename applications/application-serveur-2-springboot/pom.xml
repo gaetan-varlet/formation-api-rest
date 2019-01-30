@@ -13,7 +13,6 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>application-serveur-2-springboot</name>
 	<description>Formation API Rest : API en Spring Boot</description>
-	<packaging>war</packaging>
 
 	<properties>
 		<java.version>1.8</java.version>
@@ -103,26 +102,10 @@
 	</profiles>
 
 	<build>
-		<!-- permet le filtrage des properties afin de sélectionner le bon suivant 
-			le profil -->
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
-
-		<!-->définit le nom du WAR< -->
-		<finalName>ROOT</finalName>
-
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
-					<warName>ROOT</warName>
-					<failOnMissingWebXml>false</failOnMissingWebXml>
-				</configuration>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
