@@ -7,6 +7,7 @@ PARTIE CONSTRUCTION API
 - problème sur la création du WAR
 - vérifier si on a besoin de toutes les variables dans la déclaration des profils
 - revoir tests
+- apronfondir le CORS
 - lire l'utilisateur (idep et nom par exemple) dans le jeton côté Java
 - gestion du cache applicatif
 - comment faire un filtre avec Spring ? plus généralement, le fonctionnement des annotation @Configuration et @Bean de Spring

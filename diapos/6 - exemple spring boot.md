@@ -1190,20 +1190,31 @@ ajouter dans le pom.xml les éléments suivants :
 
 ----
 
-## Les tests dans Spring Boot
+## Les tests unitaires dans Spring Boot (1)
 
-- création d'une classe **VinServiceTest** dans *src/test/java* dans le même package qui existe dans *src/main/java*
+création d'une classe **VinServiceTest** dans *src/test/java* dans le même package qui existe dans *src/main/java*
+- utilisation de Mockito pour mocker la couche repository et tester uniquement couche service
+- [tutoriel](http://www.springboottutorial.com/spring-boot-unit-testing-and-mocking-with-mockito-and-junit)
 
 ```java
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.class) // initialise les classes et mocks avant d'exécuter les tests
 public class VinServiceTest {
 	
-	@InjectMocks
+	@InjectMocks // injecte les mocks dans VinService
 	private VinService vinService;
 	
-	@Mock
+	@Mock // crée un mock pour VinRepository
 	private VinRepository vinRepository;
-	
+}
+```
+
+----
+
+## Les tests unitaires dans Spring Boot (1)
+
+initialisation d'un jeu de données que l'on mocke et réalisation d'un test
+
+```java
 	@Before
 	public void setUp() {
 		Vin vin1 = new Vin(); vin1.setId(1); vin1.setChateau("Château 1"); vin1.setAppellation("Saint-Julien"); vin1.setPrix(10.0);
@@ -1218,9 +1229,14 @@ public class VinServiceTest {
 		List<Vin> vinRetournes = vinService.getAll();
 		assertEquals(2, vinRetournes.size());
 	}
-	
-}
 ```
+
+----
+
+## Les tests fonctionnels / d'intégration
+
+- avec Spring, possibilité de faire des requêtes HTTP qui traverse toutes les couches jusqu'à une base de test en mémoire
+- avevc Cucumber
 
 ----
 
