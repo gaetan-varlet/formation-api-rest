@@ -442,11 +442,12 @@ http://localhost:8080/vin/pageable?sort=appellation&sort=prix,DESC # renvoie les
 
 ## Filtrage sur un attribut via paramètre de requête
 
-[documentation sur les paramètres de requêtes Spring](https://www.baeldung.com/spring-request-param)
+possibilité avec Spring Data JPA d'écrire des méthodes qui vont écrire automatiquement des requêtes en fonction des mots clés utilisés ([voir ici les mots clés possibles](https://docs.spring.io/spring-data/jpa/docs/2.1.4.RELEASE/reference/html/#jpa.query-methods.query-creation))
+
 
 ```java
-// Création dans le Repository d'une méthode filtrant sur l'appellation
-List<Vin> findByAppellation(String appellation);
+// Création dans le Repository d'une méthode filtrant sur l'appellation (... where appellation = app)
+List<Vin> findByAppellation(String app);
 
 // Refactor du service getAll()
 public List<Vin> getAll(String appellation){
@@ -467,6 +468,48 @@ public List<Vin> getAll(@RequestParam(required=false) String appellation){
 http://localhost:8080/vin # donne tous les vins
 http://localhost:8080/vin?appellation=Margaux # ne donne que les Margaux
 ```
+
+----
+
+## Les options des paramètres de requêtes (1)
+
+- par défaut le paramètre à la même nom que la variable Java. Si on veut préciser un nom différent pour le paramètre de requpete, il faut le préciser dans l'attribut **name**
+```java
+@RequestParam(name = "id") String vinId
+```
+- par défaut, un paramètre de requête est requis, s'il est absent, une erreur 400 (Bad Request) est renvoyée. Pour le rendre optionnel, il faut utiliser l'attribut **required=false**. Quand le paramètre n'est pas spécifié il vaut alors `null`
+```java
+@RequestParam(required = false) String id
+```
+- il est possible de renseigner une valeur par défaut au paramètre avec l'attribut **defaultValue**. Dans ce cas, le paramètre de requête n'est plus considéré comme obligatoire
+```java
+@RequestParam(defaultValue = "test") String id
+```
+
+[documentation sur les paramètres de requêtes Spring](https://www.baeldung.com/spring-request-param)
+
+----
+
+## Les options des paramètres de requêtes (2)
+
+- il est possible de récupérer tous les paramètres dans une map
+```java
+@RequestParam Map<String,String> allParams
+```
+- si un paramètre à plusieurs valeurs, il est possible de les récupérer dans une liste
+```java
+@RequestParam List<String> id
+```
+```bash
+http://localhost:8080/foo?id=1&id=2
+http://localhost:8080/foo?id=1,2,3 # autre possibilité en Spring MVC
+```
+- les paramètres de requêtes sont décodés alors que pour les variables de chemin, la valeur est extraite de l'URL. Il peut y avoir des différences.
+```bash
+http://localhost:8080/foos/ab+c # id=ab+c
+http://localhost:8080/foos?id=ab+c # id=ab c
+```
+- les variables de chemin peuvent être rendus optionnels mais cela est déconseillé car cela peut entraîner des conflits de chemin
 
 ----
 
