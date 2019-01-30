@@ -380,7 +380,7 @@ public Vin update(@RequestBody Vin vin){
 @RequestMapping(value = { "/vin", "/vins" }, method = { RequestMethod.PUT, RequestMethod.POST })
 ```
 
-- le mapping peut encore être réduit en spécifiant un ou plusieurs en-tête dans la requête
+- le mapping peut encore être réduit en spécifiant un ou plusieurs en-tête dans la requête avec **headers**
 
 ```java
 @RequestMapping(value = "/vin", headers = "key=val", method = GET)
