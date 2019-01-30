@@ -511,13 +511,116 @@ http://localhost:8080/foos?id=ab+c # id=ab c
 
 ----
 
-## Filtrage avancé avec Querydsl
+## Filtrage avancé avec Querydsl : mise en place
 
-Par exemple, la requête suivante devrait renvoyer tous les vins à plus de 30€ et qui ont l'appellation Margaux
+ajout de 2 dépendances et un plugin dans le POM
 
-```http
-http://localhost:8080/vin?search=appellation:Margaux,prix>30
+```xml
+<dependencies>
+    <!-- ... -->
+    <dependency>
+        <groupId>com.querydsl</groupId>
+        <artifactId>querydsl-jpa</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.querydsl</groupId>
+        <artifactId>querydsl-apt</artifactId>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+
+<build>
+    <plugins>
+        <!-- ... -->
+        <plugin>
+            <groupId>com.mysema.maven</groupId>
+            <artifactId>apt-maven-plugin</artifactId>
+            <version>1.1.3</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>process</goal>
+                    </goals>
+                    <configuration>
+                        <outputDirectory>target/generated-sources/annotations</outputDirectory>
+                        <processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
 ```
+
+----
+
+## Filtrage avancé avec Querydsl : QuerydslPredicateExecutor<T> (1)
+
+- notre repository doit étendre l'interface `QuerydslPredicateExecutor<T>`
+```java
+@Repository
+public interface VinRepository extends JpaRepository<Vin, Integer>, QuerydslPredicateExecutor<Vin>
+```
+- création d'un service qui appelle la méthode `findAll()` avec un predicate en paramètre
+```java
+public Iterable<Vin> get(Predicate predicate){
+	return vinRepository.findAll(predicate);
+}
+```
+- création d'une méthode dans le controller
+```java
+import com.querydsl.core.types.Predicate;
+
+@GetMapping
+public Iterable<Vin> get(@QuerydslPredicate(root = Vin.class) Predicate predicate){
+	return vinService.get(predicate);
+}
+```
+
+----
+
+## Filtrage avancé avec Querydsl : QuerydslPredicateExecutor<T> (2)
+
+- il faut ensuite compiler le projet pour que les classes `Q-classes` soient construites
+- on peut ensuite faire des requêtes pour filtrer les données que l'on souhaite récupérer
+	- par défaut, un attribut simple présent une seule fois fera un test d'égalité dans la clause where
+	- une attribut simple présent plusieurs fois fera un `IN` dans la clause where
+	- un attribut correspondant à une collection dans l'objet Java fera un `CONTAINS` dans la clause where
+```bash
+http://localhost:8080/vin?prix=500 # from vin where prix=500
+http://localhost:8080/vin?appellation=Margaux&appellation=Pommard # from vin where appellation in (Margaux, Pommard)
+```
+- il est possible de le combiener avec un *Pageable* pour faire du tri et de la pagination
+
+----
+
+## Filtrage avancé avec Querydsl : QuerydslBinderCustomizer<QT> (1)
+
+- possibilité de personnaliser le comportement du filtrage sur les différents attributs en étendant l'interface `QuerydslBinderCustomizer<QT>` et en surchargeant la méthode **customize**
+```java
+@Repository
+public interface VinRepository extends JpaRepository<Vin, Integer>, QuerydslPredicateExecutor<Vin>, QuerydslBinderCustomizer<QVin> {
+	@Override
+   default void customize(QuerydslBindings bindings, QVin vin) {
+       // Make case-insensitive 'like' filter for all string properties 
+       bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
+   }
+}
+```
+- ajout du paramètre **bindings** dans le `@QuerydslPredicate` de la méthode du controller
+```java
+@GetMapping
+public Iterable<Vin> get(@QuerydslPredicate(root = Vin.class, bindings = VinRepository.class) Predicate predicate){
+	return vinService.get(predicate);
+}
+```
+```bash
+http://localhost:8080/vin?appellation=margaux # ramène bien les vins d'appellation Margaux
+```
+
+----
+
+## Filtrage avancé avec Querydsl : QuerydslBinderCustomizer<QT> (2)
 
 ----
 

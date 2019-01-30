@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +14,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.querydsl.core.types.Predicate;
+
 import fr.insee.formationapirest.model.Vin;
+import fr.insee.formationapirest.repository.VinRepository;
 import fr.insee.formationapirest.service.VinService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,8 +30,13 @@ public class VinController {
 	@Autowired
 	VinService vinService;
 	
+	@GetMapping
+	public Iterable<Vin> get(@QuerydslPredicate(root = Vin.class, bindings = VinRepository.class) Predicate predicate){
+		return vinService.get(predicate);
+	}
+	
 	@ApiOperation(value = "Obtenir tous les vins, ou éventuellement uniquement les vins d'une appellation avec le paramètre appellation")
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(value="/all", method = RequestMethod.GET)
 	public List<Vin> getAll(@RequestParam(required=false) String appellation){
 		return vinService.getAll(appellation);
 	}

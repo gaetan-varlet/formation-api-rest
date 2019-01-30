@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.querydsl.core.types.Predicate;
+
 import fr.insee.formationapirest.exception.VinInconnuException;
 import fr.insee.formationapirest.exception.VinInvalideException;
 import fr.insee.formationapirest.model.Vin;
@@ -23,6 +25,10 @@ public class VinService {
 			return vinRepository.findByAppellation(appellation);
 		}
 		return vinRepository.findAll();
+	}
+	
+	public Iterable<Vin> get(Predicate predicate){
+		return vinRepository.findAll(predicate);
 	}
 	
 	public Vin getById(Integer id){
