@@ -621,14 +621,14 @@ public Iterable<Vin> get(@QuerydslPredicate(root = Vin.class, bindings = VinRepo
 	return vinService.get(predicate);
 }
 ```
+```bash
+http://localhost:8080/vin?appellation=maR # ramène les vins d'appellation Margaux et Pommard
+```
 
 ----
 
 ## Filtrage avec Querydsl : QuerydslBinderCustomizer (2)
 
-```bash
-http://localhost:8080/vin?appellation=maR # ramène les vins d'appellation Margaux et Pommard
-```
 - possibilité d'implémenter des filtres plus complexes comme **between**, **greater or equal**
 - exemple sur le prix du vin, qui sera interprêté comme un between s'il est renseigné deux fois, et en supérieur ou égal sinon
 - exclusion de l'id du predicate, ce qui veut dire que même si un filtrage est demandée sur cette variable, il sera ignoré
