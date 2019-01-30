@@ -1192,9 +1192,8 @@ ajouter dans le pom.xml les éléments suivants :
 
 ## Les tests unitaires dans Spring Boot (1)
 
-création d'une classe **VinServiceTest** dans *src/test/java* dans le même package qui existe dans *src/main/java*
-- utilisation de Mockito pour mocker la couche repository et tester uniquement couche service
-- [tutoriel](http://www.springboottutorial.com/spring-boot-unit-testing-and-mocking-with-mockito-and-junit)
+- création d'une classe **VinServiceTest** dans *src/test/java* dans le même package qui existe dans *src/main/java*
+- utilisation de Mockito pour mocker la couche repository et tester uniquement la couche service ([tutoriel](http://www.springboottutorial.com/spring-boot-unit-testing-and-mocking-with-mockito-and-junit))
 
 ```java
 @RunWith(MockitoJUnitRunner.class) // initialise les classes et mocks avant d'exécuter les tests
