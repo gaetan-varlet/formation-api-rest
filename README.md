@@ -8,9 +8,8 @@ PARTIE CONSTRUCTION API
 - vérifier si on a besoin de toutes les variables dans la déclaration des profils
 - revoir tests
 - lire l'utilisateur (idep et nom par exemple) dans le jeton côté Java
-- filtrage avancée avec Spring Data avec Querydsl
 - gestion du cache applicatif
-- comment faire un filtre avec Spring ?
+- comment faire un filtre avec Spring ? plus généralement, le fonctionnement des annotation @Configuration et @Bean de Spring
 - blocage avec augmentation de la version de Jersey : cf changelog
 
 PARTIE CONSOMMATION API
