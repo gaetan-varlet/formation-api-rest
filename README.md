@@ -7,12 +7,14 @@ PARTIE CONSTRUCTION API
 - problème sur la création du WAR
 - vérifier si on a besoin de toutes les variables dans la déclaration des profils
 - ajouter un exemple avec ResponseEntity qui met un code 201 sur une création de Vin ainsi que le renvoi de l'URL de l'objet créé dans la partie Autres fonctionnalités d'une API REST
-- revoir tests
+- revoir tests : mettre un exemple de test intégration version Spring et un exemple Cucumber
 - apronfondir le CORS
-- lire l'utilisateur (idep et nom par exemple) dans le jeton côté Java
-- gestion du cache applicatif
+- lire l'utilisateur (idep et nom par exemple) dans le jeton Keycloak côté Java
+- gestion du cache applicatif : faire une partie à ce sujet pour montrer comment faire
 - comment faire un filtre avec Spring ? plus généralement, le fonctionnement des annotation @Configuration et @Bean de Spring
 - blocage avec augmentation de la version de Jersey : cf changelog
+- lire la doc de querydsl pour faire des requêtes de type group by
+- faire un tuto sur swagger pour spring boot pour voir si on utilise toutes les fonctionnalités
 
 PARTIE CONSOMMATION API
 - requete GET testTemplate correction header content-type
