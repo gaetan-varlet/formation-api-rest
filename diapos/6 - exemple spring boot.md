@@ -459,7 +459,9 @@ http://localhost:8080/vin?search=appellation:Margaux,prix>30
 ## Paging et Sorting
 - **page** : page que l'on veut récupérer, 0 par défaut
 - **size** : nombre d'éléments par page, 20 par défaut
-- **sort** : variables sur lesquels on veut trier les données au format `property,property(,ASC|DESC)` (ASC par défaut). Pour changer les ordres de tris, il faut utiliser plusieurs fois le paramètre *sort*, par exemple : `?sort=firstname&sort=lastname,asc.`
+- **sort** :
+	- variables sur lesquels on veut trier les données au format `property,property(,ASC|DESC)` (ASC par défaut)
+	- pour avoir des ordres de tris différents selon les variables, il faut utiliser plusieurs fois le paramètre *sort*, par exemple : `?sort=firstname&sort=lastname,desc.`
 
 ```java
 // service
