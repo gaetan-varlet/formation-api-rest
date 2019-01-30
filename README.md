@@ -75,12 +75,11 @@ PARTIE CONSOMMATION API
     - Création du DAO
     - Création du controller VinController
     - Création des méthodes GET-POST-PUT-DELETE sur le controller
-    - Raccourci pour le mapping des verbes HTTP dans les controllers
+    - @RequestMapping
     - Refactor : mise en place d'une couche de service
     - Paging et Sorting
     - Filtrage sur un attribut via paramètre de requête
     - Filtrage avancé avec Querydsl
-    - @Produces et @Consumes
     - Réception d'un fichier dans un controller
     - Mise en place de Swagger
     - Injection de properties
