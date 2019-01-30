@@ -627,7 +627,28 @@ public Iterable<Vin> get(@QuerydslPredicate(root = Vin.class, bindings = VinRepo
 ## Filtrage avancé avec Querydsl : QuerydslBinderCustomizer<QT> (2)
 
 ```bash
-http://localhost:8080/vin?appellation=margaux # ramène bien les vins d'appellation Margaux
+http://localhost:8080/vin?appellation=maR # ramène les vins d'appellation Margaux et Pommard
+```
+- possibilité d'implémenter des filtres plus complexes comme **between**, **greater or equal**
+- exemple sur le prix du vin, qui sera interprêté comme un between s'il est renseigné deux fois, et en supérieur ou égal sinon
+- exclusion de l'id du predicate, ce qui veut dire que même si un filtrage est demandée sur cette variable dans la requête, il sera ignoré
+```java
+bindings.bind(vin.prix).all((path, value) -> {
+	Iterator<? extends Double> it = value.iterator();
+    Double from = it.next();
+    if (value.size() >= 2) {
+    	Double to = it.next();
+        return Optional.of(path.between(from, to)); // between
+    } else {
+    	return Optional.of(path.goe(from)); // greater or equal
+    }
+});
+bindings.excluding(vin.id);
+```
+```bash
+http://localhost:8080/vin?prix=100 # ne renvoie que le Château Margaux, seul vin à plu de 100€
+http://localhost:8080/vin?prix=40&prix=100 # renvoie les vins dont le prix est compris entre 40€ et 100€
+http://localhost:8080/vin?id=1 # renvoie tous les vins car l'id est exclu du predicate
 ```
 
 ----
