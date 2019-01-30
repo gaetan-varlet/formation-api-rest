@@ -5,7 +5,6 @@
 ## TODO
 PARTIE CONSTRUCTION API
 - problème sur la création du WAR
-- faire une diapo sur les options des path param et des param de requêtes
 - vérifier si on a besoin de toutes les variables dans la déclaration des profils
 - revoir tests
 - lire l'utilisateur (idep et nom par exemple) dans le jeton côté Java

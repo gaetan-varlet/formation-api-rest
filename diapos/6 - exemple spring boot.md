@@ -502,7 +502,7 @@ http://localhost:8080/vin?appellation=Margaux # ne donne que les Margaux
 http://localhost:8080/foo?id=1&id=2
 http://localhost:8080/foo?id=1,2,3 # autre possibilité en Spring MVC
 ```
-- les paramètres de requêtes sont décodés alors que pour les variables de chemin, la valeur est extraite de l'URL. Il peut y avoir des différences.
+- les paramètres de requêtes sont décodés alors que pour les variables de chemin, la valeur est extraite de l'URL. Il peut y avoir des différences
 ```bash
 http://localhost:8080/foos/ab+c # id=ab+c
 http://localhost:8080/foos?id=ab+c # id=ab c
