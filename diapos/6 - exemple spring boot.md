@@ -414,6 +414,32 @@ public List<Vin> getAll(){
 
 ----
 
+## Paging et Sorting
+- **page** : page que l'on veut récupérer, 0 par défaut
+- **size** : nombre d'éléments par page, 20 par défaut
+- **sort** :
+	- variables sur lesquels on veut trier les données au format `property,property(,ASC|DESC)` (ASC par défaut)
+	- pour avoir des ordres de tris différents selon les variables, il faut utiliser plusieurs fois le paramètre *sort*, par exemple : `?sort=firstname&sort=lastname,desc.`
+
+```java
+// service
+public Page<Vin> pageable(Pageable p) {
+	return vinRepository.findAll(p);
+}
+// controller
+@RequestMapping(value="/pageable", method = RequestMethod.GET)
+public Page<Vin> getAllPageable(Pageable p){
+	return vinService.pageable(p);
+}
+```
+
+```bash
+http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC # renvoie les données par page de 2 éléments triés de manière décroissante par appellation puis prix
+http://localhost:8080/vin/pageable?sort=appellation&sort=prix,DESC # renvoie les données par page de 20 éléments triés dans l'ordre alphabétique des appellations puis par prix décroissant
+```
+
+----
+
 ## Filtrage sur un attribut via paramètre de requête
 
 [documentation sur les paramètres de requêtes Spring](https://www.baeldung.com/spring-request-param)
@@ -452,32 +478,6 @@ Par exemple, la requête suivante devrait renvoyer tous les vins à plus de 30�
 
 ```http
 http://localhost:8080/vin?search=appellation:Margaux,prix>30
-```
-
-----
-
-## Paging et Sorting
-- **page** : page que l'on veut récupérer, 0 par défaut
-- **size** : nombre d'éléments par page, 20 par défaut
-- **sort** :
-	- variables sur lesquels on veut trier les données au format `property,property(,ASC|DESC)` (ASC par défaut)
-	- pour avoir des ordres de tris différents selon les variables, il faut utiliser plusieurs fois le paramètre *sort*, par exemple : `?sort=firstname&sort=lastname,desc.`
-
-```java
-// service
-public Page<Vin> pageable(Pageable p) {
-	return vinRepository.findAll(p);
-}
-// controller
-@RequestMapping(value="/pageable", method = RequestMethod.GET)
-public Page<Vin> getAllPageable(Pageable p){
-	return vinService.pageable(p);
-}
-```
-
-```bash
-http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC # renvoie les données par page de 2 éléments triés de manière décroissante par appellation puis prix
-http://localhost:8080/vin/pageable?sort=appellation&sort=prix,DESC # renvoie les données par page de 20 éléments triés dans l'ordre alphabétique des appellations puis par prix décroissant
 ```
 
 ----
