@@ -374,16 +374,21 @@ public Vin update(@RequestBody Vin vin){
 ## @RequestMapping : les bases
 
 - **value** permet de spécifier le ou les chemin(s) de l'URL et **method** la ou les méthode(s) HTTP souhaitée pour cette méthode. Il n'y a pas de valeur par défaut
+
 ```java
 @RequestMapping(value = "/vin", method = RequestMethod.GET)
 @RequestMapping(value = { "/vin", "/vins" }, method = { RequestMethod.PUT, RequestMethod.POST }
 ```
+
 - le mapping peut encore être réduit en spécifiant un ou plusieurs en-tête dans la requête
+
 ```java
 @RequestMapping(value = "/vin", headers = "key=val", method = GET)
 @RequestMapping(value = "/vin", headers = { "key1=val1", "key2=val2" }, method = GET)
 ```
+
 - il existe des raccourcis pour chaque méthode HTTP
+
 ```java
 @RequestMapping (method = RequestMethod.GET) = @GetMapping
 @RequestMapping (method = RequestMethod.POST) = @PostMapping
