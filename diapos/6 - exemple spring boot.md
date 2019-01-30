@@ -383,7 +383,6 @@ public Vin update(@RequestBody Vin vin){
 @RequestMapping(value = "/vin", headers = "key=val", method = GET)
 @RequestMapping(value = "/vin", headers = { "key1=val1", "key2=val2" }, method = GET)
 ```
-
 - il existe des raccourcis pour chaque méthode HTTP
 ```java
 @RequestMapping (method = RequestMethod.GET) = @GetMapping
