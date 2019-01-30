@@ -457,11 +457,9 @@ http://localhost:8080/vin?search=appellation:Margaux,prix>30
 ----
 
 ## Paging et Sorting
-
-3 mots clés :
 - **page** : page que l'on veut récupérer, 0 par défaut
 - **size** : nombre d'éléments par page, 20 par défaut
-- **sort** : variables sur lesquels on veut trier les données au format `property,property(,ASC|DESC)` (ASC par défaut). Pour alterner les directions de tris, il faut utiliser plusieurs fois le paramètre *sort*, par exemple : `?sort=firstname&sort=lastname,asc.`
+- **sort** : variables sur lesquels on veut trier les données au format `property,property(,ASC|DESC)` (ASC par défaut). Pour changer les ordres de tris, il faut utiliser plusieurs fois le paramètre *sort*, par exemple : `?sort=firstname&sort=lastname,asc.`
 
 ```java
 // service
@@ -475,9 +473,9 @@ public Page<Vin> getAllPageable(Pageable p){
 }
 ```
 
-La requête suivante renvoie les données par page de 2 éléments triés de manière décroissante par appellation et prix
-```http
-http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC
+```bash
+http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC # renvoie les données par page de 2 éléments triés de manière décroissante par appellation puis prix
+http://localhost:8080/vin/pageable?sort=appellation&sort=prix,DESC # renvoie les données par page de 20 éléments triés dans l'ordre alphabétique des appellations puis par prix décroissant
 ```
 
 ----

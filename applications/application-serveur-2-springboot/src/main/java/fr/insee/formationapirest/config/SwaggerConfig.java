@@ -1,4 +1,4 @@
-package fr.insee.formationapirest.controller;
+package fr.insee.formationapirest.config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
