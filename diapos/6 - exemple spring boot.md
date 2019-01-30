@@ -511,9 +511,9 @@ http://localhost:8080/foos?id=ab+c # id=ab c
 
 ----
 
-## Filtrage avancé avec Querydsl : mise en place
+## Filtrage avancé avec Querydsl : mise en place (1)
 
-ajout de 2 dépendances et un plugin dans le POM
+ajout de deux dépendances et d'un plugin dans le POM
 
 ```xml
 <dependencies>
@@ -528,7 +528,13 @@ ajout de 2 dépendances et un plugin dans le POM
         <scope>provided</scope>
     </dependency>
 </dependencies>
+```
 
+----
+
+## Filtrage avancé avec Querydsl : mise en place (2)
+
+```xml
 <build>
     <plugins>
         <!-- ... -->
@@ -568,6 +574,7 @@ public Iterable<Vin> get(Predicate predicate){
 }
 ```
 - création d'une méthode dans le controller
+
 ```java
 import com.querydsl.core.types.Predicate;
 
@@ -614,13 +621,14 @@ public Iterable<Vin> get(@QuerydslPredicate(root = Vin.class, bindings = VinRepo
 	return vinService.get(predicate);
 }
 ```
-```bash
-http://localhost:8080/vin?appellation=margaux # ramène bien les vins d'appellation Margaux
-```
 
 ----
 
 ## Filtrage avancé avec Querydsl : QuerydslBinderCustomizer<QT> (2)
+
+```bash
+http://localhost:8080/vin?appellation=margaux # ramène bien les vins d'appellation Margaux
+```
 
 ----
 
