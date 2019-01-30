@@ -470,9 +470,7 @@ http://localhost:8080/vin?appellation=Margaux # ne donne que les Margaux
 
 ----
 
-## Filtrage avancé avec Spring Data
-
-possibilité de faire du filtrage avancé avec **Querydsl**
+## Filtrage avancé avec Querydsl
 
 Par exemple, la requête suivante devrait renvoyer tous les vins à plus de 30€ et qui ont l'appellation Margaux
 

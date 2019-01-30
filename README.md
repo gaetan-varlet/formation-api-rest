@@ -78,12 +78,9 @@ PARTIE CONSOMMATION API
     - Création des méthodes GET-POST-PUT-DELETE sur le controller
     - Raccourci pour le mapping des verbes HTTP dans les controllers
     - Refactor : mise en place d'une couche de service
-    - Filtrage sur un attribut via paramètre de requête
-    - Filtrage avancé avec Spring Data
-    - produces / consumes
-    - reception de fichier dans un service
-    - mise en place de Spring Data JPA avec H2
     - Paging et Sorting
+    - Filtrage sur un attribut via paramètre de requête
+    - Filtrage avancé avec Querydsl
     - @Produces et @Consumes
     - Réception d'un fichier dans un controller
     - Mise en place de Swagger
@@ -103,20 +100,5 @@ PARTIE CONSOMMATION API
     - Bonus : Bannière ASCII
     - Bonus : Gestion du cache applicatif
 
-    - gestion des logs(à travailler)
-    - bannière ASCII
-    - gestion des erreurs avec exceptions et codes HTTP
-    - mise en place de Swagger
-    - les tests dans Spring Boot
-    - Spring Security : Authentification basique, Keycloak
-    - Cors
-    - gestion du cache applicatif
-
-7. Création d'une API REST avec Jersey
+7. Spring Boot et Jax-RS, les principales différences
     - passage en revue rapide des différences avec Spring Boot
-
-8. Documentation
-    - Note de la cellule archi
-        - Utilisation des verbes
-        - Singulier / Pluriel
-        - Numéro de version
