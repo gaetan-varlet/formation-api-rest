@@ -1234,7 +1234,7 @@ initialisation d'un jeu de données que l'on mocke et réalisation d'un test
 
 ## Les tests fonctionnels / d'intégration
 
-- avec Spring, possibilité de faire des requêtes HTTP qui traverse toutes les couches jusqu'à une base de test en mémoire
+- avec Spring, possibilité de faire des requêtes HTTP qui traverse toutes les couches jusqu'à une base de données en mémoire
 - avevc Cucumber
 
 ----
