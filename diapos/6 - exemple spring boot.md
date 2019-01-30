@@ -371,17 +371,41 @@ public Vin update(@RequestBody Vin vin){
 
 ----
 
-## Raccourci pour le mapping des verbes HTTP dans les controllers
+## @RequestMapping : les bases
 
+- **value** permet de spécifier le ou les chemin(s) de l'URL et **method** la ou les méthode(s) HTTP souhaitée pour cette méthode. Il n'y a pas de valeur par défaut
 ```java
-@RequestMapping (method = RequestMethod.GET)
-@GetMapping
+@RequestMapping(value = "/vin", method = RequestMethod.GET)
+@RequestMapping(value = { "/vin", "/vins" }, method = { RequestMethod.PUT, RequestMethod.POST }
+```
+- le mapping peut encore être réduit en spécifiant un ou plusieurs en-tête dans la requête
+```java
+@RequestMapping(value = "/vin", headers = "key=val", method = GET)
+@RequestMapping(value = "/vin", headers = { "key1=val1", "key2=val2" }, method = GET)
+```
 
-@RequestMapping (method = RequestMethod.POST)
-@PostMapping
-
+- il existe des raccourcis pour chaque méthode HTTP
+```java
+@RequestMapping (method = RequestMethod.GET) = @GetMapping
+@RequestMapping (method = RequestMethod.POST) = @PostMapping
 // etc
 ```
+
+- il n'est pas possible de mapper la même URL avec la même méthode HTTP sur deux fonctions différentes, l'application ne compilera pas
+
+----
+
+##  @RequestMapping : @Consumes et @Produces
+
+- une requête peut fournir des éléments dans son body à différents formats, à préciser dans l'en-tête **Content-Type**, par exemple XML ou JSON
+- la requête peut aussi spécifier quels formats elle accepte en retour via l'en tête **Accept**
+- l'annotation `@RequestMapping` contient des attributs **consumes** et **produces** permettant de spécifier ce que le service accepte et ce qu'il produit. Si une restriction n'est pas respectée, une erreur HTTP 406 est renvoyée (Not Acceptable)
+- sans précision, il n'y a pas de restriction. Exemple de restriction :
+```java
+@RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = { "application/json", "application/xml" })
+```
+- pour transformer l'objet Java en XML, il faut ajouter l'annotation `@XmlRootElement` sur la classe de l'objet à transformer, dans notre cas, la classe Vin
+- il n'est pas possible de renvoyer une liste d'objets au format XML, il faut créer un objet contenant la liste d'objets à retourner
 
 ----
 
@@ -650,19 +674,6 @@ http://localhost:8080/vin?prix=100 # ne renvoie que le Château Margaux, seul vi
 http://localhost:8080/vin?prix=40&prix=100 # renvoie les vins dont le prix est compris entre 40€ et 100€
 http://localhost:8080/vin?id=1 # renvoie tous les vins car l'id est exclu du predicate
 ```
-
-----
-
-## @Produces et @Consumes
-
-- une requête peut fournir un élément dans son body à différents formats, par exemple XML ou JSON. Elle peut aussi spécifier quels formats elle accepte en retour via l'en tête **Accept**
-- l'annotation `@RequestMapping` contient des attributs **consumes** et **produces** permettant de spécifier ce que le service accepte et ce qu'il produit. Si une restriction n'est pas respectée, une erreur HTTP 406 est renvoyée (Not Acceptable)
-- sans précision, il n'y a pas de restriction. Exemple de restriction :
-```java
-@RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
-```
-- pour transformer l'objet Java en XML, il faut ajouter l'annotation `@XmlRootElement` sur la classe de l'objet à transformer, dans notre cas, la classe Vin
-- il n'est pas possible de renvoyer une liste d'objets au format XML, il faut créer un objet contenant la liste d'objets à retourner
 
 ----
 
