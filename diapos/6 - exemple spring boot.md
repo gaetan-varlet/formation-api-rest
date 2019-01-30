@@ -486,8 +486,6 @@ http://localhost:8080/vin?appellation=Margaux # ne donne que les Margaux
 @RequestParam(defaultValue = "test") String id
 ```
 
-[documentation sur les paramètres de requêtes Spring](https://www.baeldung.com/spring-request-param)
-
 ----
 
 ## Les options des paramètres de requêtes (2)
