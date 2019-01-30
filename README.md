@@ -6,6 +6,7 @@
 PARTIE CONSTRUCTION API
 - problème sur la création du WAR
 - vérifier si on a besoin de toutes les variables dans la déclaration des profils
+- ajouter un exemple avec ResponseEntity qui met un code 201 sur une création de Vin ainsi que le renvoi de l'URL de l'objet créé dans la partie Autres fonctionnalités d'une API REST
 - revoir tests
 - apronfondir le CORS
 - lire l'utilisateur (idep et nom par exemple) dans le jeton côté Java
