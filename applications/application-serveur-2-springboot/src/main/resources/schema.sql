@@ -6,4 +6,4 @@ CREATE TABLE formation.VIN (
 	appellation VARCHAR(100),
 	prix DECIMAL);
 
-CREATE SEQUENCE formation.vin_id_seq start 5 increment 1;
+CREATE SEQUENCE formation.vin_id_seq start 1 increment 1;
