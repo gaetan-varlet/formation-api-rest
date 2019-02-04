@@ -23,7 +23,7 @@ public class TestController {
 	private String environnement;
 	
 	@RequestMapping(value="mon-nom", method = RequestMethod.GET)
-	public String propertyNonSurchargee() {
+	public String getNom() {
 		return nom;
 	}
 	
