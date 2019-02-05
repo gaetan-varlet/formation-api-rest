@@ -9,7 +9,6 @@ PARTIE CONSTRUCTION API
 - schema sur l'auth pour expliquer les flux
 - spring security : basic avant
 - vérifier si on a besoin de toutes les variables dans la déclaration des profils
-- ajouter un exemple avec ResponseEntity qui met un code 201 sur une création de Vin ainsi que le renvoi de l'URL de l'objet créé dans la partie Autres fonctionnalités d'une API REST
 - revoir tests : mettre un exemple de test intégration version Spring et un exemple Cucumber
 - apronfondir le CORS (pre-flight request (OPTIONS))
 - lire l'utilisateur (idep et nom par exemple) dans le jeton Keycloak côté Java
