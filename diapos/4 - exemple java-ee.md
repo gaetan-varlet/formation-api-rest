@@ -243,13 +243,13 @@ public class CalculJacksonServlet extends HttpServlet {
 
 ----
 
-## Présentation de la spécification JAX-RS et exemple d'utilisation de l'implémentation Jersey
+## Présentation de la spécification JAX-RS
 
 - **JAX-RS**, pour *Java API for RESTful Web Services* est une spécification de Java EE.
-- il faut utiliser une implémentation : **Jersey** est l'implémentation de référence fournie par Oracle 
+- il faut utiliser une implémentation : **Jersey** est l'**implémentation de référence** fournie par Oracle
     - la première dépendance est la bibliothèque Jersey
     - la deuxième dépendance est Jackon pour Jersey, pour convertir les objets en Json
-	- le troisième est le moteur d'injection
+	- la troisième dépendance est le framework d'injection
 
 ```xml
 <dependency>
