@@ -17,8 +17,8 @@ import model.User;
 public class HttpRequestRestTemplate {
 
 	public static void main(String[] args) throws Exception {
-//		requeteGet();
-		requetePost();
+		requeteGet();
+//		requetePost();
 	}
 
 	public static void requeteGet() throws Exception{
@@ -34,7 +34,7 @@ public class HttpRequestRestTemplate {
 		System.out.println(response.getHeaders().getContentType()); // application/json;charset=utf-8
 		ObjectMapper mapper = new ObjectMapper();
 		User user = mapper.readValue(response.getBody(), User.class);
-		System.out.println(user);
+		System.out.println(user); // User [id=1, userName=User 1, password=Password1]
 		System.out.println();
 		
 		
@@ -46,10 +46,10 @@ public class HttpRequestRestTemplate {
 		response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 		JAXBContext jc = JAXBContext.newInstance(User.class);
 		User userXml = (User) jc.createUnmarshaller().unmarshal(new StringReader(response.getBody()));
-		System.out.println(response.getStatusCode());
-		System.out.println(response.getBody());
-		System.out.println(response.getHeaders().getContentType());
-		System.out.println(userXml);
+		System.out.println(response.getStatusCode()); // 200 OK
+		System.out.println(response.getBody()); // <User xmlns ...
+		System.out.println(response.getHeaders().getContentType()); // application/xml;charset=utf-8
+		System.out.println(userXml); // User [id=1, userName=User 1, password=Password1]
 		System.out.println();
 
 
