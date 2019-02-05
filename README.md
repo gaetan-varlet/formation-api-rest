@@ -20,7 +20,6 @@ PARTIE CONSTRUCTION API
 - faire un tuto sur swagger pour spring boot pour voir si on utilise toutes les fonctionnalités
 
 PARTIE CONSOMMATION API
-- requete GET testTemplate correction header content-type
 - pourquoi besoin du package-info.java pour lire le XML
 - ajouter jersey client dans la conso d'API
 - lecture pour conso API REST en Java :
