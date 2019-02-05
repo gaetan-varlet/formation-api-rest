@@ -149,5 +149,5 @@ https://mon-api/{variable-de-chemin}?parametre-de-requete-1=valeur&parametre-de-
     - souvent utilisé pour les variables non obligatoires notamment pour du filtrage
 
 Par exemple :
-- **https://api.insee.fr/entreprises/sirene/V3/siren** renvoi 20 entreprises
-- **https://api.insee.fr/entreprises/sirene/V3/siren?tri=true&nombre=5** renvoi les 5 premières entreprises triées par identifiant
+- **https://api.insee.fr/entreprises/sirene/V3/siren/{siren}** retourne les informations sur le siren avec recherche de la totalité des périodes historiques
+- **https://api.insee.fr/entreprises/sirene/V3/siren/{siren}?date={date}** même chose avec le paramètre date qui renvoie uniquement la période comprenant cette date
