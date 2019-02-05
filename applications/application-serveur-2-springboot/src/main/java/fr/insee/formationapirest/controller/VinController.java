@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping("/vin")
-@Api(tags = { "vin" })
+@Api(tags =  {"vin"} )
 public class VinController {
 	
 	@Autowired
