@@ -278,8 +278,8 @@ public class CalculJacksonServlet extends HttpServlet {
 	<servlet-name>javax.ws.rs.core.Application</servlet-name>
 </servlet>
 <servlet-mapping>
-        <servlet-name>javax.ws.rs.core.Application</servlet-name>
-        <url-pattern>/rest/*</url-pattern>
+    <servlet-name>javax.ws.rs.core.Application</servlet-name>
+    <url-pattern>/rest/*</url-pattern>
 </servlet-mapping>
 ```
 
