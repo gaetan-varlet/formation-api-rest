@@ -249,17 +249,23 @@ public class CalculJacksonServlet extends HttpServlet {
 - il faut utiliser une implémentation : **Jersey** est l'implémentation de référence fournie par Oracle 
     - la première dépendance est la bibliothèque Jersey
     - la deuxième dépendance est Jackon pour Jersey, pour convertir les objets en Json
+	- le troisième est le moteur d'injection
 
 ```xml
 <dependency>
-    <groupId>org.glassfish.jersey.containers</groupId>
-    <artifactId>jersey-container-servlet</artifactId>
-    <version>2.25.1</version>
+	<groupId>org.glassfish.jersey.containers</groupId>
+	<artifactId>jersey-container-servlet</artifactId>
+	<version>2.28</version>
 </dependency>
 <dependency>
 	<groupId>org.glassfish.jersey.media</groupId>
 	<artifactId>jersey-media-json-jackson</artifactId>
-	<version>2.25.1</version>
+	<version>2.28</version>
+</dependency>
+<dependency>
+	<groupId>org.glassfish.jersey.inject</groupId>
+	<artifactId>jersey-hk2</artifactId>
+	<version>2.28</version>
 </dependency>
 ```
 

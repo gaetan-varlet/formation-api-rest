@@ -15,7 +15,6 @@ PARTIE CONSTRUCTION API
 - lire l'utilisateur (idep et nom par exemple) dans le jeton Keycloak côté Java
 - gestion du cache applicatif : faire une partie à ce sujet pour montrer comment faire
 - comment faire un filtre avec Spring ? plus généralement, le fonctionnement des annotation @Configuration et @Bean de Spring
-- blocage avec augmentation de la version de Jersey : cf changelog
 - lire la doc de querydsl pour faire des requêtes de type group by
 - faire un tuto sur swagger pour spring boot pour voir si on utilise toutes les fonctionnalités
 
