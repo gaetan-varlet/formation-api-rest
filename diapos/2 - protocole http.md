@@ -67,7 +67,7 @@ say=Hi&to=Mom
 
 Dans une requête POST, il faut spécifier le type de données. Pour un formulaire HTML, il y a 2 valeurs possibles :
 - application/x-www-form-urlencoded (valeur par défaut)
-- multipart/form-data (utilisé pour le upload de fichiers)
+- multipart/form-data (utilisé pour l'upload de fichiers)
 
 Il faut également spécifier la longueur du corps.
 
@@ -123,7 +123,7 @@ Content-Type: text/html
 ## L'en-tête Content-Type
 
 - l'en-tête HTTP **content-type** :
-- permet au client d'avoir plus d'informations sur ce qu'il reçoit, par exemple `text/html` pour du HTML, `text/plain` pour du texte brut, `application/pdf`pour du PDF, `application/json` pour des données au format JSON, `application/xml` pour des données au format XML. On parle de **type MIME** [liste des types MIME](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types)
+- permet au client d'avoir plus d'informations sur ce qu'il reçoit, par exemple `text/html` pour du HTML, `text/plain` pour du texte brut, `application/pdf` pour du PDF, `application/json` pour des données au format JSON, `application/xml` pour des données au format XML. On parle de **type MIME** [liste des types MIME](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types)
 - permet aussi de préciser le jeu de caractères (**charset**) que le navigateur doit utiliser pour afficher le contenu. Par défaut, il s'agit du jeu de caractères *ISO-8859-1* nommé aussi *Latin-1*.
 
 La bonne pratique est d'utiliser l'UTF-8 comme encodage des fichiers contenant le code source et comme jeu de caractères en-tête de la réponse HTTP. Exemple pour ajouter des en-têtes en Java :

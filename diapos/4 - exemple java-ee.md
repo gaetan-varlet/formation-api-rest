@@ -162,7 +162,6 @@ public class CalculTextPlainServlet extends HttpServlet {
 ----
 
 - relancez le Tomcat et appellez l'URL [http://localhost:8080/calcul-text-plain?nombre1=3&nombre2=4](http://localhost:8080/calcul-text-plain?nombre1=3&nombre2=4)
-
 - compliqué à lire de manière automatique, on va plutôt utiliser un format tel que le XML ou le JSON
 
 ----
