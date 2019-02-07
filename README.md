@@ -5,7 +5,7 @@
 ## TODO
 
 PARTIE CONSTRUCTION API
-- problème sur la création du WAR
+- fonctionnement de swagger avec pageable + predicate
 - schema sur l'auth pour expliquer les flux
 - spring security : basic avant
 - vérifier si on a besoin de toutes les variables dans la déclaration des profils
