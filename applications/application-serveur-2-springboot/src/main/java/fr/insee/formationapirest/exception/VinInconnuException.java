@@ -11,4 +11,8 @@ public class VinInconnuException extends RuntimeException {
 	public VinInconnuException(String message) {
 		super(message);
 	}
+
+	public VinInconnuException(Integer id) {
+		super("Le vin avec l'id "+id+" n'existe pas");
+	}
 }

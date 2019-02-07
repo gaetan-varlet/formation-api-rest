@@ -73,7 +73,7 @@ public class SpringKeycloakSecurityConfiguration {
 					.antMatchers("/url1", "/url2").permitAll()
 					.antMatchers("/environnement").hasRole("TOUCAN_ADMIN")
 					.antMatchers("/mon-nom").authenticated()
-			//		.anyRequest().denyAll()
+//					.anyRequest().denyAll()
 					;
 		}
 		
