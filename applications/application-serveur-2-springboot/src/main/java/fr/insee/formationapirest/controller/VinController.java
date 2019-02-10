@@ -19,11 +19,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.querydsl.core.types.Predicate;
 
+import fr.insee.formationapirest.config.ApiPageable;
 import fr.insee.formationapirest.model.Vin;
 import fr.insee.formationapirest.repository.VinRepository;
 import fr.insee.formationapirest.service.VinService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("/vin")
@@ -44,8 +46,9 @@ public class VinController {
 		return vinService.getAll(appellation);
 	}
 
+	@ApiPageable
 	@RequestMapping(value="/pageable", method = RequestMethod.GET)
-	public Page<Vin> getAllPageable(Pageable p){
+	public Page<Vin> getAllPageable(@ApiIgnore Pageable p){
 		return vinService.pageable(p);
 	}
 
