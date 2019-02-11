@@ -2,9 +2,13 @@ package fr.insee.formationapirest.controller;
 
 import java.io.IOException;
 
+import org.keycloak.representations.AccessToken;
+import org.keycloak.representations.AccessToken.Access;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +25,9 @@ public class TestController {
 	
 	@Value("${formationapirest.environnement}")
 	private String environnement;
+	
+	@Autowired
+	private AccessToken accessToken;
 	
 	@RequestMapping(value="mon-nom", method = RequestMethod.GET)
 	public String getNom() {
@@ -41,5 +48,32 @@ public class TestController {
 	@RequestMapping(value="/upload", method = RequestMethod.POST)
 	public String upload (@RequestParam MultipartFile multipartfile) throws IOException {
 		return new String(multipartfile.getBytes());
+	}
+	
+	@GetMapping("token")
+	public String getToken() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Bonjour, je m'appelle ");
+		sb.append(accessToken.getName()); // Prénom + Nom
+		sb.append(". Mon prénom est ");
+		sb.append(accessToken.getGivenName()); // Prénom
+		sb.append(". Mon nom est ");
+		sb.append(accessToken.getFamilyName()); // Nom
+		sb.append(". Mon idep est ");
+		sb.append(accessToken.getPreferredUsername()); // idep
+		sb.append(".\n");
+		Access access = accessToken.getRealmAccess();
+		if (access != null) {
+			sb.append("Mes rôles sont : ");
+			access.getRoles().forEach(role -> { // ensemble des rôles
+				sb.append(role);
+				sb.append(", ");
+			});
+			sb.delete(sb.length()-2, sb.length());
+			sb.append(".");
+		}else {
+			sb.append("Je n'ai pas de rôles.");
+		}
+		return sb.toString();
 	}
 }

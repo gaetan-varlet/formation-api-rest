@@ -23,11 +23,23 @@ public class SimpleFilter implements Filter {
 	public void doFilter (ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 
-		HttpServletRequest req = (HttpServletRequest) request;
-		log.info("Début de la requête " + req.getRequestURI());
+		HttpServletRequest httpRequest = (HttpServletRequest) request;
+//		HttpServletResponse httpResponse = (HttpServletResponse) response;
+		log.info("Début de la requête " + httpRequest.getRequestURI());
+		
+//		KeycloakSecurityContext securityContext = (KeycloakSecurityContext) httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
+//		if(securityContext !=null) {
+//			AccessToken token = securityContext.getToken();
+//			log.info(token.getPreferredUsername()); // idep
+//			log.info(token.getName()); // Prénom Nom
+//			log.info(token.getGivenName()); // Prénom
+//			log.info(token.getFamilyName()); // Nom
+//			token.getRealmAccess().getRoles().forEach(x -> log.info(x)); // ensemble des rôles
+			chain.doFilter(request, response);
+//		} else {
+//			httpResponse.sendError(403, "accès interdit");
+//		}
 
-		chain.doFilter(request, response);
-
-		log.info("Fin de la requête " + req.getRequestURI());
+		log.info("Fin de la requête " + httpRequest.getRequestURI());
 	}
 }
