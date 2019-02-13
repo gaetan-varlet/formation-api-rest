@@ -5,7 +5,7 @@
 ## TODO
 
 PARTIE CONSTRUCTION API
-- lire l'utilisateur (idep et nom par exemple) dans le jeton Keycloak côté Java
+- parler des intercepteurs après les filtres
 - schema sur l'auth pour expliquer les flux
 - spring security : basic avant ?
 - ordre du filtre spring security - keycloak ?
