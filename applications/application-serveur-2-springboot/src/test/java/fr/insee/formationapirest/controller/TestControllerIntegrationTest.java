@@ -2,14 +2,19 @@ package fr.insee.formationapirest.controller;
 
 import static org.hamcrest.core.Is.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.FileInputStream;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -38,7 +43,7 @@ public class TestControllerIntegrationTest {
 	public void DoitRecupererNom() throws Exception{
 		mvc.perform(get("/mon-nom"))
 		.andExpect(status().isOk())
-		.andExpect(jsonPath("$",is("Gaetan")))
+		.andExpect(content().string("Gaetan"));
 		;
 	}
 	
@@ -48,7 +53,6 @@ public class TestControllerIntegrationTest {
 		mvc.perform(get("/environnement"))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$",is("environnement local")))
-//		.andExpect(jsonPath("$.[0].chateau",is("Château Margaux")))
 		;
 	}
 	
@@ -65,6 +69,30 @@ public class TestControllerIntegrationTest {
 		mvc.perform(get("/environnement"))
 		.andExpect(status().isForbidden())
 		;
+	}
+	
+	@Test
+	public void uploadFichier() throws Exception{
+		MockMultipartFile firstFile = new MockMultipartFile("multipartfile", "filename.txt", "text/plain", "some xml".getBytes());
+		
+		mvc.perform(multipart("/upload")
+				.file(firstFile)
+				)
+		.andExpect(status().is(200))
+		.andExpect(content().string("some xml"));
+	}
+	
+	@Test
+	public void uploadFichier2() throws Exception{
+		
+		FileInputStream fis = new FileInputStream("src/test/resources/toto.txt");
+      MockMultipartFile multipartFile = new MockMultipartFile("multipartfile", fis);
+		
+		mvc.perform(multipart("/upload")
+				.file(multipartFile)
+				)
+		.andExpect(status().is(200))
+		.andExpect(content().string("Je m'appelle Toto"));
 	}
 	
 }
