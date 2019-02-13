@@ -29,6 +29,7 @@ import fr.insee.formationapirest.model.Vin;
 // lance l'application complète sur un port
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = FormationApiRestApplication.class)
 @AutoConfigureMockMvc
+// précise le nom du fichier de properties s'il est différent du nom par défaut
 @TestPropertySource(locations = "classpath:vin.properties")
 //permet de rafraîchir la base entre chaque test
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -76,12 +77,12 @@ public class VinControllerIntegrationTest {
 	@Test
 	public void DoitAjouterVin() throws Exception{
 		Vin vin1 = new Vin(); vin1.setChateau("Château 1"); vin1.setAppellation("Saint-Julien"); vin1.setPrix(10.0); 
-
+		
 		mvc.perform(post("/vin")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(mapper.writeValueAsString(vin1)))
 		.andExpect(status().isCreated());
-
+		
 		mvc.perform(get("/vin"))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.length()",is(5)))
@@ -97,12 +98,12 @@ public class VinControllerIntegrationTest {
 	public void NeDoitPasAjouterVinInvalide() throws Exception{
 		// on essaie de créer un vin en fournissant un id qui existe, ce qi est interdit
 		Vin vin1 = new Vin(); vin1.setId(1); vin1.setChateau("Château 1"); vin1.setAppellation("Saint-Julien"); vin1.setPrix(10.0);
-
+		
 		mvc.perform(post("/vin")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(mapper.writeValueAsString(vin1)))
 		.andExpect(status().isBadRequest());
-
+		
 		mvc.perform(get("/vin"))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.length()",is(4)))
@@ -114,12 +115,12 @@ public class VinControllerIntegrationTest {
 	@Test
 	public void DoitMettreAJourVin() throws Exception{
 		Vin vin1 = new Vin(); vin1.setId(1); vin1.setChateau("Château 1"); vin1.setAppellation("Saint-Julien"); vin1.setPrix(10.0);
-
+		
 		mvc.perform(put("/vin")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(mapper.writeValueAsString(vin1)))
 		.andExpect(status().isOk());
-
+		
 		mvc.perform(get("/vin/1"))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.chateau",is("Château 1")))
@@ -130,7 +131,7 @@ public class VinControllerIntegrationTest {
 	@Test
 	public void NeDoitPasMettreAJourVinInexistant() throws Exception{
 		Vin vin1 = new Vin(); vin1.setId(12345); vin1.setChateau("Château 1"); vin1.setAppellation("Saint-Julien"); vin1.setPrix(10.0);
-
+		
 		mvc.perform(put("/vin")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(mapper.writeValueAsString(vin1)))
@@ -138,4 +139,3 @@ public class VinControllerIntegrationTest {
 	}
 	
 }
-

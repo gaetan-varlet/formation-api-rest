@@ -73,20 +73,20 @@ public class TestControllerIntegrationTest {
 	
 	@Test
 	public void uploadFichier() throws Exception{
-		MockMultipartFile firstFile = new MockMultipartFile("multipartfile", "filename.txt", "text/plain", "some xml".getBytes());
+		MockMultipartFile firstFile = new MockMultipartFile("multipartfile", "filename.txt", "text/plain", "coucou".getBytes());
 		
 		mvc.perform(multipart("/upload")
 				.file(firstFile)
 				)
 		.andExpect(status().is(200))
-		.andExpect(content().string("some xml"));
+		.andExpect(content().string("coucou"));
 	}
 	
 	@Test
 	public void uploadFichier2() throws Exception{
 		
 		FileInputStream fis = new FileInputStream("src/test/resources/toto.txt");
-      MockMultipartFile multipartFile = new MockMultipartFile("multipartfile", fis);
+		MockMultipartFile multipartFile = new MockMultipartFile("multipartfile", fis);
 		
 		mvc.perform(multipart("/upload")
 				.file(multipartFile)
@@ -96,4 +96,3 @@ public class TestControllerIntegrationTest {
 	}
 	
 }
-
