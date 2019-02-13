@@ -10,11 +10,9 @@ PARTIE CONSTRUCTION API
 - spring security : basic avant ?
 - ordre du filtre spring security - keycloak ?
 - vérifier si on a besoin de toutes les variables dans la déclaration des profils
-- revoir tests : mettre un exemple de test intégration version Spring et un exemple Cucumber
 - apronfondir le CORS (pre-flight request (OPTIONS))
 - gestion du cache applicatif : faire une partie à ce sujet pour montrer comment faire
 - lire la doc de querydsl pour faire des requêtes de type group by
-- faire un tuto sur swagger pour spring boot pour voir si on utilise toutes les fonctionnalités
 
 PARTIE CONSOMMATION API
 - pourquoi besoin du package-info.java pour lire le XML
