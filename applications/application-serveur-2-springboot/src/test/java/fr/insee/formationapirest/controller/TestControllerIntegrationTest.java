@@ -77,7 +77,7 @@ public class TestControllerIntegrationTest {
 		
 		mvc.perform(multipart("/upload")
 				.file(firstFile))
-		.andExpect(status().is(200))
+		.andExpect(status().isOk())
 		.andExpect(content().string("coucou"));
 	}
 	
@@ -89,7 +89,7 @@ public class TestControllerIntegrationTest {
 		
 		mvc.perform(multipart("/upload")
 				.file(multipartFile))
-		.andExpect(status().is(200))
+		.andExpect(status().isOk())
 		.andExpect(content().string("Je m'appelle Toto"));
 	}
 	
