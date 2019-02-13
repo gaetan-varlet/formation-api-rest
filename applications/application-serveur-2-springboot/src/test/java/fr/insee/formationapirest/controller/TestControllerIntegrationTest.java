@@ -76,8 +76,7 @@ public class TestControllerIntegrationTest {
 		MockMultipartFile firstFile = new MockMultipartFile("multipartfile", "filename.txt", "text/plain", "coucou".getBytes());
 		
 		mvc.perform(multipart("/upload")
-				.file(firstFile)
-				)
+				.file(firstFile))
 		.andExpect(status().is(200))
 		.andExpect(content().string("coucou"));
 	}
@@ -89,8 +88,7 @@ public class TestControllerIntegrationTest {
 		MockMultipartFile multipartFile = new MockMultipartFile("multipartfile", fis);
 		
 		mvc.perform(multipart("/upload")
-				.file(multipartFile)
-				)
+				.file(multipartFile))
 		.andExpect(status().is(200))
 		.andExpect(content().string("Je m'appelle Toto"));
 	}
