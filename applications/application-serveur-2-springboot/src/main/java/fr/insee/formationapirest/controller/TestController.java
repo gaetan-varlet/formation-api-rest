@@ -1,6 +1,7 @@
 package fr.insee.formationapirest.controller;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessToken.Access;
@@ -64,13 +65,8 @@ public class TestController {
 		sb.append(".\n");
 		Access access = accessToken.getRealmAccess();
 		if (access != null) {
-			sb.append("Mes rôles sont : ");
-			access.getRoles().forEach(role -> { // ensemble des rôles
-				sb.append(role);
-				sb.append(", ");
-			});
-			sb.delete(sb.length()-2, sb.length());
-			sb.append(".");
+			sb.append(access.getRoles()
+					.stream().collect(Collectors.joining(", ", "Mes rôles sont : ", ".")));  // ensemble des rôles
 		}else {
 			sb.append("Je n'ai pas de rôles.");
 		}
