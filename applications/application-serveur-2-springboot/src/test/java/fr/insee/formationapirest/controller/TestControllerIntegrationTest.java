@@ -25,7 +25,7 @@ import fr.insee.formationapirest.FormationApiRestApplication;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = FormationApiRestApplication.class)
 @AutoConfigureMockMvc
-@TestPropertySource(locations = "classpath:vin.properties")
+@TestPropertySource(locations = "classpath:formation-api-rest.properties")
 public class TestControllerIntegrationTest {
 	
 	@Autowired
