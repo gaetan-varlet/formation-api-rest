@@ -9,7 +9,7 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
-@Table(name = "vin", schema = "formation")
+@Table(name = "vin")
 @XmlRootElement
 public class Vin {
 	
