@@ -243,6 +243,7 @@
 					{ src: 'revealjs/plugin/notes/notes.js', async: true },
 
 					{ src: 'revealjs/plugin/menu/menu.js' },
+					{ src: 'revealjs/plugin/prism/prism.js', async: true, callback: function() { Prism.highlightAll(); } },
 					//{ src: 'revealjs/plugin/toc-progress/toc-progress.js', async: true, callback: function() { toc_progress.initialize(); toc_progress.create(); } },
 
 				]
