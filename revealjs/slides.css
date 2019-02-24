@@ -19,17 +19,7 @@
     text-transform: none;
 }
 
-.reveal .chapter h2 {
-    font-size: 5em;
-}
 
-.reveal .tp h2 {
-    font-size: 5em;
-}
-
-.reveal .exercice h2 {
-    font-size: 5em;
-}
 
 .reveal .slides img {
     border: none;
@@ -42,19 +32,7 @@
     font-size: 30px;
 }
 
-.reveal .chapter.slide-background.present  {
-    opacity: 0.2;
-}
-
-.reveal .tp.slide-background.present  {
-    opacity: 0.2;
-}
-
-.reveal .exercice.slide-background.present  {
-    opacity: 0.3;
-}
-
-.reveal .slide {
+.reveal .gauche {
     text-align: left;
 }
 
@@ -86,11 +64,10 @@
 
 .reveal ul li {
     font-size: 80%;
-    color: #1a53a1;
 }
 
 .reveal li li {
-    color: #657b83;
+
 }
 
 .reveal .small {
