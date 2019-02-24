@@ -68,7 +68,7 @@ public class CalculAvecJspServlet extends HttpServlet {
 
 - créez la JSP **reponse-calcul.jsp** dans le dossier */WEB-INF/jsp/*
 
-```jsp
+```html
 <!DOCTYPE html>
 <html>
     <head>
