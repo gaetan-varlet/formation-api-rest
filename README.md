@@ -6,8 +6,6 @@
 
 PARTIE CONSTRUCTION API
 - parler des intercepteurs après les filtres
-- schema sur l'auth pour expliquer les flux
-- spring security : basic avant ?
 - ordre du filtre spring security - keycloak ?
 - vérifier si on a besoin de toutes les variables dans la déclaration des profils
 - apronfondir le CORS (pre-flight request (OPTIONS))
