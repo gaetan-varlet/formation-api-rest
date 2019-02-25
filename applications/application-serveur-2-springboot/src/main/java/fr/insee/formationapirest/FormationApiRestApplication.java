@@ -2,6 +2,8 @@ package fr.insee.formationapirest;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.representations.AccessToken;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -26,17 +28,17 @@ public class FormationApiRestApplication {
 				).sources(FormationApiRestApplication.class);
 	}
 	
-//	@Bean
-//   @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-//   public AccessToken getAccessToken() {
-//		HttpServletRequest httpRequest = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-//		KeycloakSecurityContext securityContext = (KeycloakSecurityContext) httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
-//		if(securityContext != null) {
-//			return securityContext.getToken(); 
-//		} else {
-//			return new AccessToken();
-//		} 
-//   }
-//
+	@Bean
+   @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+   public AccessToken getAccessToken() {
+		HttpServletRequest httpRequest = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+		KeycloakSecurityContext securityContext = (KeycloakSecurityContext) httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
+		if(securityContext != null) {
+			return securityContext.getToken(); 
+		} else {
+			return new AccessToken();
+		} 
+   }
+
 }
 

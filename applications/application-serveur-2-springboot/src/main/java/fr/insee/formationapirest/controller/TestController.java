@@ -3,6 +3,8 @@ package fr.insee.formationapirest.controller;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+import org.keycloak.representations.AccessToken;
+import org.keycloak.representations.AccessToken.Access;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ public class TestController {
 	@Value("${formationapirest.environnement}")
 	private String environnement;
 	
+	@Autowired
+	private AccessToken accessToken;
 	
 	@RequestMapping(value="mon-nom", method = RequestMethod.GET)
 	public String getNom() {
@@ -47,4 +51,25 @@ public class TestController {
 		return new String(multipartfile.getBytes());
 	}
 	
+	@GetMapping("token")
+	public String getToken() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Bonjour, je m'appelle ");
+		sb.append(accessToken.getName()); // Prénom + Nom
+		sb.append(". Mon prénom est ");
+		sb.append(accessToken.getGivenName()); // Prénom
+		sb.append(". Mon nom est ");
+		sb.append(accessToken.getFamilyName()); // Nom
+		sb.append(". Mon idep est ");
+		sb.append(accessToken.getPreferredUsername()); // idep
+		sb.append(".\n");
+		Access access = accessToken.getRealmAccess();
+		if (access != null) {
+			sb.append(access.getRoles()
+					.stream().collect(Collectors.joining(", ", "Mes rôles sont : ", ".")));  // ensemble des rôles
+		}else {
+			sb.append("Je n'ai pas de rôles.");
+		}
+		return sb.toString();
+	}
 }
