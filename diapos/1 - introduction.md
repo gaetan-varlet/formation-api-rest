@@ -44,7 +44,7 @@ public class Adresse {
 
 #### Rendu en JSON
 
-```line-numbers language-json
+```json
 {
   "prenom": "Gaëtan",
   "age": 30,
