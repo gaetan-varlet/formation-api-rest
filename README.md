@@ -5,7 +5,9 @@
 ## TODO
 
 PARTIE CONSTRUCTION API
-- parler des intercepteurs après les filtres
+- ajout de création d'un CSV dans la réponse
+- ajout dans l'upload de données textes en plus du fichier
+- faire un exemple d'intercepteur
 - ordre du filtre spring security - keycloak ?
 - vérifier si on a besoin de toutes les variables dans la déclaration des profils
 - apronfondir le CORS (pre-flight request (OPTIONS))
