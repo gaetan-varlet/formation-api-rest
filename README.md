@@ -5,7 +5,6 @@
 ## TODO
 
 PARTIE CONSTRUCTION API
-- ajout de création d'un CSV dans la réponse
 - ajout dans l'upload de données textes en plus du fichier
 - faire un exemple d'intercepteur
 - ordre du filtre spring security - keycloak ?
