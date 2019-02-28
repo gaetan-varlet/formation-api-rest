@@ -1,7 +1,10 @@
 package fr.insee.formationapirest.controller;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,37 +34,51 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/vin")
 @Api(tags =  {"vin"} )
 public class VinController {
-
+	
 	@Autowired
 	VinService vinService;
-
+	
 	@GetMapping
 	public Iterable<Vin> get(@QuerydslPredicate(root = Vin.class, bindings = VinRepository.class) Predicate predicate){
 		return vinService.get(predicate);
 	}
-
+	
 	@ApiOperation(value = "Obtenir tous les vins, ou éventuellement uniquement les vins d'une appellation avec le paramètre appellation")
 	@RequestMapping(value="/all", method = RequestMethod.GET)
 	public List<Vin> getAll(@RequestParam(required=false) String appellation){
 		return vinService.getAll(appellation);
 	}
-
+	
+	@GetMapping("/csv")
+	public void getAllCsv(HttpServletResponse response) throws IOException{
+		String nomFichier = "ma-cave";
+		
+		// en-tête qui permet de préciser au navigateur s'il doit afficher le contenu (inline) ou le télécharger (attachment)
+		response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", nomFichier+".csv"));
+		// aide le navigateur à savoir quel logiciel peut ouvrir le type de contenu téléchargé
+		// et suggère un logiciel pour l'ouvrir une fois le téléchargement terminé
+		response.setContentType("text/csv"); 
+		response.setCharacterEncoding("UTF-8");
+		
+		vinService.ecrireVinsDansCsv(response.getWriter(), vinService.getAll(null));
+	}
+	
 	@ApiPageable
 	@RequestMapping(value="/pageable", method = RequestMethod.GET)
 	public Page<Vin> getAllPageable(@ApiIgnore Pageable p){
 		return vinService.pageable(p);
 	}
-
+	
 	@RequestMapping(value= "/{id}", method = RequestMethod.GET)
 	public Vin getById(@PathVariable Integer id){
 		return vinService.getById(id);
 	}
-
+	
 	@RequestMapping(value= "/{id}", method = RequestMethod.DELETE)
 	public void deleteById(@PathVariable Integer id){
 		vinService.deleteById(id);
 	}
-
+	
 	@RequestMapping (method = RequestMethod.POST)
 	public ResponseEntity<Void> add(@RequestBody Vin vin){
 		Vin vinAjoute =  vinService.add(vin);
@@ -72,10 +89,10 @@ public class VinController {
 				.toUri();
 		return ResponseEntity.created(location).build();
 	}
-
+	
 	@RequestMapping (method = RequestMethod.PUT)
 	public Vin update(@RequestBody Vin vin){
 		return vinService.update(vin);
 	}
-
+	
 }

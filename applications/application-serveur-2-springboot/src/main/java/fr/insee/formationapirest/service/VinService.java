@@ -1,5 +1,8 @@
 package fr.insee.formationapirest.service;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +10,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.opencsv.CSVWriter;
+import com.opencsv.CSVWriterBuilder;
+import com.opencsv.ICSVWriter;
 import com.querydsl.core.types.Predicate;
 
 import fr.insee.formationapirest.exception.VinInconnuException;
@@ -52,16 +58,16 @@ public class VinService {
 	}
 	
 	public Vin add(Vin vin){
-	   if(controleValiditeVin(vin)) {
-	   	// si l'id n'est pas renseigné ou si l'id renseigné n'existe pas, alors on crée le vin
-	   	if(vin.getId() == null || !vinRepository.existsById(vin.getId())){
-	   		return vinRepository.save(vin);
-	   	} else {
-	   		throw new VinInvalideException("le vin renseigné (" + vin + ") existe déjà, vous ne pouvez pas le créer");
-	   	}
-	   } else {
-	   	throw new VinInvalideException("le vin renseigné (" + vin + ") n'est pas valide");
-	   }
+		if(controleValiditeVin(vin)) {
+			// si l'id n'est pas renseigné ou si l'id renseigné n'existe pas, alors on crée le vin
+			if(vin.getId() == null || !vinRepository.existsById(vin.getId())){
+				return vinRepository.save(vin);
+			} else {
+				throw new VinInvalideException("le vin renseigné (" + vin + ") existe déjà, vous ne pouvez pas le créer");
+			}
+		} else {
+			throw new VinInvalideException("le vin renseigné (" + vin + ") n'est pas valide");
+		}
 	}
 	
 	public Vin update(Vin vin){
@@ -85,6 +91,23 @@ public class VinService {
 			return false;
 		}
 		return true;
+	}
+	
+	public void ecrireVinsDansCsv(Writer writer, List<Vin> listeAEcrire) throws IOException {
+		// Création du writer openCSV qui va écrire dans le writer fourni en paramètre
+		ICSVWriter csvWriter = new CSVWriterBuilder(writer)
+				.withSeparator(';') // séparateur point-virgule (virgule par défaut)
+				.withQuoteChar(CSVWriter.NO_QUOTE_CHARACTER) // pas de caractères autour de chaque attribut (doubles quotes par défaut)
+				.build();
+		
+		listeAEcrire.forEach(vin -> {
+			List<String> ligne = new ArrayList<>();
+			ligne.add(vin.getChateau());
+			ligne.add(vin.getAppellation());
+			ligne.add(String.valueOf(vin.getPrix()));
+			csvWriter.writeNext(ligne.toArray(new String[ligne.size()]));
+		});
+		csvWriter.close();
 	}
 	
 }
