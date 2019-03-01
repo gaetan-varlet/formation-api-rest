@@ -36,19 +36,17 @@ public class SpringKeycloakSecurityConfiguration {
 	@ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
 	public static class KeycloakConfigurationAdapter extends KeycloakWebSecurityConfigurerAdapter {
 		
-		// permet de gérer l'erreur de doublon du bean httpSessionManager
 		@Bean
 		@Override
 		@ConditionalOnMissingBean(HttpSessionManager.class)
 		protected HttpSessionManager httpSessionManager() {
-			return new HttpSessionManager();
+			return new HttpSessionManager(); // permet de gérer l'erreur de doublon du bean httpSessionManager
 		}
 		
 		@Bean
 		@Override
 		protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-			// required for bearer-only applications.
-			return new NullAuthenticatedSessionStrategy();
+			return new NullAuthenticatedSessionStrategy(); // required for bearer-only applications
 		}
 		
 		@Autowired
