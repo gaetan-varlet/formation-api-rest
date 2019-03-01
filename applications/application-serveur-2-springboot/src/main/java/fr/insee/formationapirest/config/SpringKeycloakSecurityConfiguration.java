@@ -7,7 +7,9 @@ import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
+import org.keycloak.adapters.springsecurity.management.HttpSessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -33,6 +35,14 @@ public class SpringKeycloakSecurityConfiguration {
 	@ConditionalOnProperty(name = "keycloak.enabled", havingValue = "true", matchIfMissing = true)
 	@ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
 	public static class KeycloakConfigurationAdapter extends KeycloakWebSecurityConfigurerAdapter {
+		
+		// permet de gérer l'erreur de doublon du bean httpSessionManager
+		@Bean
+		@Override
+		@ConditionalOnMissingBean(HttpSessionManager.class)
+		protected HttpSessionManager httpSessionManager() {
+			return new HttpSessionManager();
+		}
 		
 		@Bean
 		@Override
