@@ -158,7 +158,7 @@ connection.disconnect();
 <dependency>
 	<groupId>org.springframework</groupId>
 	<artifactId>spring-web</artifactId>
-	<version>5.1.3.RELEASE</version>
+	<version>5.1.5.RELEASE</version>
 </dependency>
 ```
 
