@@ -116,7 +116,7 @@ Content-Type: text/html
 - 2xx : succès
 - 3xx : redirection
 - 4xx : erreur du client
-- 5xx : erreur su serveur
+- 5xx : erreur du serveur
 
 ----
 
