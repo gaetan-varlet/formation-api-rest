@@ -24,6 +24,7 @@ import com.querydsl.core.types.Predicate;
 
 import fr.insee.formationapirest.config.ApiPageable;
 import fr.insee.formationapirest.model.Vin;
+import fr.insee.formationapirest.repository.VinDao;
 import fr.insee.formationapirest.repository.VinRepository;
 import fr.insee.formationapirest.service.VinService;
 import io.swagger.annotations.Api;
@@ -37,6 +38,14 @@ public class VinController {
 	
 	@Autowired
 	VinService vinService;
+	
+	@Autowired
+	VinDao vinDao;
+	
+	@GetMapping("test")
+	public List<Vin> toto(){
+		return vinDao.test();
+	}
 	
 	@GetMapping
 	public Iterable<Vin> get(@QuerydslPredicate(root = Vin.class, bindings = VinRepository.class) Predicate predicate){
