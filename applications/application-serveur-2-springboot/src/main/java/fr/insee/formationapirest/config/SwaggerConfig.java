@@ -38,8 +38,11 @@ public class SwaggerConfig {
 	@Value("${formationapirest.keycloak.client.id}")
 	private String clientId;
 	
-	private static final String AUTH_SERVER = "https://auth.insee.test/auth/realms/agents-insee-interne/protocol/openid-connect/auth";
-	private static final String AUTH_SERVER_TOKEN_ENDPOINT = "https://auth.insee.test/auth/realms/agents-insee-interne/protocol/openid-connect/token";
+	@Value("${keycloak.auth-server-url}")
+	private String urlServeurKeycloak;
+	
+	private static final String AUTH_SERVER = "/realms/agents-insee-interne/protocol/openid-connect/auth";
+	private static final String AUTH_SERVER_TOKEN_ENDPOINT = "/realms/agents-insee-interne/protocol/openid-connect/token";
 	private static final String REALM = "agents-insee-interne";
 	
 	public static final String SECURITY_SCHEMA_OAUTH2 = "oauth2";
@@ -60,8 +63,8 @@ public class SwaggerConfig {
 			new Contact("équipe info", null, "gaetan.varlet@insee.fr"), "", "", Collections.emptyList());
 	
 	private OAuth securitySchema() {
-		final GrantType grantType = new AuthorizationCodeGrant(new TokenRequestEndpoint(AUTH_SERVER, clientId, null),
-				new TokenEndpoint(AUTH_SERVER_TOKEN_ENDPOINT, "access_token"));
+		final GrantType grantType = new AuthorizationCodeGrant(new TokenRequestEndpoint(urlServeurKeycloak + AUTH_SERVER, clientId, null),
+				new TokenEndpoint(urlServeurKeycloak + AUTH_SERVER_TOKEN_ENDPOINT, "access_token"));
 		final List<AuthorizationScope> scopes = new ArrayList<>();
 		scopes.add(new AuthorizationScope("sampleScope", "there must be at least one scope here"));
 		return new OAuth(SECURITY_SCHEMA_OAUTH2, scopes, Collections.singletonList(grantType));
