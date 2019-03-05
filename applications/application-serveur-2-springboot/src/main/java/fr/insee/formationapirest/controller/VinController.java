@@ -42,9 +42,9 @@ public class VinController {
 	@Autowired
 	VinDao vinDao;
 	
-	@GetMapping("test")
-	public List<Vin> toto(){
-		return vinDao.test();
+	@GetMapping("appellation")
+	public List<String> getListeAppellation(){
+		return vinDao.getListeAppellation();
 	}
 	
 	@GetMapping
