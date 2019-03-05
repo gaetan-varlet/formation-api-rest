@@ -114,6 +114,9 @@
 	<profiles>
 		<profile>
 			<id>local</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<properties>
 				<env>local</env>
 				<config.properties>local</config.properties>
