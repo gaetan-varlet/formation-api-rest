@@ -97,7 +97,7 @@ public class VinService {
 		// Création du writer openCSV qui va écrire dans le writer fourni en paramètre
 		ICSVWriter csvWriter = new CSVWriterBuilder(writer)
 				.withSeparator(';') // séparateur point-virgule (virgule par défaut)
-				.withQuoteChar(CSVWriter.NO_QUOTE_CHARACTER) // pas de caractères autour de chaque attribut (doubles quotes par défaut)
+				.withQuoteChar(CSVWriter.DEFAULT_QUOTE_CHARACTER) // caractère autour de chaque attribut (doubles quotes par défaut)
 				.build();
 		
 		listeAEcrire.forEach(vin -> {
