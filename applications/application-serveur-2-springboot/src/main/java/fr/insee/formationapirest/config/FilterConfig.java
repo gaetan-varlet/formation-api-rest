@@ -13,7 +13,7 @@ import com.github.ziplet.filter.compression.CompressingFilter;
 public class FilterConfig {
 	
 	
-	// Congifuration du filtre pour la gestion du CORS
+	// Configuration du filtre pour la gestion du CORS
 	@Bean
 	public FilterRegistrationBean<CorsFilter> corsFilter() {
 		CorsConfiguration config = new CorsConfiguration();
