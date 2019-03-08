@@ -16,10 +16,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class VinDao {
-
+	
 	@PersistenceContext
 	private EntityManager entityManager;
-
+	
 	@SuppressWarnings("unchecked")
 	public List<String> getListeAppellation() {
 		String sql = "select distinct appellation from formation.vin";
@@ -27,21 +27,18 @@ public class VinDao {
 		List<String> retour = query.getResultList();
 		return retour;
 	}
-
+	
 	public List<String> getListeAppellation2(){
 		List<String> retour = new ArrayList<>();
-		try {
-			Connection connection = ((EntityManagerFactoryInfo) entityManager.getEntityManagerFactory())
-					.getDataSource().getConnection();
-			String sql = "select distinct appellation from formation.vin";
-			PreparedStatement ps = connection.prepareStatement(sql);
-			ResultSet rs = ps.executeQuery();
+		String sql = "select distinct appellation from formation.vin";
+		try(
+				Connection connection = ((EntityManagerFactoryInfo) entityManager.getEntityManagerFactory())
+				.getDataSource().getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql);
+				ResultSet rs = ps.executeQuery();){
 			while(rs.next()){
 				retour.add(rs.getString("appellation"));
 			}
-			rs.close();
-			ps.close();
-			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new RuntimeException("erreur SQL : " + e.getMessage());
