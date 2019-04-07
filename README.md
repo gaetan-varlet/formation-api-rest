@@ -5,7 +5,7 @@
 ## TODO
 
 PARTIE CONSTRUCTION API
-- - sortir la partie queryDsl et EntityManager de la formation pour le mettre dans une formation Spring Data
+- sortir la partie queryDsl et EntityManager de la formation pour le mettre dans une formation Spring Data
 - faire partie multi-modules
 - faire partie spring boot actuator
 - faire partie spring boot cache
