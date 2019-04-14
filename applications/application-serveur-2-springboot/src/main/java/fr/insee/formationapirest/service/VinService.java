@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -81,16 +82,45 @@ public class VinService {
 	public Page<Vin> pageable(Pageable p) {
 		return vinRepository.findAll(p);
 	}
-	
-	protected boolean controleValiditeVin(Vin vin) {
-		if(vin.getChateau() == null || vin.getChateau().length()<1 || vin.getChateau().length()>50) {
+
+	protected boolean controleValiditeVinOLD(Vin vin) {
+		if (vin == null)
 			return false;
-		} else if(vin.getAppellation() == null || vin.getAppellation().length()<1 || vin.getAppellation().length()>50) {
+		if (!vin.getChateau().isPresent() || vin.getChateau().get().length() < 1 || vin.getChateau().get().length() > 50) {
 			return false;
-		} else if (vin.getPrix() != null && vin.getPrix() < 0) {
+		} else if (!vin.getAppellation().isPresent() || vin.getAppellation().get().length() < 1
+			|| vin.getAppellation().get().length() > 50) {
+			return false;
+		} else if (!vin.getPrix().isPresent() || vin.getPrix().get() < 0) {
 			return false;
 		}
 		return true;
+	}
+	
+	protected boolean controleValiditeVin(Vin vin) {
+		return Optional.ofNullable(vin)
+			.filter(this::isChateauValid)
+			.filter(this::isAppellationValid)
+			.filter(this::isPrixValid)
+			.isPresent();
+	}
+
+	protected boolean isChateauValid(Vin vin) {
+		return Optional.ofNullable(vin).flatMap(Vin::getChateau)
+			.filter(c -> c.length() >= 1 && c.length() <= 50)
+			.isPresent();
+	}
+
+	protected boolean isAppellationValid(Vin vin) {
+		return Optional.ofNullable(vin).flatMap(Vin::getAppellation)
+			.filter(a -> a.length() >= 1 && a.length() <= 50)
+			.isPresent();
+	}
+
+	protected boolean isPrixValid(Vin vin) {
+		return Optional.ofNullable(vin).flatMap(Vin::getPrix)
+			.filter(p -> p >= 0)
+			.isPresent();
 	}
 	
 	public void ecrireVinsDansCsv(Writer writer, List<Vin> listeAEcrire) throws IOException {
@@ -102,9 +132,9 @@ public class VinService {
 		
 		listeAEcrire.forEach(vin -> {
 			List<String> ligne = new ArrayList<>();
-			ligne.add(vin.getChateau());
-			ligne.add(vin.getAppellation());
-			ligne.add(String.valueOf(vin.getPrix()));
+			ligne.add(vin.getChateau().get());
+			ligne.add(vin.getAppellation().get());
+			ligne.add(String.valueOf(vin.getPrix().get()));
 			csvWriter.writeNext(ligne.toArray(new String[ligne.size()]));
 		});
 		csvWriter.close();
