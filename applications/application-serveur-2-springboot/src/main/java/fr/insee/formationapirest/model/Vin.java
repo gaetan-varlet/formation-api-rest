@@ -42,24 +42,24 @@ public class Vin {
 		this.id = id;
 	}
 
-	public Optional<String> getChateau() {
-		return Optional.ofNullable(chateau);
+	public String getChateau() {
+		return chateau;
 	}
 
 	public void setChateau(String chateau) {
 		this.chateau = chateau;
 	}
 
-	public Optional<String> getAppellation() {
-		return Optional.ofNullable(appellation);
+	public String getAppellation() {
+		return appellation;
 	}
 
 	public void setAppellation(String appellation) {
 		this.appellation = appellation;
 	}
 
-	public Optional<Double> getPrix() {
-		return Optional.ofNullable(prix);
+	public Double getPrix() {
+		return prix;
 	}
 
 	public void setPrix(Double prix) {

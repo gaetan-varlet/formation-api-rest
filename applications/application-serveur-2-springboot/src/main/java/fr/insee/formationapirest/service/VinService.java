@@ -27,11 +27,13 @@ public class VinService {
 	@Autowired
 	VinRepository vinRepository;
 	
-	public List<Vin> getAll(String appellation){
-		if(appellation != null) {
+	public List<Vin> findAll(String appellation){
+		Optional<String> optional = Optional.ofNullable(appellation);
+		if(optional.isPresent()) {
 			return vinRepository.findByAppellation(appellation);
+		} else {
+			return vinRepository.findAll();
 		}
-		return vinRepository.findAll();
 	}
 	
 	public Iterable<Vin> get(Predicate predicate){
@@ -82,20 +84,6 @@ public class VinService {
 	public Page<Vin> pageable(Pageable p) {
 		return vinRepository.findAll(p);
 	}
-
-	protected boolean controleValiditeVinOLD(Vin vin) {
-		if (vin == null)
-			return false;
-		if (!vin.getChateau().isPresent() || vin.getChateau().get().length() < 1 || vin.getChateau().get().length() > 50) {
-			return false;
-		} else if (!vin.getAppellation().isPresent() || vin.getAppellation().get().length() < 1
-			|| vin.getAppellation().get().length() > 50) {
-			return false;
-		} else if (!vin.getPrix().isPresent() || vin.getPrix().get() < 0) {
-			return false;
-		}
-		return true;
-	}
 	
 	protected boolean controleValiditeVin(Vin vin) {
 		return Optional.ofNullable(vin)
@@ -106,19 +94,19 @@ public class VinService {
 	}
 
 	protected boolean isChateauValid(Vin vin) {
-		return Optional.ofNullable(vin).flatMap(Vin::getChateau)
+		return Optional.ofNullable(vin.getChateau())
 			.filter(c -> c.length() >= 1 && c.length() <= 50)
 			.isPresent();
 	}
 
 	protected boolean isAppellationValid(Vin vin) {
-		return Optional.ofNullable(vin).flatMap(Vin::getAppellation)
+		return Optional.ofNullable(vin.getAppellation())
 			.filter(a -> a.length() >= 1 && a.length() <= 50)
 			.isPresent();
 	}
 
 	protected boolean isPrixValid(Vin vin) {
-		return Optional.ofNullable(vin).flatMap(Vin::getPrix)
+		return Optional.ofNullable(vin.getPrix())
 			.filter(p -> p >= 0)
 			.isPresent();
 	}
@@ -132,9 +120,9 @@ public class VinService {
 		
 		listeAEcrire.forEach(vin -> {
 			List<String> ligne = new ArrayList<>();
-			ligne.add(vin.getChateau().get());
-			ligne.add(vin.getAppellation().get());
-			ligne.add(String.valueOf(vin.getPrix().get()));
+			ligne.add(vin.getChateau());
+			ligne.add(vin.getAppellation());
+			ligne.add(String.valueOf(vin.getPrix()));
 			csvWriter.writeNext(ligne.toArray(new String[ligne.size()]));
 		});
 		csvWriter.close();

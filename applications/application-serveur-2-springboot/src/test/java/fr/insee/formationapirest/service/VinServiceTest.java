@@ -36,7 +36,7 @@ public class VinServiceTest {
 	
 	@Test
 	public void recupererTousLesVins() {
-		List<Vin> vinRetournes = vinService.getAll(null);
+		List<Vin> vinRetournes = vinService.findAll(null);
 		assertEquals(2, vinRetournes.size());
 		assertEquals("Château 1", vinRetournes.get(0).getChateau());
 	}

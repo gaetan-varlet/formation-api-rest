@@ -54,8 +54,8 @@ public class VinController {
 	
 	@ApiOperation(value = "Obtenir tous les vins, ou éventuellement uniquement les vins d'une appellation avec le paramètre appellation")
 	@RequestMapping(value="/all", method = RequestMethod.GET)
-	public List<Vin> getAll(@RequestParam(required=false) String appellation){
-		return vinService.getAll(appellation);
+	public List<Vin> findAll(@RequestParam(required=false) String appellation){
+		return vinService.findAll(appellation);
 	}
 	
 	@GetMapping("/csv")
@@ -69,7 +69,7 @@ public class VinController {
 		response.setContentType("text/csv"); 
 		response.setCharacterEncoding("UTF-8");
 		
-		vinService.ecrireVinsDansCsv(response.getWriter(), vinService.getAll(null));
+		vinService.ecrireVinsDansCsv(response.getWriter(), vinService.findAll(null));
 	}
 	
 	@ApiPageable
