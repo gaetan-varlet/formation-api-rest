@@ -1,7 +1,5 @@
 package fr.insee.formationapirest.model;
 
-import java.util.Optional;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
