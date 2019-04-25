@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -126,6 +127,12 @@ public class VinService {
 			csvWriter.writeNext(ligne.toArray(new String[ligne.size()]));
 		});
 		csvWriter.close();
+	}
+
+	@Cacheable("longService")
+	public boolean longService(int i) throws Exception{
+		Thread.sleep(2000);
+		return i % 2 == 0 ? true : false;
 	}
 	
 }

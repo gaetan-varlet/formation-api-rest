@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,8 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/vin")
 @Api(tags =  {"vin"} )
 public class VinController {
+
+	private static final Logger log = LoggerFactory.getLogger(VinController.class);
 	
 	@Autowired
 	VinService vinService;
@@ -102,6 +106,14 @@ public class VinController {
 	@RequestMapping (method = RequestMethod.PUT)
 	public Vin update(@RequestBody Vin vin){
 		return vinService.update(vin);
+	}
+
+	@GetMapping("long/{number}")
+	public boolean longFonction(@PathVariable int number) throws Exception {
+		log.info("avant long service");
+		boolean b = vinService.longService(number);
+		log.info("après long service");
+		return b;
 	}
 	
 }

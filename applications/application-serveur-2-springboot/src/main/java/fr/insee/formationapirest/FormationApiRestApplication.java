@@ -7,6 +7,7 @@ import org.keycloak.representations.AccessToken;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -15,6 +16,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 @SpringBootApplication
+@EnableCaching
 public class FormationApiRestApplication {
 	
 	private static final String NOM_FICHIER_PROPERTIES = "formation-api-rest";
