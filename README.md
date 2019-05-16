@@ -4,14 +4,17 @@
 
 ## TODO
 
-PARTIE CONSTRUCTION API
+PARTIE SPRING BOOT
+- tuto microservices :
+    - https://openclassrooms.com/fr/courses/4668056-construisez-des-microservices
+    - https://openclassrooms.com/fr/courses/4668216-optimisez-votre-architecture-microservices
+- désactiver keycloak avec le profil local : https://stackoverflow.com/questions/47861513/spring-boot-how-to-disable-keycloak
+- actuator :
+    - secure endpoints
+    - jmx vs http
 - sortir la partie queryDsl et EntityManager de la formation pour le mettre dans une formation Spring Data
-- faire partie multi-modules
-- faire partie spring boot actuator
-- faire partie spring boot cache
 - ordre du filtre spring security - keycloak ?
 - vérifier si on a besoin de toutes les variables dans la déclaration des profils
-- gestion du cache applicatif : faire une partie à ce sujet pour montrer comment faire
 - lire la doc de querydsl pour faire des requêtes de type group by
 
 PARTIE CONSOMMATION API avec RestTemplate :
