@@ -12,6 +12,7 @@ PARTIE SPRING BOOT
 - actuator :
     - secure endpoints
     - jmx vs http
+- surcharge des properties en ligne de commande une fois le jar/war créé
 - sortir la partie queryDsl et EntityManager de la formation pour le mettre dans une formation Spring Data
 - ordre du filtre spring security - keycloak ?
 - vérifier si on a besoin de toutes les variables dans la déclaration des profils
@@ -28,3 +29,4 @@ PARTIE CONSOMMATION API avec RestTemplate :
 - @Repository : cette annotation est appliquée à la classe afin d'indiquer à Spring qu'il s'agit d'une classe qui gère les données, ce qui nous permettra de profiter de certaines fonctionnalités comme les translations des erreurs. Nous y reviendrons.
 - @Service
 - @Component
+- @Resource
