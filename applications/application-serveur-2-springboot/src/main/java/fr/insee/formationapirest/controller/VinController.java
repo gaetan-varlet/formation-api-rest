@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.querydsl.core.types.Predicate;
 
 import fr.insee.formationapirest.config.ApiPageable;
@@ -39,59 +43,74 @@ import springfox.documentation.annotations.ApiIgnore;
 public class VinController {
 
 	private static final Logger log = LoggerFactory.getLogger(VinController.class);
-	
+
 	@Autowired
 	VinService vinService;
-	
+
 	@Autowired
 	VinDao vinDao;
-	
+
+	@GetMapping("filtre")
+	public MappingJacksonValue filtrageAttributs() {
+		List<Vin> vins = vinService.findAll(null);
+		// permet d'établir les règles de filtrage sur un Bean
+		SimpleBeanPropertyFilter monFiltre = SimpleBeanPropertyFilter.serializeAllExcept("prix");
+		// déclaration que les règles de filtrage que nous avons créées (monFiltre)
+		// peuvent s'appliquer à tous les Bean qui sont annotés avec monFiltreDynamique
+		FilterProvider listDeNosFiltres = new SimpleFilterProvider().addFilter("monFiltreDynamique", monFiltre);
+		// mise au format MappingJacksonValue de notre liste de vin
+		MappingJacksonValue produitsFiltres = new MappingJacksonValue(vins);
+		// application du filtre créé juste avant
+		produitsFiltres.setFilters(listDeNosFiltres);
+		return produitsFiltres;
+	}
+
 	@GetMapping("appellation")
 	public List<String> getListeAppellation(){
 		return vinDao.getListeAppellation();
 	}
-	
+
 	@GetMapping
 	public Iterable<Vin> get(@QuerydslPredicate(root = Vin.class, bindings = VinRepository.class) Predicate predicate){
 		return vinService.get(predicate);
 	}
-	
+
 	@ApiOperation(value = "Obtenir tous les vins, ou éventuellement uniquement les vins d'une appellation avec le paramètre appellation")
 	@RequestMapping(value="/all", method = RequestMethod.GET)
 	public List<Vin> findAll(@RequestParam(required=false) String appellation){
 		return vinService.findAll(appellation);
 	}
-	
+
 	@GetMapping("/csv")
 	public void getAllCsv(HttpServletResponse response) throws IOException{
 		String nomFichier = "ma-cave";
-		
+
 		// en-tête qui permet de préciser au navigateur s'il doit afficher le contenu (inline) ou le télécharger (attachment)
 		response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", nomFichier+".csv"));
 		// aide le navigateur à savoir quel logiciel peut ouvrir le type de contenu téléchargé
 		// et suggère un logiciel pour l'ouvrir une fois le téléchargement terminé
 		response.setContentType("text/csv"); 
 		response.setCharacterEncoding("UTF-8");
-		
+
 		vinService.ecrireVinsDansCsv(response.getWriter(), vinService.findAll(null));
 	}
-	
+
 	@ApiPageable
 	@RequestMapping(value="/pageable", method = RequestMethod.GET)
 	public Page<Vin> getAllPageable(@ApiIgnore Pageable p){
 		return vinService.pageable(p);
 	}
-	
+
 	@RequestMapping(value= "/{id}", method = RequestMethod.GET)
 	public Vin getById(@PathVariable Integer id){
 		return vinService.getById(id);
 	}
-	
+
 	@RequestMapping(value= "/{id}", method = RequestMethod.DELETE)
 	public void deleteById(@PathVariable Integer id){
 		vinService.deleteById(id);
 	}
-	
+
 	@RequestMapping (method = RequestMethod.POST)
 	public ResponseEntity<Void> add(@RequestBody Vin vin){
 		Vin vinAjoute =  vinService.add(vin);
@@ -102,7 +121,7 @@ public class VinController {
 				.toUri();
 		return ResponseEntity.created(location).build();
 	}
-	
+
 	@RequestMapping (method = RequestMethod.PUT)
 	public Vin update(@RequestBody Vin vin){
 		return vinService.update(vin);
@@ -115,5 +134,5 @@ public class VinController {
 		log.info("après long service");
 		return b;
 	}
-	
+
 }

@@ -8,9 +8,12 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+
 @Entity
 @Table(name = "vin")
 @XmlRootElement
+@JsonFilter("monFiltreDynamique")
 public class Vin {
 
 	@Id
