@@ -28,5 +28,3 @@ PARTIE CONSOMMATION API avec RestTemplate :
 - @Repository : cette annotation est appliquée à la classe afin d'indiquer à Spring qu'il s'agit d'une classe qui gère les données, ce qui nous permettra de profiter de certaines fonctionnalités comme les translations des erreurs. Nous y reviendrons.
 - @Service
 - @Component
-
-- ajouter une partie sur le filtrage des attributs (filtrage statique et dynamique) et tester ce qui ce passe avec le XML

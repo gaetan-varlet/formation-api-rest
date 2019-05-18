@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,9 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.querydsl.core.types.Predicate;
 
 import fr.insee.formationapirest.config.ApiPageable;
@@ -50,20 +46,6 @@ public class VinController {
 	@Autowired
 	VinDao vinDao;
 
-	@GetMapping("filtre")
-	public MappingJacksonValue filtrageAttributs() {
-		List<Vin> vins = vinService.findAll(null);
-		// définition des règles de filtrage sur un Bean
-		SimpleBeanPropertyFilter monFiltre = SimpleBeanPropertyFilter.serializeAllExcept("prix");
-		// déclaration des règles de filtrage que nous avons créées (monFiltre) en disant
-		// qu'elles s'appliquent à tous les Bean qui sont annotés avec monFiltreDynamique
-		FilterProvider listDeNosFiltres = new SimpleFilterProvider().addFilter("monFiltreDynamique", monFiltre);
-		// mise au format MappingJacksonValue de notre liste de vin
-		MappingJacksonValue produitsFiltres = new MappingJacksonValue(vins);
-		// application du filtre créé juste avant
-		produitsFiltres.setFilters(listDeNosFiltres);
-		return produitsFiltres;
-	}
 
 	@GetMapping("appellation")
 	public List<String> getListeAppellation(){
