@@ -53,10 +53,10 @@ public class VinController {
 	@GetMapping("filtre")
 	public MappingJacksonValue filtrageAttributs() {
 		List<Vin> vins = vinService.findAll(null);
-		// permet d'établir les règles de filtrage sur un Bean
+		// définition des règles de filtrage sur un Bean
 		SimpleBeanPropertyFilter monFiltre = SimpleBeanPropertyFilter.serializeAllExcept("prix");
-		// déclaration que les règles de filtrage que nous avons créées (monFiltre)
-		// peuvent s'appliquer à tous les Bean qui sont annotés avec monFiltreDynamique
+		// déclaration des règles de filtrage que nous avons créées (monFiltre) en disant
+		// qu'elles s'appliquent à tous les Bean qui sont annotés avec monFiltreDynamique
 		FilterProvider listDeNosFiltres = new SimpleFilterProvider().addFilter("monFiltreDynamique", monFiltre);
 		// mise au format MappingJacksonValue de notre liste de vin
 		MappingJacksonValue produitsFiltres = new MappingJacksonValue(vins);
