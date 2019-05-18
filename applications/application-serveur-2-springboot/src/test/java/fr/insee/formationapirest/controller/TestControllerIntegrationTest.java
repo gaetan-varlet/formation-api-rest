@@ -48,7 +48,7 @@ public class TestControllerIntegrationTest {
 	}
 	
 	@Test
-	@WithMockUser(roles="TOUCAN_ADMIN")
+	@WithMockUser(roles="ADMIN_TOUCAN")
 	public void DoitRecupererEnvironnement() throws Exception{
 		mvc.perform(get("/environnement"))
 		.andExpect(status().isOk())
