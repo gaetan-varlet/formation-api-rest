@@ -80,7 +80,7 @@ public class User {
 
 ----
 
-Création dun **package-info.java** pour lire la réponse XML :
+Création d'un fichier **package-info.java** pour lire la réponse XML :
 ```java
 @XmlSchema(
     namespace="http://schemas.datacontract.org/2004/07/FakeRestAPI.Web.Models",
