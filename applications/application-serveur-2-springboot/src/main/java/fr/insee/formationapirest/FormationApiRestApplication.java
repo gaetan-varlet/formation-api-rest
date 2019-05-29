@@ -52,7 +52,7 @@ public class FormationApiRestApplication {
 	
 	@Bean
 	@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-	// retourne le principal mis dans la requête par Keycloak ou un principal avec un "name" null sinon
+	// renvoie le principal mis dans la requête par Keycloak ou un principal avec un "name" null sinon
 	public Principal getPrincipal(HttpServletRequest httpRequest) {
 		return Optional.ofNullable(httpRequest.getUserPrincipal()).orElse(() -> null);
 	}
