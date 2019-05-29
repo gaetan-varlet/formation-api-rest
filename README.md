@@ -6,7 +6,6 @@
 
 PARTIE SPRING BOOT
 - tuto microservices : https://openclassrooms.com/fr/courses/4668216-optimisez-votre-architecture-microservices
-- désactiver keycloak avec le profil local : https://stackoverflow.com/questions/47861513/spring-boot-how-to-disable-keycloak
 - actuator :
     - secure endpoints
     - jmx vs http
