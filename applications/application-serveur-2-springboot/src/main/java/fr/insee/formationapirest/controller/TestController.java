@@ -1,6 +1,7 @@
 package fr.insee.formationapirest.controller;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.stream.Collectors;
 
 import org.keycloak.representations.AccessToken;
@@ -29,6 +30,9 @@ public class TestController {
 	
 	@Autowired
 	private AccessToken accessToken;
+	
+	@Autowired
+	private Principal principal;
 	
 	@RequestMapping(value="mon-nom", method = RequestMethod.GET)
 	public String getNom() {
@@ -71,5 +75,10 @@ public class TestController {
 			sb.append("Je n'ai pas de rôles.");
 		}
 		return sb.toString();
+	}
+	
+	@GetMapping("principal")
+	public String getPrincipal() {
+		return "Mon idep est " + principal.getName() + "."; 
 	}
 }

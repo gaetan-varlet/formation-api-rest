@@ -1,5 +1,8 @@
 package fr.insee.formationapirest;
 
+import java.security.Principal;
+import java.util.Optional;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.keycloak.KeycloakSecurityContext;
@@ -45,6 +48,13 @@ public class FormationApiRestApplication {
 		} else {
 			return new AccessToken();
 		} 
+	}
+	
+	@Bean
+	@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+	// retourne le principal mis dans la requête par Keycloak ou un principal avec un "name" null sinon
+	public Principal getPrincipal(HttpServletRequest httpRequest) {
+		return Optional.ofNullable(httpRequest.getUserPrincipal()).orElse(() -> null);
 	}
 	
 }
