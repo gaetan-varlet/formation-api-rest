@@ -81,4 +81,5 @@ public class TestController {
 	public String getPrincipal() {
 		return "Mon idep est " + principal.getName() + "."; 
 	}
+	
 }

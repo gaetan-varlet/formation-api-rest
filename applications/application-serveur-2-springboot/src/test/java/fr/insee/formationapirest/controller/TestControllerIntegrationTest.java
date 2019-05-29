@@ -93,4 +93,21 @@ public class TestControllerIntegrationTest {
 		.andExpect(content().string("Je m'appelle Toto"));
 	}
 	
+	@Test
+	public void DoitRetournerIdepSansIdep() throws Exception {
+		mvc.perform(get("/principal"))
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$",is("Mon idep est null.")))
+		;
+	}
+	
+	@Test
+	@WithMockUser(username="toto")
+	public void DoitRetournerIdepAvecIdep() throws Exception {
+		mvc.perform(get("/principal"))
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$",is("Mon idep est toto.")))
+		;
+	}
+	
 }
