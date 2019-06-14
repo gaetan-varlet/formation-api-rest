@@ -110,4 +110,21 @@ public class TestControllerIntegrationTest {
 		;
 	}
 	
+	@Test
+	@WithMockUser(roles="toto")
+	public void DoitValiderRole() throws Exception {
+		mvc.perform(get("/role/toto"))
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$",is(true)))
+		;
+	}
+	
+	@Test
+	public void DoitInvaliderRole() throws Exception {
+		mvc.perform(get("/role/toto"))
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$",is(false)))
+		;
+	}
+	
 }

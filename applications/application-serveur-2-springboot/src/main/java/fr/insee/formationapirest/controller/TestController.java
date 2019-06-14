@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessToken.Access;
 import org.slf4j.Logger;
@@ -11,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -80,6 +83,11 @@ public class TestController {
 	@GetMapping("principal")
 	public String getPrincipal() {
 		return "Mon idep est " + principal.getName() + "."; 
+	}
+	
+	@GetMapping("role/{role}")
+	public boolean getRole(HttpServletRequest request, @PathVariable String role) {
+		return request.isUserInRole(role);
 	}
 	
 }
