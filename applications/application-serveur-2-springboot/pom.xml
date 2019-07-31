@@ -120,19 +120,9 @@
 	<profiles>
 		<profile>
 			<id>local</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<properties>
 				<env>local</env>
 				<config.properties>local</config.properties>
-			</properties>
-		</profile>
-		<profile>
-			<id>dev</id>
-			<properties>
-				<env>dev</env>
-				<config.properties>dev</config.properties>
 			</properties>
 		</profile>
 	</profiles>
