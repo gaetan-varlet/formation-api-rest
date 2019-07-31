@@ -31,10 +31,11 @@ public class FormationApiRestApplication {
 	}
 	
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		// spring.config.location permet de définir les chemins où spring va chercher des fichiers de properties pour la prod pour le CEI
+		// spring.config.name permet de définir le nom du fichier de properties lu automatiquement par springboot sous src/main/resources
+		// spring.config.location permet de définir les chemins où spring va chercher des fichiers de properties à charger (ceux définis à la fin sont prioritaires)
 		return application.properties(
-				"spring.config.location=classpath:/,file:///${catalina.base}/webapps/formation.properties",
-				"spring.config.name="+NOM_FICHIER_PROPERTIES // définition de la property pour le foncitonnement sur les plateformes du CEI
+			"spring.config.location=classpath:/toucan.properties, file:${catalina.base}/webapps/formation.properties",
+				"spring.config.name="+NOM_FICHIER_PROPERTIES // définition de la property pour le fonctionnement sur les plateformes du CEI
 				).sources(FormationApiRestApplication.class);
 	}
 	

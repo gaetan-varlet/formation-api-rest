@@ -10,12 +10,14 @@
 	<files>
 		<file>
 			<source>target/ROOT.war</source>
+			<!-- renommage du ROOT.war en FORMATION.war -->
 			<destName>FORMATION.war</destName>
 		</file>
 		<file>
 			<!-- filtered = true permet de remplacer des champs variables de l'intérieur d'un fichier par leur valeur,
 			par exemple formation.version qui est une property maven que l'on souhaite récupérer dans une property -->
-			<source>src/main/resources/formation.properties</source>
+			<source>src/main/resources/prod.properties</source>
+			<destName>formation.properties</destName>
 			<filtered>true</filtered>
 		</file>
 		<file>
