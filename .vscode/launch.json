@@ -1,0 +1,20 @@
+{
+    "configurations": [
+
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - FormationApiRestApplication sans préciser de profil",
+            "request": "launch",
+            "mainClass": "fr.insee.formationapirest.FormationApiRestApplication",
+            "projectName": "application-serveur-2-springboot"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - FormationApiRestApplication avec le profil local",
+            "request": "launch",
+            "mainClass": "fr.insee.formationapirest.FormationApiRestApplication",
+            "projectName": "application-serveur-2-springboot",
+            "args": "--spring.profiles.active=local"
+        }
+    ]
+}

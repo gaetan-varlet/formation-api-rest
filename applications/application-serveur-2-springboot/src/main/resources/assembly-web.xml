@@ -10,14 +10,16 @@
 	<files>
 		<file>
 			<source>target/ROOT.war</source>
+			<destName>FORMATION.war</destName>
 		</file>
 		<file>
-			<source>src/main/resources/assembly/formation.properties</source>
+			<!-- filtered = true permet de remplacer des champs variables de l'intérieur d'un fichier par leur valeur,
+			par exemple formation.version qui est une property maven que l'on souhaite récupérer dans une property -->
+			<source>src/main/resources/formation.properties</source>
 			<filtered>true</filtered>
 		</file>
 		<file>
 			<source>src/main/resources/log4j2-cei.xml</source>
-			<filtered>true</filtered>
 		</file>
 	</files>
 

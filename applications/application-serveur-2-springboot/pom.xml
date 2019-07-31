@@ -170,7 +170,7 @@
 						</goals>
 						<configuration>
 							<descriptors>
-								<descriptor>src/main/resources/assembly/assembly-web.xml</descriptor>
+								<descriptor>src/main/resources/assembly-web.xml</descriptor>
 							</descriptors>
 							<finalName>formation-api</finalName>
 						</configuration>
