@@ -117,17 +117,6 @@
 
 	</dependencies>
 
-	<profiles>
-		<profile>
-			<id>local</id>
-			<properties>
-				<env>local</env>
-				<config.properties>local</config.properties>
-			</properties>
-		</profile>
-	</profiles>
-
-
 	<build>
 		<!-- permet le filtrage des properties afin de sélectionner le bon fichier 
 			suivant le profil -->
