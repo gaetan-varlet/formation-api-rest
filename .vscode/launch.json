@@ -1,6 +1,26 @@
 {
     "configurations": [
-
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - HttpRequestJava",
+            "request": "launch",
+            "mainClass": "request.HttpRequestJava",
+            "projectName": "application-client"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - HttpRequestRestTemplate",
+            "request": "launch",
+            "mainClass": "request.HttpRequestRestTemplate",
+            "projectName": "application-client"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - HttpRequestJerseyClient",
+            "request": "launch",
+            "mainClass": "request.HttpRequestJerseyClient",
+            "projectName": "application-client"
+        },
         {
             "type": "java",
             "name": "CodeLens (Launch) - FormationApiRestApplication sans préciser de profil",
