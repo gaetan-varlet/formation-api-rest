@@ -12,6 +12,7 @@ node_modules/
 css/reveal.min.css
 js/reveal.min.js
 
+logs/
 applications/**/target
 applications/**/.settings
 applications/**/.project
