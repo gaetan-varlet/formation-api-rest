@@ -40,7 +40,7 @@
             <AppenderRef ref="RollingFile" />
         </Root>
         <!-- LOG "com.example" at TRACE level -->
-        <Logger name="com.example" level="trace"></Logger>
+        <Logger name="fr.insee" level="trace"></Logger>
     </Loggers>
  
 </Configuration>

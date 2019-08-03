@@ -89,5 +89,16 @@ public class TestController {
 	public boolean getRole(HttpServletRequest request, @PathVariable String role) {
 		return request.isUserInRole(role);
 	}
+
+
+	@GetMapping("log")
+	public String testLog() {
+		log.trace("message TRACE");
+		log.debug("message DEBUG");
+		log.info("message INFO");
+		log.warn("message WARN");
+		log.error("message ERROR");
+		return "test de la log";
+	}
 	
 }
