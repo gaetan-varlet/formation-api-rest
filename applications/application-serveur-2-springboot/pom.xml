@@ -141,7 +141,7 @@
 			</resource>
 		</resources>
 
-		<!-->définit le nom du WAR< -->
+		<!-- définit le nom du WAR -->
 		<finalName>ROOT</finalName>
 		<plugins>
 			<plugin>
