@@ -10,6 +10,7 @@ import org.keycloak.representations.AccessToken;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
@@ -20,7 +21,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 @SpringBootApplication
 @EnableCaching
-public class FormationApiRestApplication {
+public class FormationApiRestApplication extends SpringBootServletInitializer {
 	
 	private static final String NOM_FICHIER_PROPERTIES = "formation-api-rest";
 	
@@ -35,8 +36,8 @@ public class FormationApiRestApplication {
 		// spring.config.location permet de définir les chemins où spring va chercher des fichiers de properties à charger (ceux définis à la fin sont prioritaires)
 		return application.properties(
 			"spring.config.location=classpath:/toucan.properties, file:${catalina.base}/webapps/formation.properties",
-				"spring.config.name="+NOM_FICHIER_PROPERTIES // définition de la property pour le fonctionnement sur les plateformes du CEI
-				).sources(FormationApiRestApplication.class);
+			"spring.config.name="+NOM_FICHIER_PROPERTIES // définition de la property pour le fonctionnement sur les plateformes du CEI
+			).sources(FormationApiRestApplication.class);
 	}
 	
 	@Bean

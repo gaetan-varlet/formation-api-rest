@@ -115,6 +115,13 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+
 		<!-- ajout de la dépendance pour JAXB suite au passage à Java 9+ qui ne l'inclut plus d'office -->
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
@@ -138,12 +145,8 @@
 		<finalName>ROOT</finalName>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
-					<warName>ROOT</warName>
-					<failOnMissingWebXml>false</failOnMissingWebXml>
-				</configuration>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
