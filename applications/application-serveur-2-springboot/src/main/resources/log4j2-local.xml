@@ -39,7 +39,7 @@
             <AppenderRef ref="Console" />
             <AppenderRef ref="RollingFile" />
         </Root>
-        <!-- LOG "com.example" at TRACE level -->
+        <!-- LOG "fr.insee" at TRACE level -->
         <Logger name="fr.insee" level="trace"></Logger>
     </Loggers>
  
