@@ -26,7 +26,7 @@ public class FormationApiRestApplication extends SpringBootServletInitializer {
 	private static final String NOM_FICHIER_PROPERTIES = "formation-api-rest";
 
 	public static void main(String[] args) {
-		// définition des property pour le local
+		// définition des system properties pour le local
 		System.setProperty("spring.config.name", NOM_FICHIER_PROPERTIES);
 		// properties pour savoir où s'enregistrent les logs
 		System.setProperty("dossierLog", "./logs");
