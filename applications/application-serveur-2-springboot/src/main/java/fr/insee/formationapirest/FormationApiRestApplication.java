@@ -28,6 +28,9 @@ public class FormationApiRestApplication extends SpringBootServletInitializer {
 	public static void main(String[] args) {
 		// définition de la property pour le local
 		System.setProperty("spring.config.name", NOM_FICHIER_PROPERTIES);
+		System.setProperty("log4j.skipJansi", "false"); //permet de colorer les logs sous Windows
+		// permet de rendre rendre asynchrone toutes les logs sans toucher au fichier de conf log4j2.xml
+		System.setProperty("Log4jContextSelector", "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
 		SpringApplication.run(FormationApiRestApplication.class, args);
 	}
 	

@@ -90,7 +90,6 @@ public class TestController {
 		return request.isUserInRole(role);
 	}
 
-
 	@GetMapping("log")
 	public String testLog() {
 		log.trace("message TRACE");
@@ -99,6 +98,14 @@ public class TestController {
 		log.warn("message WARN");
 		log.error("message ERROR");
 		return "test de la log";
+	}
+
+	@GetMapping("log-async")
+	public String testLogAsync(){
+		for(int i = 0; i < 100_000; i++){
+			log.info("test log async " + i);
+		}
+		return "test log async";
 	}
 	
 }

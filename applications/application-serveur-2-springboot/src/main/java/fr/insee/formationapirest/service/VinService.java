@@ -9,7 +9,6 @@ import java.util.Optional;
 import com.opencsv.CSVWriter;
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVWriter;
-import com.querydsl.core.types.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +38,6 @@ public class VinService {
 		} else {
 			return vinRepository.findAll();
 		}
-	}
-
-	public Iterable<Vin> get(Predicate predicate) {
-		return vinRepository.findAll(predicate);
 	}
 
 	public Vin getById(Integer id) {

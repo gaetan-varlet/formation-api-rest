@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,12 +21,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.querydsl.core.types.Predicate;
-
 import fr.insee.formationapirest.config.ApiPageable;
 import fr.insee.formationapirest.model.Vin;
 import fr.insee.formationapirest.repository.VinDao;
-import fr.insee.formationapirest.repository.VinRepository;
 import fr.insee.formationapirest.service.VinService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -52,13 +48,8 @@ public class VinController {
 		return vinDao.getListeAppellation();
 	}
 
-	@GetMapping
-	public Iterable<Vin> get(@QuerydslPredicate(root = Vin.class, bindings = VinRepository.class) Predicate predicate){
-		return vinService.get(predicate);
-	}
-
 	@ApiOperation(value = "Obtenir tous les vins, ou éventuellement uniquement les vins d'une appellation avec le paramètre appellation")
-	@RequestMapping(value="/all", method = RequestMethod.GET)
+	@RequestMapping(method = RequestMethod.GET)
 	public List<Vin> findAll(@RequestParam(required=false) String appellation){
 		return vinService.findAll(appellation);
 	}
