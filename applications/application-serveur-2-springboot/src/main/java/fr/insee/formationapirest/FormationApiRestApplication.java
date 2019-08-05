@@ -24,11 +24,15 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class FormationApiRestApplication extends SpringBootServletInitializer {
 	
 	private static final String NOM_FICHIER_PROPERTIES = "formation-api-rest";
-	
+
 	public static void main(String[] args) {
-		// définition de la property pour le local
+		// définition des property pour le local
 		System.setProperty("spring.config.name", NOM_FICHIER_PROPERTIES);
-		System.setProperty("log4j.skipJansi", "false"); //permet de colorer les logs sous Windows
+		// properties pour savoir où s'enregistrent les logs
+		System.setProperty("dossierLog", "./logs");
+		System.setProperty("nomFichierLog", "formation-api-rest");
+		//permet de colorer les logs sous Windows
+		System.setProperty("log4j.skipJansi", "false");
 		// permet de rendre rendre asynchrone toutes les logs sans toucher au fichier de conf log4j2.xml
 		System.setProperty("Log4jContextSelector", "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
 		SpringApplication.run(FormationApiRestApplication.class, args);
