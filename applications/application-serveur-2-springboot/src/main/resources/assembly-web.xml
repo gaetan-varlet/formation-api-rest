@@ -21,7 +21,7 @@
 			<filtered>true</filtered>
 		</file>
 		<file>
-			<source>src/main/resources/log4j2-cei.xml</source>
+			<source>src/main/resources/log4j2.xml</source>
 		</file>
 	</files>
 
