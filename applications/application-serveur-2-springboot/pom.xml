@@ -16,7 +16,6 @@
 	<description>Formation API Rest : API en Spring Boot</description>
 	<packaging>war</packaging>
 
-
 	<properties>
 		<formation.version>2.0</formation.version>
 		<java.version>11</java.version>
@@ -118,13 +117,10 @@
 			<artifactId>disruptor</artifactId>
 			<version>3.3.6</version>
 		</dependency>
-				
-		
 	</dependencies>
 
 	<build>
-		<!-- permet le filtrage des properties afin de sélectionner le bon fichier 
-			suivant le profil -->
+		<!-- permet d'injecter des properties Maven dans le fichier de properties de l'application -->
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
