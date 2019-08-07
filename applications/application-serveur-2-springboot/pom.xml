@@ -99,6 +99,13 @@
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<!-- permet un redémarrage rapide du serveur quand un fichier du classpath change.
+		devtools est désactivé automatiquement quand l'application est exécutée de manière packagé (java -jar...) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
+		</dependency>
 		<!-- ajout de la dépendance pour JAXB suite au passage à Java 9+ qui ne l'inclut plus d'office -->
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
