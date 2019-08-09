@@ -15,20 +15,22 @@ import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class VinDao {
+public class VinRepositoryCustomImpl implements VinRepositoryCustom {
 	
 	@PersistenceContext
 	private EntityManager entityManager;
 	
+	@Override
 	@SuppressWarnings("unchecked")
-	public List<String> getListeAppellation() {
+	public List<String> getListeAppellationJpa() {
 		String sql = "select distinct appellation from formation.vin";
 		Query query = entityManager.createNativeQuery(sql);
 		List<String> retour = query.getResultList();
 		return retour;
 	}
 	
-	public List<String> getListeAppellation2(){
+	@Override
+	public List<String> getListeAppellationJdbc() {
 		List<String> retour = new ArrayList<>();
 		String sql = "select distinct appellation from formation.vin";
 		try(

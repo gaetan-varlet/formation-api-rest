@@ -23,7 +23,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import fr.insee.formationapirest.config.ApiPageable;
 import fr.insee.formationapirest.model.Vin;
-import fr.insee.formationapirest.repository.VinDao;
 import fr.insee.formationapirest.service.VinService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,13 +38,9 @@ public class VinController {
 	@Autowired
 	VinService vinService;
 
-	@Autowired
-	VinDao vinDao;
-
-
 	@GetMapping("appellation")
 	public List<String> getListeAppellation(){
-		return vinDao.getListeAppellation();
+		return vinService.getListeAppellation();
 	}
 
 	@ApiOperation(value = "Obtenir tous les vins, ou éventuellement uniquement les vins d'une appellation avec le paramètre appellation")
@@ -88,10 +83,10 @@ public class VinController {
 	public ResponseEntity<Void> add(@RequestBody Vin vin){
 		Vin vinAjoute =  vinService.add(vin);
 		URI location = ServletUriComponentsBuilder
-				.fromCurrentRequest()
-				.path("/{id}")
-				.buildAndExpand(vinAjoute.getId())
-				.toUri();
+			.fromCurrentRequest()
+			.path("/{id}")
+			.buildAndExpand(vinAjoute.getId())
+			.toUri();
 		return ResponseEntity.created(location).build();
 	}
 

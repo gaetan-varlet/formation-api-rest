@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import fr.insee.formationapirest.model.Vin;
 
 @Repository
-public interface VinRepository extends JpaRepository<Vin, Integer> {
+public interface VinRepository extends JpaRepository<Vin, Integer>, VinRepositoryCustom {
 
     List<Vin> findByAppellation(String appellation);
 

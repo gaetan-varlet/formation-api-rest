@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - FormationApiRestApplication sans profil",
+            "request": "launch",
+            "mainClass": "fr.insee.formationapirest.FormationApiRestApplication",
+            "projectName": "application-serveur-2-springboot"
+        }
+    ]
+}

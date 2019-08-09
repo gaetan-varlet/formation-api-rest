@@ -29,7 +29,11 @@ public class VinService {
 	private static final Logger log = LoggerFactory.getLogger(VinService.class);
 
 	@Autowired
-	VinRepository vinRepository;
+	private VinRepository vinRepository;
+
+	public List<String> getListeAppellation(){
+		return vinRepository.getListeAppellationJpa();
+	}
 
 	public List<Vin> findAll(String appellation) {
 		Optional<String> optional = Optional.ofNullable(appellation);
