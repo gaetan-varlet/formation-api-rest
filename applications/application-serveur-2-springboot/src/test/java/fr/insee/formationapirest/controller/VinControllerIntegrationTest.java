@@ -21,13 +21,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fr.insee.formationapirest.FormationApiRestApplication;
 import fr.insee.formationapirest.model.Vin;
 
 //indique qui exécute les tests
 @RunWith(SpringRunner.class)
 // lance l'application complète sur un port
-@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = FormationApiRestApplication.class)
+@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 // précise le nom du fichier de properties s'il est différent du nom par défaut
 @TestPropertySource(locations = "classpath:formation-api-rest.properties")
