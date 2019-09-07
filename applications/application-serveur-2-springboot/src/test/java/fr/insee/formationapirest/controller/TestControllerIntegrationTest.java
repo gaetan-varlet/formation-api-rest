@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.io.FileInputStream;
+import java.io.InputStream;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,9 +83,9 @@ public class TestControllerIntegrationTest {
 	
 	@Test
 	public void uploadFichier2() throws Exception{
-		
-		FileInputStream fis = new FileInputStream("src/test/resources/toto.txt");
-		MockMultipartFile multipartFile = new MockMultipartFile("multipartfile", fis);
+
+		InputStream inputSteam = getClass().getClassLoader().getResourceAsStream("toto.txt");
+		MockMultipartFile multipartFile = new MockMultipartFile("multipartfile", inputSteam);
 		
 		mvc.perform(multipart("/upload")
 				.file(multipartFile))

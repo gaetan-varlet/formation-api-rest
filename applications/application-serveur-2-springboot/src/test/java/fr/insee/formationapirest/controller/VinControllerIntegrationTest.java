@@ -44,7 +44,7 @@ public class VinControllerIntegrationTest {
 	
 	@Test
 	public void DoitRecupererTousLesVins() throws Exception{
-		mvc.perform(get("/vin/all"))
+		mvc.perform(get("/vin"))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.length()",is(4)))
 		.andExpect(jsonPath("$.[0].chateau",is("Château Margaux")))
