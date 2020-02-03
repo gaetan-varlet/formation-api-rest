@@ -48,11 +48,12 @@ public class HttpRequestHttpClient {
 		System.out.println(response.body()); // le User en XML ou JSON
 		// même chose avec récupération du body dans un InputStream
 		HttpResponse<InputStream> responseStream = httpClient.send(httpRequest, BodyHandlers.ofInputStream());
-		if ("application/xml".equals(accept)) {
+		String contentType = responseStream.headers().firstValue("Content-Type").get();
+		if (contentType.contains("application/xml")) {
 			JAXBContext jc = JAXBContext.newInstance(User.class);
 			User user = (User) jc.createUnmarshaller().unmarshal(responseStream.body());
 			System.out.println(user); // User [id=1, userName=User 1, password=Password1]
-		} else if ("application/json".equals(accept)) {
+		} else if (contentType.contains("application/json")) {
 			ObjectMapper mapper = new ObjectMapper();
 			User user = mapper.readValue(responseStream.body(), User.class);
 			System.out.println(user); // User [id=1, userName=User 1, password=Password1]
