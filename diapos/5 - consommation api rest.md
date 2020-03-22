@@ -266,12 +266,13 @@ System.out.println(LocalDateTime.now()); // 16:03:28.319822
 
 ----
 
-### Requêtes vers API sécurisée en mode Basic
+### Requête vers API sécurisée en mode Basic
 
 TODO
 
+
 ----
 
-### Requêtes vers API sécurisée en mode Bearer
+### Requête vers API sécurisée en mode Bearer
 
 TODO
