@@ -263,13 +263,13 @@ for (CompletableFuture<HttpResponse<String>> completableFuture : cfResponses) {
 }
 System.out.println(LocalDateTime.now()); // 16:03:28.319822
 ```
----
+----
 
 ### Requêtes vers API sécurisée en mode Basic
 
 TODO
 
----
+----
 
 ### Requêtes vers API sécurisée en mode Bearer
 
