@@ -8,8 +8,8 @@ Un service web est une technologie permettant à des applications de dialoguer �
 
 Une **API REST**, pour *REpresentational State Transfer*,  est une API basée sur le protocole **HTTP**, où chaque ressource est accessible via un identifiant unique (URI).
 
-Exemple : [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
-     - obtenir la liste des utilisateurs : [https://jsonplaceholder.typicode.com/users](https://jsonplaceholder.typicode.com/users)
+Exemple : [JSONPlaceholder](https://jsonplaceholder.typicode.com/)  
+Obtenir la liste des utilisateurs : [https://jsonplaceholder.typicode.com/users](https://jsonplaceholder.typicode.com/users)
 
 ----
 
