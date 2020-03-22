@@ -39,7 +39,8 @@ public class HttpRequestHttpClient {
 	public static void requeteGetSynchroneXmlJson(String accept) throws Exception {
 		// requête en GET avec réponse en XML ou JSON que l'on récupère dans un String
 		HttpClient httpClient = HttpClient.newBuilder()
-				.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080))).build();
+			.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
+			.build();
 		HttpRequest httpRequest = HttpRequest.newBuilder().header("Accept", accept)
 				.uri(URI.create("http://fakerestapi.azurewebsites.net/api/Users/1")).GET().build();
 		HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofString());
@@ -89,7 +90,8 @@ public class HttpRequestHttpClient {
 
 	public static void uneRequeteGetAsynchrone() throws Exception {
 		HttpClient httpClient = HttpClient.newBuilder()
-				.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080))).build();
+			.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
+			.build();
 		HttpRequest httpRequest = HttpRequest.newBuilder().header("Accept", "application/json")
 				.uri(URI.create("http://fakerestapi.azurewebsites.net/api/Users/1")).GET().build();
 		System.out.println(LocalDateTime.now()); // 15:44:19.690822
@@ -104,7 +106,8 @@ public class HttpRequestHttpClient {
 
 	public static void multiplesRequetesGetAsynchrone() throws Exception {
 		HttpClient httpClient = HttpClient.newBuilder()
-				.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080))).build();
+			.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
+			.build();
 		List<String> urls = List.of(
 			"http://fakerestapi.azurewebsites.net/api/Users/1",
 			"http://fakerestapi.azurewebsites.net/api/Users/2",

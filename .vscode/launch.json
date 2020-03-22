@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - HttpRequestHttpClient",
+            "request": "launch",
+            "mainClass": "request.HttpRequestHttpClient",
+            "projectName": "application-client"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - HttpRequestJava",
             "request": "launch",
             "mainClass": "request.HttpRequestJava",

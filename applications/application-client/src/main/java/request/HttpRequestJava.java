@@ -78,6 +78,7 @@ public class HttpRequestJava {
 		while ((line=reader.readLine()) != null) {
 			System.out.println(line);
 		}
+		reader.close();
 		connection.disconnect();
 	}
 

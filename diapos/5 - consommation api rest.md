@@ -28,7 +28,7 @@
 
 - sans bibliothèque en utilisant une **HttpURLConnection** et en lisant la réponse dans un **InputStream**, puis en utlisant **JAXB** pour lire les réponses XML et **Jackson** pour lire les réponses JSON
 - avec HttpClient de Java 11
-- avec des bibliothèques : OkHTTP, Jersey Client, Rest Template...
+- avec des bibliothèques : OkHTTP, Jersey Client, Web Client...
 
 ----
 
@@ -147,6 +147,7 @@ String line = null;
 while ((line=reader.readLine()) != null) {
 	System.out.println(line);
 }
+reader.close();
 connection.disconnect();
 ```
 
@@ -158,7 +159,8 @@ connection.disconnect();
 public static void requeteGetSynchroneXmlJson(String accept) throws Exception {
 	// requête en GET avec réponse en XML ou JSON que l'on récupère dans un String
 	HttpClient httpClient = HttpClient.newBuilder()
-			.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080))).build();
+			.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
+			.build();
 	HttpRequest httpRequest = HttpRequest.newBuilder().header("Accept", accept)
 			.uri(URI.create("http://fakerestapi.azurewebsites.net/api/Users/1")).GET().build();
 	HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofString());
@@ -217,7 +219,8 @@ while ((line=reader.readLine()) != null) {
 
 ```java
 HttpClient httpClient = HttpClient.newBuilder()
-		.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080))).build();
+		.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
+		.build();
 HttpRequest httpRequest = HttpRequest.newBuilder().header("Accept", "application/json")
 		.uri(URI.create("http://fakerestapi.azurewebsites.net/api/Users/1")).GET().build();
 System.out.println(LocalDateTime.now()); // 15:44:19.690822
@@ -236,7 +239,8 @@ System.out.println(response.body()); // le User en XML ou JSON
 
 ```java
 HttpClient httpClient = HttpClient.newBuilder()
-		.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080))).build();
+		.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
+		.build();
 List<String> urls = List.of(
 	"http://fakerestapi.azurewebsites.net/api/Users/1",
 	"http://fakerestapi.azurewebsites.net/api/Users/2",
@@ -259,73 +263,14 @@ for (CompletableFuture<HttpResponse<String>> completableFuture : cfResponses) {
 }
 System.out.println(LocalDateTime.now()); // 16:03:28.319822
 ```
+---
 
-----
+### Requêtes vers API sécurisée en mode Basic
 
-### Requête HTTP GET avec RestTemplate (1)
+TODO
 
-```xml
-<dependency>
-	<groupId>org.springframework</groupId>
-	<artifactId>spring-web</artifactId>
-	<version>5.1.6.RELEASE</version>
-</dependency>
-```
+---
 
-```java
-String url = "http://fakerestapi.azurewebsites.net/api/Users/1";
+### Requêtes vers API sécurisée en mode Bearer
 
-System.out.println("Demande de la réponse sous forme de String (que l'on récupère au format JSON)");
-RestTemplate restTemplate = new RestTemplate();
-ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-System.out.println(response.getStatusCode()); // 200 OK
-System.out.println(response.getBody()); // {"ID":1,"UserName":"User 1","Password":"Password1"}
-System.out.println(response.getHeaders().getContentType()); // application/json;charset=utf-8
-ObjectMapper mapper = new ObjectMapper();
-User user = mapper.readValue(response.getBody(), User.class);
-System.out.println(user); // User [id=1, userName=User 1, password=Password1]
-System.out.println();
-```
-
-----
-
-### Requête HTTP GET avec RestTemplate (2)
-
-```java
-System.out.println("Demande de la réponse sous forme de String au format XML");
-HttpHeaders headers = new HttpHeaders();
-headers.set("Accept", "application/xml");
-HttpEntity<String> entity = new HttpEntity<String>(headers);
-restTemplate = new RestTemplate();
-response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-JAXBContext jc = JAXBContext.newInstance(User.class);
-User userXml = (User) jc.createUnmarshaller().unmarshal(new StringReader(response.getBody()));
-System.out.println(response.getStatusCode()); // 200 OK
-System.out.println(response.getBody()); // <User xmlns ...
-System.out.println(response.getHeaders().getContentType()); // application/xml;charset=utf-8
-System.out.println(userXml); // User [id=1, userName=User 1, password=Password1]
-System.out.println();
-
-System.out.println("Demande de la réponse sous forme d'objet User");
-restTemplate = new RestTemplate();
-user = restTemplate.getForObject(url, User.class);
-System.out.println(user);
-```
-
-----
-
-### Requête HTTP POST avec RestTemplate
-
-```java
-String url = "http://fakerestapi.azurewebsites.net/api/Users";
-
-User user = new User();
-user.setUserName("toto");
-user.setPassword("azerty");
-System.out.println(user);
-
-RestTemplate restTemplate = new RestTemplate();
-HttpEntity<User> request = new HttpEntity<>(user);
-User userResponse = restTemplate.postForObject(url, request, User.class);
-System.out.println(userResponse);
-```
+TODO
