@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.stream.Collectors;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 
 import org.keycloak.representations.AccessToken;
@@ -51,6 +52,12 @@ public class TestController {
 	public String helloWorld() {
 		log.info("passage dans le controller helloWorld");
 		return "Hello World !";
+	}
+
+	@RolesAllowed("ADMIN_TOUCAN")
+	@GetMapping(value="hello-secured")
+	public String helloWorldSecured() {
+		return "Hello World sécurisé !";
 	}
 	
 	@RequestMapping(value="/upload", method = RequestMethod.POST)
