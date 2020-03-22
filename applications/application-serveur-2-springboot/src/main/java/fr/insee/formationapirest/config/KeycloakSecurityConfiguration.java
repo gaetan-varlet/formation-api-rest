@@ -1,22 +1,16 @@
 package fr.insee.formationapirest.config;
 
-
-
-import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
-import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
+import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
-import org.keycloak.adapters.springsecurity.management.HttpSessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,42 +22,40 @@ import org.springframework.security.web.authentication.preauth.x509.X509Authenti
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 
-// Tuto pour mise en place :
-// https://blog.ineat-conseil.fr/2017/12/securisez-vos-apis-spring-avec-keycloak-3-utilisation-des-connecteurs-spring-de-keycloak/
+public class KeycloakSecurityConfiguration {
 
-public class SpringKeycloakSecurityConfiguration {
-	
-	@Profile("!local")
+	// bug avec la montée de version de keycloak-spring-boot-starter à partir de la version 7.0.0
+	// La découverte automatique de la configuration du Keycloak à partir du fichier de properties ne fonctionne pas
+	// Il faut déclarer un KeycloakSpringBootConfigResolver dans une classe de configuration à part
+	// https://stackoverflow.com/questions/57787768/issues-running-example-keycloak-spring-boot-app
 	@Configuration
-	@EnableWebSecurity
-	@ConditionalOnProperty(name = "keycloak.enabled", havingValue = "true", matchIfMissing = true)
-	@ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
+	public static class KeycloakConfig {
+		@Bean
+		public KeycloakSpringBootConfigResolver keycloakConfigResolver() {
+			return new KeycloakSpringBootConfigResolver();
+		}
+	}
+	
+	@ConditionalOnProperty(name = "keycloak.enabled", havingValue = "true")
+	// @KeycloakConfiguration englobe 3 annotations : @Configuration, @EnableWebSecurity et @ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
+	@KeycloakConfiguration
+	@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 	public static class KeycloakConfigurationAdapter extends KeycloakWebSecurityConfigurerAdapter {
 		
 		@Bean
 		@Override
-		@ConditionalOnMissingBean(HttpSessionManager.class)
-		protected HttpSessionManager httpSessionManager() {
-			return new HttpSessionManager(); // permet de gérer l'erreur de doublon du bean httpSessionManager
-		}
-		
-		@Bean
-		@Override
 		protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-			return new NullAuthenticatedSessionStrategy(); // required for bearer-only applications
+			// dans le cadre d'une API, nous ne voulons pas de stratégie d'authentification de session (keycloak.bearer-only=true)
+			return new NullAuthenticatedSessionStrategy();
 		}
 		
 		@Autowired
 		public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 			KeycloakAuthenticationProvider keycloakAuthenticationProvider = keycloakAuthenticationProvider();
-			// simple Authority Mapper to avoid ROLE_
+			// SimpleAuthorityMapper évite que les rôles soient préfixés par "ROLE_"
 			keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(new SimpleAuthorityMapper());
+			// enregistrement de Keycloak comme fournisseur d'authentification auprès de Spring Security
 			auth.authenticationProvider(keycloakAuthenticationProvider);
-		}
-		
-		@Bean
-		public KeycloakConfigResolver KeycloakConfigResolver() {
-			return new KeycloakSpringBootConfigResolver();
 		}
 		
 		@Override
@@ -90,7 +82,7 @@ public class SpringKeycloakSecurityConfiguration {
 		}
 	}
 	
-	@Profile("local")
+	@ConditionalOnProperty(name = "keycloak.enabled", havingValue = "false")
 	@Configuration
 	@EnableWebSecurity
 	public static class KeycloakEnLocal extends WebSecurityConfigurerAdapter {
@@ -104,6 +96,6 @@ public class SpringKeycloakSecurityConfiguration {
 		@Override
 		public void configure(WebSecurity web) throws Exception {
 			web.ignoring().antMatchers("/**");
-		}	
+		}
 	}
 }
