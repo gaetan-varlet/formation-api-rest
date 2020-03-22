@@ -135,7 +135,7 @@ public class HttpRequestHttpClient {
 	}
 
 	public static void requeteGetSynchroneWithBasicAuth() throws Exception {
-		String idMdp = "id" + ":" + "mdp";
+		String idMdp = "ID" + ":" + "MDP";
 		HttpClient httpClient = HttpClient.newBuilder()
 			.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
 			.build();
