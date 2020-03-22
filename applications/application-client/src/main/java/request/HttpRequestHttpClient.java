@@ -14,6 +14,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -34,6 +35,8 @@ public class HttpRequestHttpClient {
 		// requetePostSynchroneJson();
 		// uneRequeteGetAsynchrone();
 		multiplesRequetesGetAsynchrone();
+		// requeteGetSynchroneWithBasicAuth();
+		// requeteGetSynchroneWithBearerAuth();
 	}
 
 	public static void requeteGetSynchroneXmlJson(String accept) throws Exception {
@@ -129,6 +132,35 @@ public class HttpRequestHttpClient {
 			System.out.println(completableFuture.join().body());
 		}
 		System.out.println(LocalDateTime.now()); // 16:03:28.319822
+	}
+
+	public static void requeteGetSynchroneWithBasicAuth() throws Exception {
+		String idMdp = "id" + ":" + "mdp";
+		HttpClient httpClient = HttpClient.newBuilder()
+			.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
+			.build();
+		HttpRequest httpRequest = HttpRequest.newBuilder()
+			.header("Accept", "application/json")
+			.header("Authorization", "Basic " + Base64.getEncoder().encodeToString(idMdp.getBytes()))
+			.uri(URI.create("URL_API")).GET().build();
+		HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofString());
+		System.out.println(response.statusCode());
+		System.out.println(response.headers().allValues("content-type"));
+		System.out.println(response.body());
+	}
+
+	public static void requeteGetSynchroneWithBearerAuth()throws Exception {
+		HttpClient httpClient = HttpClient.newBuilder()
+			.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
+			.build();
+		HttpRequest httpRequest = HttpRequest.newBuilder()
+			.header("Accept", "application/json")
+			.header("Authorization", "Bearer " + "CONTENU_BEARER")
+			.uri(URI.create("URL_API")).GET().build();
+		HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofString());
+		System.out.println(response.statusCode());
+		System.out.println(response.headers().allValues("content-type"));
+		System.out.println(response.body());
 	}
 
 }

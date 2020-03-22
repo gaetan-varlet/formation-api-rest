@@ -268,11 +268,35 @@ System.out.println(LocalDateTime.now()); // 16:03:28.319822
 
 ### Requête vers API sécurisée en mode Basic
 
-TODO
-
+```java
+String idMdp = "id" + ":" + "mdp";
+HttpClient httpClient = HttpClient.newBuilder()
+	.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
+	.build();
+HttpRequest httpRequest = HttpRequest.newBuilder()
+	.header("Accept", "application/json")
+	.header("Authorization", "Basic " + Base64.getEncoder().encodeToString(idMdp.getBytes()))
+	.uri(URI.create("URL_API")).GET().build();
+HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofString());
+System.out.println(response.statusCode());
+System.out.println(response.headers().allValues("content-type"));
+System.out.println(response.body());
+```
 
 ----
 
 ### Requête vers API sécurisée en mode Bearer
 
-TODO
+```java
+HttpClient httpClient = HttpClient.newBuilder()
+	.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
+	.build();
+HttpRequest httpRequest = HttpRequest.newBuilder()
+	.header("Accept", "application/json")
+	.header("Authorization", "Bearer " + "CONTENU_BEARER")
+	.uri(URI.create("URL_API")).GET().build();
+HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofString());
+System.out.println(response.statusCode());
+System.out.println(response.headers().allValues("content-type"));
+System.out.println(response.body());
+```
