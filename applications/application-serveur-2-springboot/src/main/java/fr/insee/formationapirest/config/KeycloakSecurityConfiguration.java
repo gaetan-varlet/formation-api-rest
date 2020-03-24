@@ -39,6 +39,7 @@ public class KeycloakSecurityConfiguration {
 	@ConditionalOnProperty(name = "keycloak.enabled", havingValue = "true")
 	// @KeycloakConfiguration englobe 3 annotations : @Configuration, @EnableWebSecurity et @ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
 	@KeycloakConfiguration
+	// @EnableGlobalMethodSecurity permet d'activer la gestion de la sécurité par annotation
 	@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 	public static class KeycloakConfigurationAdapter extends KeycloakWebSecurityConfigurerAdapter {
 		
