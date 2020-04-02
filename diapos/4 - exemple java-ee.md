@@ -4,7 +4,7 @@
 
 ## Création d'une application web classique avec Maven
 
-- créez un nouveau projet maven en choisissant l'option "skip archetype" et packaging "war"
+- créez un nouveau projet maven en choisissant l'option "skip archetype" et packaging "war", ou avec la commande maven : `mvn archetype:generate -DgroupId=fr.insee.junit4 -DartifactId=junit4 -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false`
 - créez un fichier **web.xml** dans le dossier *src/main/webapp/WEB-INF/*
 ```xml
 <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
@@ -17,22 +17,29 @@
 
 ----
 
-- passez en Java 8 et ajoutez l'API Servlet dans le **pom.xml**
+- passez en Java 11 et ajoutez l'API Servlet dans le **pom.xml**
 
 ```xml
-	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-	</properties>
-
-	<dependencies>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
+<dependencies>
+	<dependency>
+		<groupId>javax.servlet</groupId>
+		<artifactId>javax.servlet-api</artifactId>
+		<version>4.0.1</version>
+		<scope>provided</scope>
+	</dependency>
+</dependencies>
+<build>
+	<plugins>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>3.8.1</version>
+			<configuration>
+				<release>11</release>
+			</configuration>
+		</plugin>
+	</plugins>
+</build>
 ```
 
 ----
@@ -83,7 +90,7 @@ public class CalculAvecJspServlet extends HttpServlet {
 </html>
 ```
 
-- déployez le projet à la racine de votre Tomcat 8 et appellez l'URL [http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4](http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4)
+- déployez le projet à la racine de votre Tomcat 9 et appellez l'URL [http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4](http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4)
 
 ----
 

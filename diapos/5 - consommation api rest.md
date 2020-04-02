@@ -59,7 +59,7 @@ réponse en XML :
 
 ----
 
-Création d'un projet Maven en java 8 avec la dépendence **jackson-databind**, et création d'un Bean **User** :
+Création d'un projet Maven en Java 11 avec la dépendence **jackson-databind**, et création d'un Bean **User** :
 ```java
 @XmlRootElement(name = "User")
 @XmlAccessorType(XmlAccessType.FIELD)
