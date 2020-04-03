@@ -34,18 +34,14 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig {
-	
+
+	private String SECURITY_SCHEMA_OAUTH2 = "oauth2";
 	@Value("${formationapirest.keycloak.client.id}")
-	private String clientId;
-	
+	private String CLIENT_ID;
 	@Value("${keycloak.auth-server-url}")
-	private String urlServeurKeycloak;
-	
-	private static final String AUTH_SERVER = "/realms/agents-insee-interne/protocol/openid-connect/auth";
-	private static final String AUTH_SERVER_TOKEN_ENDPOINT = "/realms/agents-insee-interne/protocol/openid-connect/token";
-	private static final String REALM = "agents-insee-interne";
-	
-	public static final String SECURITY_SCHEMA_OAUTH2 = "oauth2";
+	private String URL_KEYCLOAK;
+	@Value("${keycloak.realm}")
+	private String REALM;
 	
 	@Bean
 	public Docket productApi() {
@@ -63,8 +59,11 @@ public class SwaggerConfig {
 			new Contact("équipe info", null, "gaetan.varlet@insee.fr"), "", "", Collections.emptyList());
 	
 	private OAuth securitySchema() {
-		final GrantType grantType = new AuthorizationCodeGrant(new TokenRequestEndpoint(urlServeurKeycloak + AUTH_SERVER, clientId, null),
-				new TokenEndpoint(urlServeurKeycloak + AUTH_SERVER_TOKEN_ENDPOINT, "access_token"));
+		String AUTH_SERVER = "/realms/" + REALM + "/protocol/openid-connect/auth";
+		String AUTH_SERVER_TOKEN_ENDPOINT = "/realms/" + REALM + "/protocol/openid-connect/token";
+		TokenRequestEndpoint tokenRequestEndpoint = new TokenRequestEndpoint(URL_KEYCLOAK + AUTH_SERVER, CLIENT_ID, null);
+		TokenEndpoint tokenEndpoint = new TokenEndpoint(URL_KEYCLOAK + AUTH_SERVER_TOKEN_ENDPOINT, "access_token");
+		final GrantType grantType = new AuthorizationCodeGrant(tokenRequestEndpoint, tokenEndpoint);
 		final List<AuthorizationScope> scopes = new ArrayList<>();
 		scopes.add(new AuthorizationScope("sampleScope", "there must be at least one scope here"));
 		return new OAuth(SECURITY_SCHEMA_OAUTH2, scopes, Collections.singletonList(grantType));
@@ -83,6 +82,6 @@ public class SwaggerConfig {
 	
 	@Bean
 	public SecurityConfiguration security() {
-		return SecurityConfigurationBuilder.builder().clientId(clientId).realm(REALM).scopeSeparator(",").build();
+		return SecurityConfigurationBuilder.builder().clientId(CLIENT_ID).realm(REALM).scopeSeparator(",").build();
 	}
 }
