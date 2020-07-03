@@ -11,7 +11,7 @@ node_modules/
 .sass-cache
 css/reveal.min.css
 js/reveal.min.js
-
+*.log
 logs/
 applications/**/target
 applications/**/.settings
