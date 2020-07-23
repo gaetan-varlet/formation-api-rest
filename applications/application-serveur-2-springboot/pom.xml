@@ -69,7 +69,7 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-data-rest</artifactId>
 			<version>1.4.3</version>
-		 </dependency>
+		</dependency>
 		<dependency>
 			<groupId>com.github.ziplet</groupId>
 			<artifactId>ziplet</artifactId>
@@ -82,7 +82,7 @@
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-spring-boot-starter</artifactId>
-			<version>9.0.0</version>
+			<version>11.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
