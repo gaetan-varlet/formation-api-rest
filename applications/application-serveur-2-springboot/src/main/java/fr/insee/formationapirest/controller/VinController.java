@@ -21,16 +21,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import fr.insee.formationapirest.config.ApiPageable;
 import fr.insee.formationapirest.model.Vin;
 import fr.insee.formationapirest.service.VinService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import springfox.documentation.annotations.ApiIgnore;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/vin")
-@Api(tags =  {"vin"} )
+@Tag(name = "vin")
 public class VinController {
 
 	private static final Logger log = LoggerFactory.getLogger(VinController.class);
@@ -43,7 +41,7 @@ public class VinController {
 		return vinService.getListeAppellation();
 	}
 
-	@ApiOperation(value = "Obtenir tous les vins, ou éventuellement uniquement les vins d'une appellation avec le paramètre appellation")
+	@Operation(summary = "Obtenir tous les vins, ou éventuellement uniquement les vins d'une appellation avec le paramètre appellation")
 	@RequestMapping(method = RequestMethod.GET)
 	public List<Vin> findAll(@RequestParam(required=false) String appellation){
 		return vinService.findAll(appellation);
@@ -63,9 +61,8 @@ public class VinController {
 		vinService.ecrireVinsDansCsv(response.getWriter(), vinService.findAll(null));
 	}
 
-	@ApiPageable
 	@RequestMapping(value="/pageable", method = RequestMethod.GET)
-	public Page<Vin> getAllPageable(@ApiIgnore Pageable p){
+	public Page<Vin> getAllPageable(Pageable p){
 		return vinService.pageable(p);
 	}
 

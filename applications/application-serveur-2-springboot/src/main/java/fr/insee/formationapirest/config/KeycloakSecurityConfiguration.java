@@ -73,7 +73,7 @@ public class KeycloakSecurityConfiguration {
 			// manage routes securisation here
 			.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll()
 			// configuration pour Swagger
-			.antMatchers("/swagger-ui.html/**", "/v2/api-docs","/csrf", "/", "/webjars/**", "/swagger-resources/**").permitAll()
+			.antMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 			// configuration de nos URLS
 			.antMatchers("/url1", "/url2").permitAll()
 			.antMatchers("/mon-nom").authenticated()
