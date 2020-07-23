@@ -17,13 +17,12 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 public class OpenApiConfiguration {
 
 	@Value("${keycloak.auth-server-url:}")
-	public String keycloakUrl;
+	private String keycloakUrl;
 
 	@Value("${keycloak.realm:}")
-	public String realmName;
+	private String realmName;
 
-	public final String SCHEMEKEYCLOAK = "oAuthScheme";
-	public final String SCHEMEBASIC = "basic";
+	private final String SCHEMEKEYCLOAK = "oAuthScheme";
 
 	@Bean
 	public OpenAPI customOpenAPIKeycloak() {
