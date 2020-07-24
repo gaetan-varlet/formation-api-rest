@@ -74,8 +74,8 @@ public class KeycloakSecurityConfiguration extends KeycloakWebSecurityConfigurer
 				// configuration pour Swagger
 				.antMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 				// configuration de nos URLS
-				.antMatchers("/url1", "/url2").permitAll().antMatchers("/mon-nom").authenticated()
-				.antMatchers("/environnement").hasRole("ADMIN_TOUCAN")
+				.antMatchers("/url1", "/url2").permitAll().antMatchers("/vin", "/vin/**").permitAll()
+				.antMatchers("/mon-nom").authenticated().antMatchers("/environnement").hasRole("ADMIN_TOUCAN")
 		// .anyRequest().denyAll()
 		;
 	}
