@@ -8,8 +8,8 @@ Spring :
 - Spring est souvent en avance par rapport aux solutions proposées par Jave EE
 - Spring est aujourd'hui incontournable pour les applications Java EE
 - Spring structure le code d'une application, le rend évolutif
-- Spring Boot facilite le déploiement des applications Java
-
+- **Spring Initializr** est un site web qui permet d'initialiser une application prêt à l'emploi en fonction de nos besoins
+- **Spring Boot** facilite le déploiement des applications Java avec un serveur d'application embarqué
 
 ## Rappel : Librairies Java et introduction à Maven
 
@@ -39,4 +39,26 @@ Spring :
 </dependency>
 ```
 
-## Spring Initializr
+## L'architectire Web MVC
+
+- l'architecture Web MVC 2 est une évolution qui consiste à centraliser toutes les requêtes HTTP vers une seule ressource qui est une servlet, également appelé **Front Controller**, qui va déléguer le traitement à une classe différente pour chaque besoin appelé **Classes de commande**
+- **Struts** est un framework qui a été le standard incontournable pour réaliser une application web pendant plusieurs années
+- Java EE a par la suite a proposé un standard MVC2 : **JSF** pour JavaServer Faces
+- Struts/Struts2, et JSF/JSF2 ne sont plus beaucoup utilisés car ils ont été remplacé par le framework Spring
+
+## Pourquoi a t-on besoin de Spring ?
+
+
+
+
+## Les fondamentaux du framework Spring
+
+## Mise en place de Spring Boot
+
+## Les applications Web avec Spring Boot
+
+## Développer une API REST avec Spring
+
+## Spring et les bases de données relationnelles
+
+## Architectures "Cloud native" et microservices
