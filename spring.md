@@ -61,10 +61,52 @@ Spring :
 - cette solution reste cependant compliquée
 
 ### Inversion de contrôle
-### Récapitulons
-
+- il est possible d'utiliser la refléxivité pour dire quelle implémentation de l'interface utiliser, ce qui permet en cas de création d'un nouvelle implémentation de ne pas avoir à faire évoluer son code
+- il est possible de mettre le nom des classes dans un fichier de configuration pour choisir quoi instancier et injecter au démarrage de l'application : solution de Spring
+- le fait d'avoir un endroit centralisé du code qui se charge d'instancier les composants et de les mettre en relation grâce à l'injection de dépendances s'appelle l'inversion de contrôle
+```java
+UserService userService = (UserService) Class.forName(userServiceClass).getDeclaredConstructor().newInstance();
+```
+```properties
+userServiceClass=com.demo.myapp.service.UserServiceImpl
+```
 
 ## Les fondamentaux du framework Spring
+
+### Conteneur léger Spring
+le conteneur léger de Spring permet de :
+- lire le fichier de configuration
+- instancier les classes
+- mettre en relation les composants en invoquant les setters
+
+Ce conteneur léger va effectuer l'inversion de contrôle et garder en mémoire tous les composants instanciés durant toute la vie de l'application.  
+Le fichier de configuration au format XML est le fonctionnement originel de Spring : **applicationContext.xml** dans le dossier `src/main/resources`
+- il ya une balise racine `<beans>` qui contient des `<bean>` pour chaque classe à instancier
+```xml
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean class="com.demo.myapp.service.UserServiceImpl">
+        <property name="userRepository" ref="userRepo">
+        <!-- permet d'injecter une dépendance dans l'attribut userRepository  -->
+    </bean>
+    <bean id="userRepo" class="com.demo.myapp.repository.UserRepositoryImpl"/>
+</beans>
+```
+- il faut utiliser la bibliothèque **spring-context** pour que ça fonctionne et utiliser le code suivant. L'implémentation définie dans le fichier de configuration sera automatiquement utilisée.
+```java
+ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+UserService userService = context.getBean(UserService.class);
+userService.findAll();
+```
+
+### Affectation d'une valeur à une propriété
+### Autowiring byName et byType
+### Configuration par annotation
+### Valorisation des propriétés par annotation : @Value et fichier de propriétés
+### Détection automatique des beans
+### Gérer les conflits de dépendances
+### Se passer du fichier XML
+### Les classes de configuration plus en détail
+
 
 ## Mise en place de Spring Boot
 
