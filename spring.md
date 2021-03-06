@@ -17,6 +17,7 @@ Spring :
 - le site *Maven Repository* permet d'obtenir des bibliothèques Java
 - lorsqu'on utilise une bibliothèque, il faut également ajouter les dépendances de cette bibliothèque (et éventullement les dépendances des dépendances)
 - utilisation d'une bibliothèque Java sans Maven/Gradle : il faut télécharger le JAR. Et dans la plupart des IDE, il est possible d'ajouter un JAR externe au projet, ce qui ajoute automatiquement le JAR dans le *classpath* du projet, et il pourra alors être utilisé dans le projet
+- le *classpath* est le chemin d'accès au répertoire où se trouvent les classes et les packages Java
 - pour simplifier cela, il est possible d'utiliser *Maven*, qui va trouver une bibiothèque, la télécharger et la déposer dans un dossier centralisé, et ajouter la réfénrence de cette bibliothèque dans le projet
 - pour utiliser Maven, il faut télécharger un client Maven (mvn en ligne de commande par exemple) ou utiliser le client Maven des IDE
 - `groupId x artifactId x version` permet d'identifier de manière unique un JAR
@@ -48,7 +49,19 @@ Spring :
 
 ## Pourquoi a t-on besoin de Spring ?
 
+### La programmation par contrat
+- créer des classes pour nos services et nos repository n'est pas flexible/évolutif, car nos composants font appel explicitement à d'autres composants en instanciant un service dans un controller par exemple. On crée donc un **couplage fort**
+- pour flexibiliser ses dépendances, on va faire appel au design pattern **programmation par contrat** qui permet de relâcher les contraintes qui existent entre les différents composants grâce aux interfaces. On passe d'un couplage fort à un **couplage faible**
+- ces interfaces vont définir comment le composent appelant communique avec le composant appelé. On parle aussi de *contrat*
+- à la place d'instancier une classe, on fait référence à l'interface sans l'instancier. Le code compile mais une exception va être levée à l'utilisation car nos interfaces ne pointent sur aucune implémentation
 
+### Injection de dépendance
+- il faut ajouter des *setters* dans les classes ou une référence aux interfaces est faite
+- dans le composant appelant de haut niveau, il faut instancier une implémentation de chaque interface des différents composants que l'on souhaite utiliser et les injecter en utilisant les *setters*
+- cette solution reste cependant compliquée
+
+### Inversion de contrôle
+### Récapitulons
 
 
 ## Les fondamentaux du framework Spring
