@@ -99,6 +99,14 @@ userService.findAll();
 ```
 
 ### Affectation d'une valeur à une propriété
+- les classes instanciées par Spring ne le sont qu'une seule fois. Il n'est donc pas nécessaire d'avoir des attributs statiques
+- il est possible d'affecter une valeur à une propriété en le renseignant dans le fichier de configuration XML avec une balise `<property>` dans le `<bean>` en question
+- il faut que la propiété ait un setter
+```xml
+ <property name="age" value="2">
+ <property name="prenom" value="Louis">
+```
+
 ### Autowiring byName et byType
 ### Configuration par annotation
 ### Valorisation des propriétés par annotation : @Value et fichier de propriétés
