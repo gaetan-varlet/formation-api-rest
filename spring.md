@@ -108,15 +108,183 @@ userService.findAll();
 ```
 
 ### Autowiring byName et byType
+
+- pour éviter d'avoir à préciser des `<property>` à injecter via l'attribut **ref** et l'attribut **id**, il est possbile d'utiliser l'attribut **autowire="byName"** dans les balises `<bean>` ou directement dans la balise `<beans default-autowire="byName">`, en se basant syr la valeur de l'attribut **id**
+- il est également possible d'utiliser l'autowiring **byType** qui se base sur le type des propriétés au lieu de leur id. Spring va rechercher s'il existe un composant de type compatible, une implémentation de l'interface dans notre cas
+
+```xml
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd" default-autowire="byType">
+    <bean class="com.demo.myapp.service.UserServiceImpl">
+    <bean class="com.demo.myapp.repository.UserRepositoryImpl"/>
+</beans>
+```
+
 ### Configuration par annotation
+
+- depuis Spring 2.5, il est possible d'exploiter les annotations Java pour configurer les applications, ce qui permet de palier à la verbosité des fichiers XML. ON parle de **XML Hell**
+- il existe plusieurs annotations qui permettent de faire de l'autowiring : `@Autowired` spéficique à Spring, ou `@Inject` annotation Java
+- avant cela, il faut :
+    - supprimer `default-autowire="byType"`
+    - ajouter un **xmlns** dans la balise `<beans>` pour pouvoir utiliser une balise XML de Spring Context **annotation-config**
+
+```xml
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <context:annotation-config/>
+    <bean class="com.demo.myapp.service.UserServiceImpl">
+    <bean class="com.demo.myapp.repository.UserRepositoryImpl"/>
+</beans>
+```
+
+```java
+public class UserServiceImpl implements UserService {
+    @Autowired
+    private UserRepository userRepository;
+}
+```
+
 ### Valorisation des propriétés par annotation : @Value et fichier de propriétés
+
+- `@Value` permet de se passer des balises *property* pour valoriser une propriété
+- il est possible d'injecter ce qui est marqué dans un fichier de properties, en ajoutant dans le fichier de configuration XML `<context:property-placeholder location="classpath:application.properties"/>`
+
+```java
+@Value("124")
+private int number; // inutile car équivalent à number = 124
+@Value("${myNumber}")
+private int number2;
+```
+```properties
+myNumber=12
+```
+
 ### Détection automatique des beans
+
+- il est également possible de se passer dans balises `<bean>` dans le fichier de configuration XML en utilisant des annotations
+- l'annotation la plus générique que l'on peut utiliser est `@Component`. Elle indique que la classe est un composant de notre architecture
+- l'annotation fille `@Controller` permet d'indiquer plus précisément de quel type de composant il s'agit, même si Spring va les traiter de la même manière
+- l'annotation `@Service` suit la même logique
+- l'annotation `@Repository` suit également la même logique avec quand même quelques subtilités négligeables par rapports aux autres annotations
+- il est possible que Spring interprète différemment ces annotations dans le futur
+
+```java
+@Service
+public class UserServiceImpl implements UserService {}
+```
+
+- il faut préciser à Spring dans quels packages il doit détecter les annotations dans ces classes avec une balise dans le fichier de configuration XML `<component-scan>`
+
+```xml
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <context:annotation-config/>
+    <context:property-placeholder location="classpath:application.properties"/>
+    <context:component-scan base-package="com.demo.myapp"/>
+</beans>
+```
+
+- ce n'est pas forcément une bonne idée car pour changer d'implémentation d'une interface, il faut ajouter une annotation sur une implémentation et enlever l'annotation sur l'autre implémentation, alors qu'avant, il suffisait de modifier le fichier de configuration XML
+
 ### Gérer les conflits de dépendances
+
+- il existe une meilleure solution où il est possible de laisser annoté plusieurs implémentation d'une même interface sans avoir de conflit (erreur **Expecting single matching bean but found 2**)
+- il n'y a pas une seule solutions, mais plusieurs :
+    - répartition par packages
+    - répartition par librairie
+    - annotation `@Primary`
+    - autowiring byName
+    - `@Profile` ou `@Conditional`
+
+- il est possible de dupliquer la balise `<context:component-scan/>` en scannant non pas le package racine mais les différents sous-packages contenant les stéréotypes, ce qui peut éviter des problèmes difficiles à débugguer
+
+```xml
+<context:component-scan base-package="com.demo.myapp.controller"/>
+<context:component-scan base-package="com.demo.myapp.service"/>
+<context:component-scan base-package="com.demo.myapp.repository"/>
+```
+
+Cela ne règle pas le problème des conflits de dépendances, mais cela ouvre la voie à la **création de sous-packages** pour grouper les implémentations (un sous-package par implémentation), et choisir le sous-package que l'on souhaite dans la balise `<context:component-scan/>`, par exemeple : `<context:component-scan base-package="com.demo.myapp.controller.default"/>`
+
 ### Se passer du fichier XML
+
+- le fichier XML est presque vide, il va être possible de s'en passer
+- il est déjà possible de supprimer `<context:annotation-config/>` avec l'introduction de `<context:component-scan/>` car elle active implicitivement la première
+- il est possible de créer une classe Java pour la configuration qui doit être annotée `@Configuration`
+
+```java
+@Configuration
+@ComponentScan(basePackages = {"com.demo.myapp.controller", "com.demo.myapp.service", "com.demo.myapp.repository"})
+@PropertySource("classpath:application.properties")
+public class AppConfig {}
+```
+
+Dans la classe avec le main de l'application, il faut utiliser une autre implémentation de l'interface **ApplicationContext** en précisant non plus le chemin du fichier XML mais la classe Java contenant la configuration
+
+```java
+// AVANT
+ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+// APRES
+ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+```
+
+Il est possible de se passer du fichier XML, mails il est également possible de l'utiliser de manière complétaire en ajoutant une annotation `@ImportResource`
+
+```java
+@Configuration
+@ComponentScan(basePackages = {"com.demo.myapp.controller", "com.demo.myapp.service", "com.demo.myapp.repository"})
+@PropertySource("classpath:application.properties")
+@ImportResource("classpath:applicationContext.xml")
+public class AppConfig {}
+```
+
+
 ### Les classes de configuration plus en détail
 
+- il est possible d'avoir plusieurs classes de configuration (toutes annotées `@Configuration`), il faut alors les préciser dans la création de l'`ApplicationContext` qui peut prendre plusieurs classes en paramètre
+- il est également possible de na pas avoir de classe de configuration en faisant la configuration directement sur la classe contenant le main, en se référençant dans l'`ApplicationContext`
+
+```java
+@Configuration
+@ComponentScan(basePackages = {"com.demo.myapp.controller", "com.demo.myapp.service", "com.demo.myapp.repository"})
+@PropertySource("classpath:application.properties")
+public class App {
+    public static void main(String[] args){
+        ApplicationContext context = new AnnotationConfigApplicationContext(App.class);
+        ...
+    }
+}
+```
+
+- il est possible dans les classes de configuration d'ajouter des méthodes, annotées`@Bean`, qui vont fournir des objets supplémentaires au conteneur léger Spring
+- il est par exemple possible qu'un service soit instancié via une méthode au lieu du componentScan de l'annotation `@Service`
+
+```java
+@Bean
+public UserService configUserService(){
+    return new UserServiceImpl();
+}
+```
 
 ## Mise en place de Spring Boot
+
+### SpringBootApplication
+
+- `@ComponentScan` peut ne pas avoir de *basePackages*, Spring va alors autodétecter tous les composants dans le package et les sous-packages de la classe annotée
+- `@SpringBootApplication`, qui se trouve dans la bibliothèque *spring-boot-autoconfigure*, inclut `@ComponentScan` dans sa version par défaut, ainsi que `@Configuration`
+- l'instanciation de l'`ApplicationContext` change également
+- concernant `@PropertySource("classpath:application.properties")`, par défault, SpringBoot cherche un fichier de properties *application.properties*. L'annotation peut donc être supprimée
+
+```java
+@SpringBootApplication
+public class App {
+    public static void main(String[] args){
+        ApplicationContext context = SpringApplication.run(App.class);
+        ...
+    }
+}
+```
+
+### Spring Boot et Maven
+
+### Fat Archive - Déployer une application en production
 
 ## Les applications Web avec Spring Boot
 
