@@ -408,3 +408,22 @@ public String hello(){
 ## Spring et les bases de données relationnelles
 
 ## Architectures "Cloud native" et microservices
+
+### Introduction
+
+- les architectures "Cloud native" sous-entendent la conception d'une application en microservices
+- historiquement, conception d'**applications monoblocs**, qui contient tout ce qu'il faut pour remplir sa mission
+- pour ce qui concerne les considérations transversales à différentes applications, il fallait souvent passer par des bases de données pour synchroniser les données entre les applications
+- avec le temps, les applications ont commencé à exploiter des modules/logiciels qui ont vocation à assurer des fonctions génériques de l'entreprise (serveur LDAP, serveur d'authentification), ce qui permet de déléguer une partie des fonctionnalités communes à une application tierce. On parle alors d'**application d'entreprise**
+- les applications migrent vers le navigateur web pour offrir des interfaces utilisateurs. L'ère du **SAS** pour **Software As A Service** a commencée
+- des applications commencent à offrir leurs propres services via des API sur des protocoles standardisés notamment HTTP comme SOAP ou plus tard REST. C'est l'avénement des architectures orientées service, **SOA** pour **Service Oriented Architecture**
+- en parallèle de ces évolutions logicielles, on voit émerger les environnements virtualisés comme AWS qui permettent d'héberger les applications offrant des services web. C'est le début de l'ère du **PAS** pour **Plateform As A Service**
+- les applications exposent de plus en plus de service, certains sont plus importants que d'autres, méritent d'être plus sécurisés, redondant ou d'avoir une capacité de montée en charge variable
+- arrive également la problématique des montées de version, monter de version toute une application pour un petit changement est contraignant
+- l'idée des microservices est de répartir les fonctionnalités de l'application monolithique, dans de plus petites applications autonomes, qui vont interagir les uns avec les autres via leur web-services
+- avec les microservices, les API Rest sont dédiées à d'autres applications internes, et non pas à des applications ou utilisateurs externes. Ces services sont souvent inaccessible de l'extérieur
+- on va utiliser les capacités de la virtualisation pour répartir et orchestrer ces différentes unités autonomes. Le terme **cloud** apparaît en 2009 pour désigner ces applications distribuées sur plusieurs machines virtuelles
+- en 2020, les architectures en microservices s'imposent. Ces services sont écris dans plusieurs langages, et répartis sur plusieurs serveurs ou même plusieurs infrastructures (Google Cloud, Azure, AWS...). On parle désormais de **IAAS** pour **Infrastructure As A Service**
+- d'un point de vue applicatif, il va falloir concevoir les applications différemments : on va voir comment concevoir les microservices et comment les faire interagir dans un environnement cloud compatible
+
+### Découpage en microservices
