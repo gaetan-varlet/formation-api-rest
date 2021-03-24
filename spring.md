@@ -379,7 +379,7 @@ public class MonController {
 public String hello(){
     return "toto";
 }
-``
+```
 
 ### Spring MVC : Affichage de données dans la vue - Le modèle
 
