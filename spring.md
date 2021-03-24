@@ -409,7 +409,7 @@ public String hello(){
 
 ## Architectures "Cloud native" et microservices
 
-### Introduction
+### Introduction
 
 - les architectures "Cloud native" sous-entendent la conception d'une application en microservices
 - historiquement, conception d'**applications monoblocs**, qui contient tout ce qu'il faut pour remplir sa mission
