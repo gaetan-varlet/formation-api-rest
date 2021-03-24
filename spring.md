@@ -426,4 +426,4 @@ public String hello(){
 - en 2020, les architectures en microservices s'imposent. Ces services sont écris dans plusieurs langages, et répartis sur plusieurs serveurs ou même plusieurs infrastructures (Google Cloud, Azure, AWS...). On parle désormais de **IAAS** pour **Infrastructure As A Service**
 - d'un point de vue applicatif, il va falloir concevoir les applications différemments : on va voir comment concevoir les microservices et comment les faire interagir dans un environnement cloud compatible
 
-### Découpage en microservices
+### Découpage en microservices
