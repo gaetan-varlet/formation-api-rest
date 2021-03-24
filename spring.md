@@ -284,11 +284,60 @@ public class App {
 
 ### Spring Boot et Maven
 
+- lorsqu'on ne connaît pas Spring Boot, on a l'impression que c'est magique
+- gestion du cycle de vie de l'application avec Maven
+    - il n'est pas conseillé d'utiliser la dépendance `spring-boot-autoconfigure`
+    - il est conseillé d'utiliser la balise `<parent>` `spring-boot-starter-parent`, pour bénéficier de tout ce qui est déclaré dans le parent, il y a dedans par exemple la bibliothèque `spring-boot-release`, `spring-boot-starter-data-jpa`...
+    - toutes les dépendances gérées dans le POM parent ne sont pas directement téléchargées mais pour lesquels on donne des informations a priori, en donnant la version par défaut qu'il faudrait utiliser pour le cas où elles seraient nécessaire
+    - si on utilise aucun starter, il est possible d'utiliser le starter `spring-boot-starter` pour bénéficier notamment de la dépendance `spring-boot-autoconfigure`
+    - le plugin `spring-boot-maven-plugin` apporte également des choses intéressantes concernant le démarrage de l'application ou le build de l'application
+
 ### Fat Archive - Déployer une application en production
+
+- pour lancer une application Java en ligne de commande, il faut exécuter la classe contenant la méthode *main* en ajoutant dans l'argument `-cp` toutes les bibliothèques auxquelles on fait référence : `java -cp "..." com.demo.myapp.App`
+- avec le plugin `spring-boot-maven-plugin`, il suffit de lancer la commande `mvn spring-boot:run` pour démarrer une application Spring Boot
+- pour créer un JAR de l'application, il faut utiliser la commande `mvn clean install`
+    - sans le plugin de Spring Boot, on obtient un JAR avec les classes du projet, avec un fichier MANIFEST.MF, sans le classpath avec toutes les bibliothèques nécessaires, ni la classe à exécuter. Il n'est donc pas possible d'exécuter le JAR. Même en disant à Maven de renseigner comme il se doit le fichier MANIFEST, il resterait le problème que toutes les bibliothèques nécessaires à l'exécution du JAR ne sont pas embarquées dans le JAR
+    - le plugin `spring-boot-maven-plugin` permet de faire tout cela automatiquement. Une étape supplémentaire de **repackage** a été effectué. Le JAR léger original a été suffixé avec `.original`, par exemple `toto-1.0.0.jar.original`. Un nouveau JAR, bien plus gros, appelé FAT JAR, a téé créé par le plugin, qui ne contient plus directement les classes du projet. Il y a un répertoire *BOOT-INF*, avec un répertoire *classes* où il y a les classes du projet et les fichiers de configuration, et également un répertoire *lib*, avec toutes les bibliothèques nécessaires au projet. Le fichier MANIFEST est également modifié pour fonctionner correctement
+    - il suffit ensuite d'exécuter la commande `java -jar toto-1.0.0.jar`
+- pour que tout cela fonctione, il faut utiliser le plugin `spring-boot-maven-plugin`, utiliser l'annotation `@SpringBootApplication`, et démarrer l'application avec `SpringApplication.run()`
+- cela simplifie l'écriture, le build, le déploiemennt et l'exécution de l'application
 
 ## Les applications Web avec Spring Boot
 
+### Spring Boot Web Starter
+
+### Auto-configuration Spring
+
+### Ressources Web statiques
+
+### Spring MVC : Le controleur frontal (Front Controller)
+
+### Spring MVC : Les controleurs Web
+
+### Spring MVC : Les vues avec Thymeleaf
+
+### Spring MVC : Affichage de données dans la vue - Le modèle
+
+### Modularité
+
+### Paramètre de requête et préparation à ReST
+
+### Spring MVC : Gestion de formulaire
+
+### Validation des beans
+
+### Affichage des erreurs de saisie
+
 ## Développer une API REST avec Spring
+
+### Rappels : Web Services ReST
+
+### ResponseBody, RequestBody et RestController
+
+### Expérimenter les services ReST
+
+### Exploiter les services ReST dans l’application
 
 ## Spring et les bases de données relationnelles
 
