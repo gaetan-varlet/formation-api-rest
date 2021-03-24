@@ -307,15 +307,79 @@ public class App {
 
 ### Spring Boot Web Starter
 
+- une application web Java doit être servie par un serveur d'application web Java (conteneur de servlets), par exemple le serveur Apache Tomcat
+- une application web est un ensemble de classes Java et de contenu web, zippé au format WAR (Web Archive)
+- un serveur est démarré sur une machine, et il sert une ou plusieurs applications Java déployées sur le serveur
+- avec Spring Boot, on démarre l'application Java qui embarque le serveur dans l'application web
+
+Le starter `spring-boot-starter-web` permet de faire cela
+- en démarrant l'application, on peut voir qu'un tomcat est démarré sur le port 8080
+- création d'un répertoire `static` dans le dossier `resources` et création d'un fichier *index.html*, qui sera retourné en appelant l'URL racine `localhost:8080`
+
 ### Auto-configuration Spring
+
+- la bibliothèque `spring-boot-starter-web` a une dépendance vers tomcat-embed
+- `@SpringBootApplication` en plus de `@ComponentScan` et `@Configuration`, contient également `@EnableAutoConfiguration`
+- avec `@EnableAutoConfiguration`, Spring va partir à la recherche dans les bibliothèques de notre projet de certaines classes annotées `@Configuration`, et cette classe de configuration va faire le travail
+- il est possible de changer des réglages comme le port d'écoute du tomcat via les properties
+- il est également possible de changer de serveur d'application, en utilisant par exemple *Undertow* à la place de *Tomcat*
+    - il faut commencer par exclure la dépendance `spring-boot-starter-tomcat` de la dépendance `spring-boot-starter-web` afin qu'elle ne soit plus dans le classpath et que Spring n'essaie pas d'autoconfigurer l'application avec le serveur Tomcat
+    - il faut ensuite ajouter une nouvelle dépendance `spring-boot-starter-undertow`
 
 ### Ressources Web statiques
 
+- lors de la modification d'une ressource statique, elle n'est pas prise en compte sans redémarrer le serveur
+- il est possible de configurer l'IDE pour rebuilder le projet automatiquement lorsqu'on fait une modification
+- Spring DevTools permet de rafraîchir l'application de manière globale
+- ces solutions fonctionnent en phase développement mais pas en production où un JAR est déployé
+- il est possible de redéfinir la property `spring.resources.static-locations`, qui indique par défaut tous les emplacements qui sont considérés par Sring Boot pour servir du contenu statique (notamment /resources, /static). On va ajouter un emplacement qui se trouve en dehors du JAR, qui se trouve sur la machine. Exemple : `spring.resources.static-locations=file:C://temp/toto/,classpath:/static/`. Les modifications du fichier sont alors prises en compte
+
 ### Spring MVC : Le controleur frontal (Front Controller)
+
+- Spring MVC est un framework web MVC, écrit en Java et utilise Spring. Il s'exécute côté serveur, et est dans le même esprit que Struts ou JSF
+- il va faire appel à un contrôleur frontal pour attraper toutes les requêtes HTTP qui lui sont destinées. Il s'agit de la classe **DispatcherServlet**, fournie par `spring-webmvc`
+- cette servlet dispatcher va attraper un ensemble de requêtes HTTP, par défaut toutes les requêtes. Il est possible de modifier cela pour ne capter qu'une certaine gamme de requêtes
 
 ### Spring MVC : Les controleurs Web
 
+- la *DispatcherServlet* va s'adresser à un **Controller** en fonction de l'URL
+
+```java
+@Controller
+public class MonController {
+    @GetMapping("/hello")
+    public String hello(){
+        return "Hello";
+    }
+}
+```
+
 ### Spring MVC : Les vues avec Thymeleaf
+
+- une vue comporte des parties dynamiques
+ - solution historique : génération du HTML côté serveur
+ - solution AJAX : envoyer une page HTML incomplète et laisser Javascript récupérer les informations via des requêtes AJAX pour rafraîchir une partie de la page sans recharger la page complète
+
+**Solution historique**
+- pour générer sur le serveur une page HTML, il faut un **moteur de templating**. En Java EE, on utilise généralement les **JSP** (Java Server Pages). Cette technologie montre de plus en plus de limitations avec le temps. Spring recommande d'utiliser **Thymeleaf**
+- il faut ajouter une dépendance pour pouvoir l'utiliser : `spring-boot-starter-thymeleaf`
+- avec Thymeleaf, il est possible de conserver la page avec l'extension *html* alors qu'avec les JSP, il fallait utiliser l'extension *jsp*
+- il faut adapter l'en-tête HTML en ajouter le namespace *thymeleaf* pour ajouter de nouvelles balises et attributs
+```html
+<!DOCTYPE html xmlns:th="http://www.thymeleaf.org">
+<html lang="fr">
+<head>...</head>
+<body></body>
+</html>
+```
+- ces fichiers ne sont plus statiques, il faut donc ne pas les mettre dans le dossier *static* mais dans un dossier **templates** dans le dossier *resources*
+- pour utiliser un fichier `toto.html`, il faut le retourner dans une méthode d'un controller (fonctionnement par défaut pour faire le lien entre un controller et une vue)
+```java
+@GetMapping("/hello")
+public String hello(){
+    return "toto";
+}
+``
 
 ### Spring MVC : Affichage de données dans la vue - Le modèle
 
@@ -329,6 +393,7 @@ public class App {
 
 ### Affichage des erreurs de saisie
 
+
 ## Développer une API REST avec Spring
 
 ### Rappels : Web Services ReST
@@ -338,6 +403,7 @@ public class App {
 ### Expérimenter les services ReST
 
 ### Exploiter les services ReST dans l’application
+
 
 ## Spring et les bases de données relationnelles
 
