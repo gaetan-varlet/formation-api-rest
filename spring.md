@@ -383,9 +383,71 @@ public String hello(){
 
 ### Spring MVC : Affichage de données dans la vue - Le modèle
 
+- création d'un jeu de données (le modèle) à transmettre à la vue pour l'afficher
+- récupération via un service, qui lui même fait appel à un repository
+- en Java EE classique, il est possible de mettre le jeu de données dans l'objet `HttpServletRequest` via sa méthode *setAttribute* et de le récupérer dans la vue, avec `th:each` de *Thymeleaf*
+- s'il y a un seul attribut à retourner, possibilité que le controller le retourne et le place implicitement dans le scope *request* pour le récupérer dans la vue
+    - par défault, Spring va alors nous rediriger vers la page HTML correspondant à l'URL dans *RequestMapping*
+    - il faut utiliser l'annotation `@ModelAttribute` pour prévciser l'identifiant de l'objet passé dans la requête
+
+```java
+@Controller
+public class MonController {
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/user")
+    public String users(HttpServletRequest request){
+        List<User> users = userService.findAll();
+        request.setAttribute("users", users);
+        return "toto";
+    }
+
+    @GetMapping("/user")
+    public @ModelAttribute("users") List<User> users(){
+        List<User> users = userService.findAll();
+        return users;
+    }
+}
+```
+
 ### Modularité
 
+- sans le fichier de configuration XML, il est nécessaire de n'avoir qu'une implémentation annoté par Spring pour chaque interface pour éviter les conflits lors de l'injection de dépendance
+- l'idée de Spring est de flexibiliser l'architecture, de pouvoir basculer d'une implémentation à une autre, en rendant l'application plus modulaire
+- la première étape est de séparer le projet en 2 projets : un projet Core et un projet Web, qui contiendra le controller
+- le projet Core n'a plus vocation a être exécuté, c'est une simple librairie. Il n'a plus vocation à être un projet SpringBoot mais un simple projet Spring avec `spring-context`
+- déplacement des properties vers le projet Web qui doivent être définies par l'utilisateur de la bibliothèque, celles qui doivent être définies dans la librairie peuvent rester dans le Core. Possibilité de les laisser aux 2 endroits, le Core fourni alors des valeurs par défaut qui peuvnt être surchargées pour l'utilisateur de la bibliothèque
+- les 2 projets ont le même *package racine*, par exemple `com.example.test`. En général, on ajoute un niveau de package supplémentaire au projet Core, par exemple `com.example.test.core`
+- après avoir buildé le projet core et ajouté la dépendance dans le POM du projet Web, il faut que le chemin des packages du Core soit dans le chemin de l'annotation `@ComponentScan` du projet Web
+
 ### Paramètre de requête et préparation à ReST
+
+- utilisation de `@PathVariable` pour récupérer une variable de chemin
+- utilisation de l'objet **ModelAndView** qui permet de porter à la fois la vue vers laquelle se rediriger et un objet à utiliser dans la vue
+- utilisation de l'objet **Model** qui ne porte que l'objet, et la méthode retourne alors le nom de la page html vers laquelle se rediriger
+
+```java
+@Controller
+public class MonController {
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/user/{id}")
+    public ModelAndView user(@PathVariable Integer id){
+        User user = userService.findById(id);
+        ModelAndView mv = new ModelAndView("toto");
+        mv.addObject("user", user);
+        return mv;
+
+    @GetMapping("/user/{id}")
+    public String user(@PathVariable Integer id, Model model){ // Model doit être le dernier argument de la méthode
+        User user = userService.findById(id);
+        model.addAttribute("user", user);
+        return "toto";
+    }
+}
+```
 
 ### Spring MVC : Gestion de formulaire
 
