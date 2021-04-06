@@ -11,14 +11,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class User {
 
-	@XmlElement(name = "ID")
-	@JsonProperty("ID")
+	@XmlElement(name = "id")
+	@JsonProperty("id")
 	private int id;
-	@XmlElement(name = "UserName")
-	@JsonProperty("UserName")
+	@XmlElement(name = "userName")
+	@JsonProperty("userName")
 	private String userName;
-	@XmlElement(name = "Password")
-	@JsonProperty("Password")
+	@XmlElement(name = "password")
+	@JsonProperty("password")
 	private String password;
 
 	public int getId() {

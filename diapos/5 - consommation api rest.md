@@ -5,7 +5,7 @@
 ## Faire une requête HTTP
 - avec le navigateur, via la barre d'adresse (uniquement requêtes GET)
 - en utilisant des applications spécifiques telles que **Postman** ou **Advanced REST client**, qui sont liées au navigateur Chrome, ou **RESTClient** lié au navigateur Firefox
-- avec la documentation interactive **Swagger** d'une API. Par exemple : `http://fakerestapi.azurewebsites.net/swagger/`
+- avec la documentation interactive **Swagger** d'une API. Par exemple : `http://fakerestapi.azurewebsites.net/`
 - en Java : par exemple, consommer une API dans son API ou dans son application web
 - en JavaScript : consommer son API pour faire une IHM en JavaScript
 - en bash : `curl https://jsonplaceholder.typicode.com/posts/1`
@@ -36,15 +36,15 @@
 
 Lecture du service :
 ```http
-http://fakerestapi.azurewebsites.net/api/Users/1
+http://fakerestapi.azurewebsites.net/api/v1/Users/1
 ```
 
 réponse en JSON :
 ```json
 {
-    "ID": 1,
-    "UserName": "User 1",
-    "Password": "Password1"
+    "id": 1,
+    "userName": "User 1",
+    "password": "Password1"
 }
 ```
 
@@ -65,14 +65,14 @@ Création d'un projet Maven en Java 11 avec la dépendence **jackson-databind**,
 @XmlAccessorType(XmlAccessType.FIELD)
 public class User {
 
-	@XmlElement(name = "ID")
-	@JsonProperty("ID")
+	@XmlElement(name = "id")
+	@JsonProperty("id")
 	private int id;
-	@XmlElement(name = "UserName")
-	@JsonProperty("UserName")
+	@XmlElement(name = "userName")
+	@JsonProperty("userName")
 	private String userName;
-	@XmlElement(name = "Password")
-	@JsonProperty("Password")
+	@XmlElement(name = "password")
+	@JsonProperty("password")
 	private String password;
 
     // getters, setters et méthode toString()
@@ -102,7 +102,7 @@ System.setProperty("http.proxyHost", "proxy-rie.http.insee.fr");
 System.setProperty("http.proxyPort", "8080");
 
 // requête en GET avec réponse en XML
-URL url = new URL("http://fakerestapi.azurewebsites.net/api/Users/1");
+URL url = new URL("http://fakerestapi.azurewebsites.net/api/v1/Users/1");
 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 connection.setRequestMethod("GET");
 connection.setRequestProperty("Accept", "application/xml");
@@ -115,7 +115,7 @@ System.out.println(connection.getResponseCode()); // 200
 System.out.println(connection.getContentType()); // application/xml; charset=utf-8
 
 // requête en GET avec réponse en JSON
-URL url = new URL("http://fakerestapi.azurewebsites.net/api/Users/1");
+URL url = new URL("http://fakerestapi.azurewebsites.net/api/v1/Users/1");
 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 connection.setRequestMethod("GET");
 connection.setRequestProperty("Accept", "application/json");
@@ -133,7 +133,7 @@ System.out.println(user);
 ```java
 User user = new User(); user.setUserName("toto"); user.setPassword("azerty");
 ObjectMapper mapper = new ObjectMapper();
-URL url = new URL("http://fakerestapi.azurewebsites.net/api/Users");
+URL url = new URL("http://fakerestapi.azurewebsites.net/api/v1/Users");
 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 connection.setRequestMethod("POST");
 connection.setRequestProperty("Accept", "application/json");
@@ -162,7 +162,7 @@ public static void requeteGetSynchroneXmlJson(String accept) throws Exception {
 			.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
 			.build();
 	HttpRequest httpRequest = HttpRequest.newBuilder().header("Accept", accept)
-			.uri(URI.create("http://fakerestapi.azurewebsites.net/api/Users/1")).GET().build();
+			.uri(URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users/1")).GET().build();
 	HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofString());
 	System.out.println(response.statusCode()); // 200
 	System.out.println(response.headers().allValues("content-type")); // [application/xml; charset=utf-8] ou [application/json; charset=utf-8]
@@ -199,7 +199,7 @@ HttpClient httpClient = HttpClient.newBuilder()
 HttpRequest httpRequest = HttpRequest.newBuilder()
 	.header("Accept", "application/json")
 	.header("Content-type", "application/json")
-	.uri(URI.create("http://fakerestapi.azurewebsites.net/api/Users"))
+	.uri(URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users"))
 	.POST(BodyPublishers.ofString(userString)).build();
 HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofString());
 System.out.println(response.body());
@@ -222,7 +222,7 @@ HttpClient httpClient = HttpClient.newBuilder()
 		.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
 		.build();
 HttpRequest httpRequest = HttpRequest.newBuilder().header("Accept", "application/json")
-		.uri(URI.create("http://fakerestapi.azurewebsites.net/api/Users/1")).GET().build();
+		.uri(URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users/1")).GET().build();
 System.out.println(LocalDateTime.now()); // 15:44:19.690822
 CompletableFuture<HttpResponse<String>> cfResponse = httpClient.sendAsync(httpRequest, BodyHandlers.ofString());
 System.out.println(LocalDateTime.now()); // 15:44:19.717822
@@ -242,11 +242,11 @@ HttpClient httpClient = HttpClient.newBuilder()
 		.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
 		.build();
 List<String> urls = List.of(
-	"http://fakerestapi.azurewebsites.net/api/Users/1",
-	"http://fakerestapi.azurewebsites.net/api/Users/2",
-	"http://fakerestapi.azurewebsites.net/api/Users/3",
-	"http://fakerestapi.azurewebsites.net/api/Users/4",
-	"http://fakerestapi.azurewebsites.net/api/Users/5");
+	"http://fakerestapi.azurewebsites.net/api/v1/Users/1",
+	"http://fakerestapi.azurewebsites.net/api/v1/Users/2",
+	"http://fakerestapi.azurewebsites.net/api/v1/Users/3",
+	"http://fakerestapi.azurewebsites.net/api/v1/Users/4",
+	"http://fakerestapi.azurewebsites.net/api/v1/Users/5");
 System.out.println(LocalDateTime.now()); // 16:03:28.104822
 List<CompletableFuture<HttpResponse<String>>> cfResponses = urls.stream()
 .map(url -> httpClient.sendAsync(
