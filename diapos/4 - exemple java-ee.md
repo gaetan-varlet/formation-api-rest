@@ -208,7 +208,7 @@ public class CalculJsonServlet extends HttpServlet {
 <dependency>
 	<groupId>com.fasterxml.jackson.core</groupId>
 	<artifactId>jackson-databind</artifactId>
-	<version>2.10.3</version>
+	<version>2.12.2</version>
 </dependency>
 ```
 
@@ -262,17 +262,17 @@ public class CalculJacksonServlet extends HttpServlet {
 <dependency>
 	<groupId>org.glassfish.jersey.containers</groupId>
 	<artifactId>jersey-container-servlet</artifactId>
-	<version>2.30.1</version>
+	<version>2.33</version>
 </dependency>
 <dependency>
 	<groupId>org.glassfish.jersey.media</groupId>
 	<artifactId>jersey-media-json-jackson</artifactId>
-	<version>2.30.1</version>
+	<version>2.33</version>
 </dependency>
 <dependency>
 	<groupId>org.glassfish.jersey.inject</groupId>
 	<artifactId>jersey-hk2</artifactId>
-	<version>2.30.1</version>
+	<version>2.33</version>
 </dependency>
 ```
 
