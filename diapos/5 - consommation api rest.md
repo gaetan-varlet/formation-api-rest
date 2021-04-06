@@ -51,9 +51,9 @@ réponse en JSON :
 réponse en XML :
 ```xml
 <User xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/FakeRestAPI.Web.Models">
-    <ID>1</ID>
-    <Password>Password1</Password>
-    <UserName>User 1</UserName>
+    <id>1</id>
+    <password>Password1</password>
+    <userName>User 1</userName>
 </User>
 ```
 
