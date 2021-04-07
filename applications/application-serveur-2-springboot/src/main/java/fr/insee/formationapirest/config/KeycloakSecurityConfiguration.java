@@ -78,5 +78,9 @@ public class KeycloakSecurityConfiguration extends KeycloakWebSecurityConfigurer
 				.antMatchers("/mon-nom").authenticated().antMatchers("/environnement").hasRole("ADMIN_TOUCAN")
 		// .anyRequest().denyAll()
 		;
+
+		// autorisation d'afficher des frames dans l'appli pour afficher la console h2
+		// (risque de clickjacking)
+		http.headers().frameOptions().sameOrigin();
 	}
 }
