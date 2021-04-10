@@ -451,10 +451,81 @@ public class MonController {
 
 ### Spring MVC : Gestion de formulaire
 
+- un formulaire de saisie permet d'envoyer des informations depuis une page web vers un serveur
+- possibilité de le faire avec *Thymeleaf*
+- création d'une méthode Java qui va retourner vers la page html
+- notion de **Backing Bean** : création d'une classe avec autant d'attributs que de champs dans le formulaire
+
+```java
+@GetMapping("/create-form")
+public String formulaire() {
+    return "toto"
+}
+
+@PostMapping("/create")
+public String resultat(@ModelAttribute("form") User user) {
+    userService.create(user);
+    return "toto-created"
+}
+```
+
+```html
+<body>
+<form th:action="@{/create}" method="POST"> <!-- renvoi à la méthode sur cette URL -->
+    <p>Nom<input type="text" th:fiel="*{nom}"></p>
+    <p>Prénom<input type="text" th:fiel="*{prenom}"></p>
+    <input type="submit" value="OK">
+</form>
+</body>
+```
+
+
 ### Validation des beans
+
+- contrôle que l'objet envoyé par l'utilisateur est correct, par exemple le nombre de caractères d'une chaîne caractère
+- Spring MVC est de vérifier les valeurs dans le *Backing Bean* après collecte de ces valeurs. Il faut donc soumettre le formulaire au serveur, qui va retourner les potentielles erreurs
+- En Java, lorsqu'on souhaite valider les propriétés d'un *Bean*, il y a un standard : les JSR 303 et 380, appelés **Jakarka Bean Validation**
+- **hibernate-validator** est l'implémentation de référence
+- ajout su starter **spring-boot-starter-validation**, et ajout des critères de validité grâce à des annotations sur les propritétés des *Bean* à valider
+- création d'un bean différent pour la validation du bean et celui qu'on enregistre en base, puis conversion de l'objet pour l'envoyer dans la couche inférieure
+- ajout d'une annotation `@Valid` lors de la récupératio de l'objet dans le controller
+
+```java
+public class UserForm {
+    @NotBlank(message = "Le nom est obligatoire") // non null et non vide
+    private String nom;
+    @Size(min=10,max=13)
+    private String prenom;
+
+    // Autre annotation
+    @Pattern(regexp = ...)
+    // D'autres annotation spécifiques à Hibernate Validator
+    @CreditCardNumber
+    private String creditCardNumber;
+}
+
+@PostMapping("/create")
+public String resultat(@Valid @ModelAttribute("form") User user) { ... }
+```
+
+- collecte des erreurs dans un objet `BindingResult` et possibilité de retourner vers une autre page s'il y a des erreurs
+
+```java
+@PostMapping("/create")
+public String resultat(@Valid @ModelAttribute("form") User user, BindingRestult) {
+    if(results.hasErrors()){ ... }
+    return "toto";
+
+```
 
 ### Affichage des erreurs de saisie
 
+- possibilité d'ajouter une `<div>` dans la vue en dessous de chaque champ de saisie, qui va s'affichier uniquement s'il y a une erreur
+
+```html
+<p>Nom<input type="text" th:fiel="*{nom}"></p>
+<div th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}"></div>
+```
 
 ## Développer une API REST avec Spring
 
