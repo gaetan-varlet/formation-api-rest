@@ -529,6 +529,12 @@ public String resultat(@Valid @ModelAttribute("form") User user, BindingRestult)
 
 ## Développer une API REST avec Spring
 
+- on parle de service web REST lorsque l'URL utilisée pour contacter le serveur s'écrit sous une forme standard qui indique le changement d'état que va subir la ressource ciblée
+- par exemple, `/user` en *GET* est censé renvoyer les informations relatives aux utilisateurs
+- format de données utilisé : XML / JSON
+- standard Java : JAX-RS avec Jersey comme implémentation de référence
+- Spring propose une alternative avec Spring MVC, qui n'est pas une implémentation de JAX-RS
+
 ### Rappels : Web Services ReST
 
 ### ResponseBody, RequestBody et RestController
