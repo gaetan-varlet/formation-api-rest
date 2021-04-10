@@ -686,7 +686,7 @@ public User create(User user) {
     - lE DDD est inévitable pour modulariser une application, ou encore pour les microservices
     - impact sur la façon d'écrire les entités (liens entre les entités seraient matérialisés par des identifiants et non des objets)
 
-### Spring Data JDBC : Model et Repository
+### Spring Data JDBC : Model et Repository
 
 - il faut utiliser le starter `spring-boot-starter-data-jdbc`
 - il faut annoter l'identifiant de notre entité avec `@Id` de Spring Data, psa besoin de `@Entity` comme en JPA
@@ -744,7 +744,7 @@ public class User {
 
 ### Spring Data JPA : Modèle de données plus complexe
 
-![Modèle de données](spring/modele-donnees.png "Modèle de données")
+![Modèle de données](/spring/modele-donnees.png "Modèle de données")
 
 Script de BDD correspondant :
 
