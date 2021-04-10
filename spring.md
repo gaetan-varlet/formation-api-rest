@@ -529,22 +529,58 @@ public String resultat(@Valid @ModelAttribute("form") User user, BindingRestult)
 
 ## Développer une API REST avec Spring
 
+### Rappels : Web Services ReST
+
 - on parle de service web REST lorsque l'URL utilisée pour contacter le serveur s'écrit sous une forme standard qui indique le changement d'état que va subir la ressource ciblée
 - par exemple, `/user` en *GET* est censé renvoyer les informations relatives aux utilisateurs
 - format de données utilisé : XML / JSON
 - standard Java : JAX-RS avec Jersey comme implémentation de référence
 - Spring propose une alternative avec Spring MVC, qui n'est pas une implémentation de JAX-RS
 
-### Rappels : Web Services ReST
-
 ### ResponseBody, RequestBody et RestController
+
+- transformation d'un controller en ressource *REST* en renvoyant un objet
+- il faut ajouter l'annotation `@ResponseBody` pour le retourner sans passer dans une vue1
+- l'objet va être converti en XML ou en JSON (par défaut), via spring-boot-starter-json (qui ramène Jackson) : configurable de manière fine via le concept de **Content Negociation**
+- pour une méthode de création ou l'objet est envoyé par l'utilisateur, il faut ajouter l'annotation `@RequestBody` pour qu'il soit converti du JSON vers un objet Java
+- pour éviter de dire que les sorties doivent être converties en JSON avec `@ResponseBody`, on peut remplacer `@Controller` par `@RestController`
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+    @GetMapping
+    @ResponseBody
+    public List<User> getAll(){
+        return userService.getAll();
+    }
+
+    @PostMapping
+    @ResponseBody
+    public User create(@RequestBody User user){
+        return userService.save(user);
+    }
+}
+```
 
 ### Expérimenter les services ReST
 
+- pour utiliser l'API REST, il va falloir adapter les pages HTML avec un peu de javascript afin que l'application soit plus réactive via des requêtes AJAX en arrière-plan et mettre à jour le contenu du DOM sans rechargement de la page
+- créer une API peut avoir d'autres objectifs comme d'offrir à d'autres applications la possibilité d'interagir avec nos services
+
 ### Exploiter les services ReST dans l’application
 
+- l'idée est de ne pas attendre que toutes les données soient prêtes pour afficher la page (on parle d'asynchrone)
+- cela va permettre que la page s'affiche très vite mais incomplète avec des indicateurs qui montrent que le chargement des éléments est en cours
+- comportement courant sur la plupart des sites modernes
 
 ## Spring et les bases de données relationnelles
+
+### Présentation
+
+### Spring JDBC
+
+### Introduction à Spring Data et Spring Data JDBC
 
 ## Architectures "Cloud native" et microservices
 
