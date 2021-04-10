@@ -578,7 +578,45 @@ public class UserController {
 
 ### Présentation
 
+- étude de l'interaction avec les données, plus particulièrement sur l'exploitation de **base de données relationnelles** en utilisant **JDBC**, **Hibernate** et **JPA**, dans le cadre d'un sous-projet de Spring : **Spring Data**
+- possibilité d'utiliser la base de données en mémoire **H2**, ou une base de données à installer comme **MySQL** ou **PostgreSQL**
+- installation de MySQL Community Edition
+    - en **standalone MySQL Server**
+    - création d'un compte root et éventuellement de compte utilisateurs avec des droits d'accès restreint pour utiliser dans l'application
+- installation d'un client de d'accès aux BDD : **DBeaver**
+    - il est compatible avec tous les moteurs de BDD
+    - pour se connecter à un serveur de BDD, DBeaver va utiliser un driver JDBC (une bibliothèque Java) qu'il va télécharger via Maven
+
 ### Spring JDBC
+
+- pour utiliser une base MySQL, il faut ajouter dans le projet java le driver MySQL, en scope *runtime* car les classes du driver ne sont pas utilisées directement dans le code de l'application
+- il faut également une bibliothèque pour établir une connexion avec la base, par exemple **Spring JDBC** (`spring-boot-starter-jdbc`), à ne pas confondre avec **Spring Data JDBC**
+- utilisation d'une **DataSource** pour obtenir une connexion à la base, instanciée par Spring
+- configuration via un *Bean* de configuration
+
+```java
+@Bean
+public DataSource getDataSource(){
+    DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
+    dataSourceBuilder.driverClassName("com.mysql.cj.jdbc.Driver");
+    dataSourceBuilder.url("");
+    dataSourceBuilder.username("");
+    dataSourceBuilder.password("");
+    return dataSourceBuilder.build();
+}
+```
+
+- pour éviter de passer par un Bean de configuration, il est possible de créer un Bean de configuration automatiquement en passant par des properties
+
+```properties
+spring.datasource.url=jdbc:mysql:...
+spring.datasource.username=
+spring.datasource.password=
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+```
+
+- s'il y a plusieurs BDD, il faudra utiliser des Bean de configuration
+- le pool de connexion créé par défaut est de type **HikariCP**
 
 ### Introduction à Spring Data et Spring Data JDBC
 
