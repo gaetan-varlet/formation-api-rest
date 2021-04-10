@@ -225,7 +225,7 @@ ApplicationContext context = new ClassPathXmlApplicationContext("applicationCont
 ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
 ```
 
-Il est possible de se passer du fichier XML, mails il est également possible de l'utiliser de manière complétaire en ajoutant une annotation `@ImportResource`
+Il est possible de se passer du fichier XML, mails il est également possible de l'utiliser de manière complémentaire en ajoutant une annotation `@ImportResource`
 
 ```java
 @Configuration
@@ -587,7 +587,7 @@ public class UserController {
     - il est compatible avec tous les moteurs de BDD
     - pour se connecter à un serveur de BDD, DBeaver va utiliser un driver JDBC (une bibliothèque Java) qu'il va télécharger via Maven
 
-### Spring JDBC
+### Introduction à Spring JDBC
 
 - pour utiliser une base MySQL, il faut ajouter dans le projet java le driver MySQL, en scope *runtime* car les classes du driver ne sont pas utilisées directement dans le code de l'application
 - il faut également une bibliothèque pour établir une connexion avec la base, par exemple **Spring JDBC** (`spring-boot-starter-jdbc`), à ne pas confondre avec **Spring Data JDBC**
@@ -598,7 +598,7 @@ public class UserController {
 @Bean
 public DataSource getDataSource(){
     DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
-    dataSourceBuilder.driverClassName("com.mysql.cj.jdbc.Driver");
+    dataSourceBuilder.driverClassName("com.mysql.jdbc.Driver");
     dataSourceBuilder.url("");
     dataSourceBuilder.username("");
     dataSourceBuilder.password("");
@@ -618,7 +618,119 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 - s'il y a plusieurs BDD, il faudra utiliser des Bean de configuration
 - le pool de connexion créé par défaut est de type **HikariCP**
 
+### Utilisation de JdbcTemplate
+
+- le fait d'avoir une classe annotée `@Repository` donne accès à un objet `JdbcTemplate`, qui permet d'effectuer des requêtes, en exploitant la *Datasource*, en récupérant une connexion, et gérer les potentielles erreurs
+- exemple de récupération d'une liste d'objets avec la méthode `query(String requete, RowMapper<User> rowMapper)`, avec un rowMapper qui itère sur le ResultSet et crée des objets en conséquence
+
+```java
+@Repository
+public class UserRepository {
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public List<User> findAll() {
+        return jdbcTemplate.query("SELECT * FROM USER", (rs, rowNum) -> new User(rs.getInt("ID"), rs.getString("NOM"),
+                rs.getString("PRENOM"), rs.getString("EMAIL"), rs.getInt("AGE")));
+    }
+}
+```
+
+- exemple de récupération d'un seul objet en fonction de son id avec la méthode `queryForObject(String requete, Object[] args, RowMapper<User> rowMapper)`
+
+```java
+public User findById(Integer id) {
+    return jdbcTemplate.queryForObject("SELECT * FROM USER WHERE id= ?", new Object[] { id },
+        (rs, rowNum) -> new User(rs.getInt("ID"), rs.getString("NOM"), rs.getString("PRENOM"), rs.getString("EMAIL"), rs.getInt("AGE")));
+}
+```
+
+- exemple de requête générique pour effectuer une mise à jour avec `update()` (insert, update, delete), proche de `executeUpdate()` en JDBC natif
+- pour récupérer l'identifiant auto-généré, il faut passer par une instance de `PreparedStatement`
+
+```java
+public User create(User user) {
+    // objet qui permet de récupérer la clé autogénéré
+    KeyHolder kh = new GeneratedKeyHolder();
+    jdbcTemplate.update(connection -> {
+        // RETURN_GENERATED_KEYS indique que le PS doit être utilisé pour récupérer les
+        // clés autogénérés
+        PreparedStatement ps = connection.prepareStatement(
+                "INSERT INTO USER(id, nom, prenom, email, age) VALUES (?,?,?,?,?)",
+                Statement.RETURN_GENERATED_KEYS);
+        ps.setInt(1, user.getId());
+        ps.setString(2, user.getNom());
+        ps.setString(3, user.getPrenom());
+        ps.setString(4, user.getEmail());
+        ps.setInt(5, user.getAge());
+        return ps;
+    }, kh);
+    // récupération de la clé autogénéré et affectation à l'id de l'objet
+    user.setId(kh.getKey().intValue());
+    return user;
+}
+```
+
 ### Introduction à Spring Data et Spring Data JDBC
+
+- Spring JDBC est assez flexible, mais la contrepartie est que c'est assez verbeux
+- on aimerait écrire moins de code sans forcément utiliser un ORM (Hibernate) car utiliser Hibernate est identifié comme la principale cause d'échec de projets Java
+- il existe une solution qui permet de se limiter à JDBC tout en écrivant moins de code : **Spring Data JDBC**, qui est un sous-ensemble de **Spring Data**
+- **Spring Data** propose une manière d'aborder le concept de *Repository* commune à toute solution technologique de persistance (JDBC, JPA, NoSQL...)
+- cette couche d'abstraction exploite intensivement le principe de **Convention Over Configuration**, ce qui veut dire que plutôt d'ajouter des fichiers XML ou des annotations pour expliquer à Spring comment l'application fonctionne, on va écrire le code de manière standardisé, notamment avec une orthographe précise, ce qui va alléger le code
+- ces principes sont très intéressants au niveau des *Repository* car ces derniers contiennent toujours la même chose : des méthodes de CRUD
+- pour **Spring Data JDBC**, il s'agit d'appliquer les principes de *Spring Data* à *JDBC*
+    - on peut le voir comme un *ORM* beaucoup plus léger, sans notion de cache, de lazy-loading, ou de flush...
+    - c'est un projet assez récent, plus récent que Spring Data JPA
+- il faut bien maîtriser le *Domaine Driver Design* (**DDD**), car il est imposé par *Spring Data JDBC*
+    - lE DDD est inévitable pour modulariser une application, ou encore pour les microservices
+    - impact sur la façon d'écrire les entités (liens entre les entités seraient matérialisés par des identifiants et non des objets)
+
+### Spring Data JDBC : Model et Repository
+
+- il faut utiliser le starter `spring-boot-starter-data-jdbc`
+- il faut annoter l'identifiant de notre entité avec `@Id` de Spring Data, psa besoin de `@Entity` comme en JPA
+- par défaut, le camel case des propriétés Java est converti en snake case (monNom -> mon_nom). On parle de **NamimgStrategy**, qu'on peut changer
+- s'il y a des exceptions, on peut utiliser `@Column`
+- création d'une interface pour le repository qui étend `PagingAndSortingRepository` ou `CrudRepository`
+- grâce à `@EnableJdbcRepositories` dont on bénéficie automatiquement grâce au starter, Spring va retrouver toutes les interfaces qui étendent notre interface et une nouvelle classe qui implémente l'interface va être écrite à la volée et injectée dans les services
+
+```java
+public class User {
+    @Id // import org.springframework.data.annotation.Id;
+    private Integer id;
+    @Column("name")
+    private String nom;
+    private String prenom;
+}
+
+@Repository
+public interface UserRepository extends CrudRepository<User, Integer> {
+    // PagingAndSortingRepository ou CrudRepository ou Repository
+}
+
+// Exemple d'utilisation
+userRepository.findAll();
+userRepository.findById(id);
+userRepository.save(user);
+```
+
+### Spring Data JPA avec Hibernate
+
+- **Spring Data JPA** est l'équivalent de *Spring Data JDBC* mais pour **JPA**
+- il s'agit d'exploiter via Spring Data l'API de persistance de Java EE JPA
+- utilisation du starter `spring-boot-starter-data-jpa`
+
+
+### Spring Data JPA : Modèle de données plus complexe
+### Spring Data JPA : Jackson et le Open Session In View (OSIV)
+### Nullifier les proxy avec Jackson Hibernate5Module
+### Solution 1 : La déproxification à postériori (N+1 Select)
+### Solution 2 : Les fetch à priori dans les repository (@Query ou @EntityGraph)
+### Open Session / EntityManager in View, est-ce une bonne idée ?
+### Spring Data JPA : Ecriture en base de données
+### Introduction à la gestion transactionnelle
+
 
 ## Architectures "Cloud native" et microservices
 
@@ -640,3 +752,13 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 - d'un point de vue applicatif, il va falloir concevoir les applications différemments : on va voir comment concevoir les microservices et comment les faire interagir dans un environnement cloud compatible
 
 ### Découpage en microservices
+### Les entites métier et les données
+### Premier endpoint (micro)service
+### Préparation du microservice consommateur
+### Exploiter le service avec RestTemplate
+### Associations entre entites et API ReST
+### Spring cloud et Client Side Service Discovery avec Netflix Eureka
+### Enregistrement des clients du discovery server
+### Obtenir l'emplacement d'un microservice avec @LoadBalanced
+### Expérimenter le load balancing côté client
+### Programmation réactive et WebClient
