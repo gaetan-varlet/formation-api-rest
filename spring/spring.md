@@ -719,17 +719,116 @@ userRepository.save(user);
 
 - **Spring Data JPA** est l'équivalent de *Spring Data JDBC* mais pour **JPA**
 - il s'agit d'exploiter via Spring Data l'API de persistance de Java EE JPA
-- utilisation du starter `spring-boot-starter-data-jpa`
+- utilisation du starter `spring-boot-starter-data-jpa`, qui embarque implicitement l'annotation `@EnableJpaRepositories`
+- utilisation des annotations de JPA
+- utilisation de la même interface que Spring Data JDBC : `CrudRepository`, ou `JpaRepository` qui propose des méthodes en plus
+- au démarrage de l'application, grâce à SpringBoot qui a fait des choix, on peut voir que :
+    - JPA a été utilisé avec l'instanciation de l'EntityManagerFactory avec un *persistence unit* qui a été appelé **default**
+    - l'implémentation de JPA qui a été utilisé est Hibernate
+    - un dialect a été choisi pour nous
+- tous ces choix peuvent être changés
+- ajout de properties pour voir les requêtes SQL dans la log : `spring.data.show-sql=true` et `spring.jpa.properties.hibernate.format_sql=true`
+- les ORM ont la capacité de générer les tables du modèle de données au démarrage de l'application sur la base des annotations placées sur les *Entity*. Avec Hibernate, c'est le mode **ddl-auto**
+- Avec Spring Data, c'est le cas par défaut seulement si c'est une base de données mémoire comme H2 ou HSQL
+- il est possible d'utiliser des fichiers **schema.sql** et **data.sql** pour générer la base de données. Il faut alors également utiliser la property `spring.jpa.hibernate.ddl-auto=none` pour ne pas qu'Hibernate génère lui-même la base et ignore nos fichiers
 
+```java
+@Entity
+public class User {
+    @Id // import javax.persistence.Id;
+    private Integer id;
+    private String nom;
+    private String prenom;
+}
+```
 
 ### Spring Data JPA : Modèle de données plus complexe
-### Spring Data JPA : Jackson et le Open Session In View (OSIV)
+
+![Modèle de données](spring/modele-donnees.png "Modèle de données")
+
+Script de BDD correspondant :
+
+```sql
+CREATE TABLE IF NOT EXISTS ADDRESS  (
+  ID BIGINT NOT NULL AUTO_INCREMENT,
+  STREET VARCHAR(50) NOT NULL,
+  STREET_NUMBER VARCHAR(10),
+  CITY VARCHAR(20) NOT NULL,
+  ZIP_CODE VARCHAR(10) NOT NULL,
+  COUNTRY VARCHAR(20) NOT NULL,
+  PRIMARY KEY(ID)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS CUSTOMER  (
+  ID BIGINT NOT NULL AUTO_INCREMENT,
+  NAME VARCHAR(50) NOT NULL,
+  ID_ADDRESS BIGINT NOT NULL,
+  PRIMARY KEY(ID),
+  FOREIGN KEY(ID_ADDRESS) REFERENCES ADDRESS(ID)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS PRODUCT  (
+  ID BIGINT NOT NULL AUTO_INCREMENT,
+  NAME VARCHAR(50) NOT NULL,
+  PRIMARY KEY(ID)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS CATEGORY  (
+  ID BIGINT NOT NULL AUTO_INCREMENT,
+  NAME VARCHAR(50) NOT NULL,
+  PRIMARY KEY(ID)
+) ENGINE=InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS PRODUCT_CATEGORIES  (
+ID_PRODUCT BIGINT NOT NULL,
+ID_CATEGORY BIGINT NOT NULL,
+PRIMARY KEY(ID_PRODUCT, ID_CATEGORY),
+FOREIGN KEY(ID_PRODUCT) REFERENCES PRODUCT(ID),
+FOREIGN KEY(ID_CATEGORY) REFERENCES CATEGORY(ID)
+) ENGINE=InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS INVOICE  (
+  INVOICE_NUMBER BIGINT NOT NULL AUTO_INCREMENT,
+  /*CUSTOMER_NAME VARCHAR(50) NOT NULL,*/
+  ORDER_NUMBER VARCHAR(13),
+  ID_CUSTOMER BIGINT NOT NULL,
+  PRIMARY KEY(INVOICE_NUMBER),
+  FOREIGN KEY(ID_CUSTOMER) REFERENCES CUSTOMER(ID)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS INVOICE_LINE  (
+  ID BIGINT NOT NULL AUTO_INCREMENT,
+  QUANTITY SMALLINT NOT NULL,
+  ID_PRODUCT BIGINT NOT NULL,
+  INVOICE_NUMBER BIGINT NOT NULL,
+  PRIMARY KEY(ID),
+  FOREIGN KEY(INVOICE_NUMBER) REFERENCES INVOICE(INVOICE_NUMBER),
+  FOREIGN KEY(ID_PRODUCT) REFERENCES PRODUCT(ID)
+) ENGINE=InnoDB;
+```
+
+### Spring Data JPA : Jackson et l'anti-pattern Open Session In View (OSIV)
 ### Nullifier les proxy avec Jackson Hibernate5Module
 ### Solution 1 : La déproxification à postériori (N+1 Select)
 ### Solution 2 : Les fetch à priori dans les repository (@Query ou @EntityGraph)
 ### Open Session / EntityManager in View, est-ce une bonne idée ?
-### Spring Data JPA : Ecriture en base de données
-### Introduction à la gestion transactionnelle
+
+- chaque solution proposée au problème de déproxyfication à pour effet de ne plus déclencher aucune requête SQL lors de la transformation des entités en JSON
+- il n'est donc plus nécessaire d'avoir une session ou un EntityManager ouvert dans le controller
+- il est donc possible de passer la property `spring.jpa.open-in-view` à false, ce qui est contraire au comportement par défaut de Spring Boot
+- dans la log, il est indiqué sous forme de warning, que pour que Spring Boot soit simple à utiliser, le paradigme **open-session-in-view** est activé, au risque de déproxyfier les données et de faire chuter les performances
+- la bonne pratique est plutôt de mettre la property à false
+
+### Spring Data JPA : Ecriture en base de données et introduction à la gestion transactionnelle
+
+- lorsqu'on enregistre une entité, si elle contient une autre entité, il faut alors enregistrer au préalable cette entité
+- il est possible de le faire automatiquement en mettant dans l'annotation `@ManyToOne(cascade = CascadeType.PERSIST)`, mais il vaut mieux ne pas le faire entre 2 aggrégats
+- si la première requête a fonctionné et que la deuxième échoue, il ne faut pas que la première requête soit persistée : on parle de **gestion transactionnelle**
+- pour rendre une méthode transactionnelle, il faut l'annoter `@Transactional`. Une transaction est ouverte avant l'exécution de la méthode, et un commit sera effectué à la fin de la méthode si tout c'est bien passé. Si une exception survient, un rollback est effectuée
+- lors d'une erreur dans une transaction, JDBC reçoit une `SQLException` que Spring encapsule dans une `DataAccessException`
+- pour comprendre correctement le fonctionnement des transactions avec Spring, il faut étudier le développement orienté aspect (AOP with Spring)
 
 
 ## Architectures "Cloud native" et microservices
