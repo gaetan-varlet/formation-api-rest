@@ -13,8 +13,8 @@ css/reveal.min.css
 js/reveal.min.js
 *.log
 logs/
-applications/**/target
-applications/**/.settings
-applications/**/.project
-applications/**/.classpath
+**/target
+**/.settings
+**/.project
+**/.classpath
 
