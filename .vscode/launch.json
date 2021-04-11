@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch DemoApplication",
+            "request": "launch",
+            "mainClass": "com.example.demo.DemoApplication",
+            "projectName": "demo"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - HttpRequestHttpClient",
             "request": "launch",
             "mainClass": "request.HttpRequestHttpClient",
@@ -12,13 +19,6 @@
             "name": "CodeLens (Launch) - HttpRequestJava",
             "request": "launch",
             "mainClass": "request.HttpRequestJava",
-            "projectName": "application-client"
-        },
-        {
-            "type": "java",
-            "name": "CodeLens (Launch) - HttpRequestRestTemplate",
-            "request": "launch",
-            "mainClass": "request.HttpRequestRestTemplate",
             "projectName": "application-client"
         },
         {
