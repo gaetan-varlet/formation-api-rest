@@ -817,7 +817,7 @@ CREATE TABLE IF NOT EXISTS INVOICE_LINE  (
     - si la session est ouverte (ce qui est le cas avec Spring Boot, on parle de **OpenSessionInView** ou **OpenEntityManagerInView**), des requêtes complémentaires sont effectuées et le proxy est complété des nouvelles informations obtenues
     - dans le cas où la session est ouverte, il y a quand même une erreur car Jackson essaie de convertir également les propriétés des proxy, comme **HibernateLazyInitializer**, alors que cette propriété n'intéresse pas le client. Il faut donc dire à Jackson de ne pas transformer cette propriété en ajoutant `@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})` sur tous les objets *Entity* qui posent problème (une autre propriété `handler` pose le même problème)
     - en faisant cela, Jackson va déproxyfier tous les sous-objets et faire énormément de requêtes, ce qui va ramener probablement plus d'informations qu'on a besoin, ce qui va probablement dégrader les performances
-- une solution est d'utiliser le paradigme DTO (Data Transfer Object) qui va consister dans la couche de service à convertir les *Entity* en d'autres objets taillé sur mesure pour les interfaces utilisateurs avec que les propriétés uniquement nécessaires. Cette solution est très populaire mais assez verbeuse
+- une solution est d'utiliser le **paradigme DTO** (Data Transfer Object) qui va consister dans la couche de service à convertir les *Entity* en d'autres objets taillé sur mesure pour les interfaces utilisateurs avec que les propriétés uniquement nécessaires. Cette solution est très populaire mais assez verbeuse
 
 ### Nullifier les proxy avec Jackson Hibernate5Module
 
@@ -836,7 +836,44 @@ public Hibernate5Module hibernateModule(){
 ```
 
 ### Solution 1 : La déproxification à postériori (N+1 Select)
+
+- la bonne pratique est de déproxifier dans la couche de service, en appelant les sous-objects, ce qui va forcer l'ORM à initialiser le proxy
+- cette solution est flexible, car on choisit dans la couche de service quelles sont les propriétés qu'on va initialiser
+- cependant, cela va faire beaucoup de requêtes secondaires, ce qui est dangereux pour les performances de l'application
+
+```java
+List<Invoice> invoices = invoiceRepository.findAll();
+// ceci permet d'initialiser le client de chaque facture
+invoices.forEach(invoice -> invoice.geCustomer().getName());
+```
+
 ### Solution 2 : Les fetch à priori dans les repository (@Query ou @EntityGraph)
+
+- solution qui consiste à ne pas initialiser les proxys dans la couche de service, mais réaliser des requêtes adaptés au niveau des repository
+- exemple de redéfinition de la méthode `findAll()` de `InvoiceRepository` qui va aller chercher les clients en faisant une jointure
+
+```java
+@Query("SELECT invoice from Invoice invoice inner join fetch invoice.customer")
+Iterable<Invoice> findAll();
+```
+
+- cette méthode fonctionne bien mais c'est dommage de devoir écrire un `@Query` pour forcer la requête à faire la jointure
+- il existe une deuxième méthode sans écrire la requête en utilisant **EntityGraph**
+
+```java
+@Entity
+ // nommage pour l'utiliser ailleurs
+ // déclaration qu'il est possible de faire une requête sur invoice avec un fetch sur customer si cela est explicitement demandé
+@NamedEntityGraph(name = "invoice.customer", attributeNodes = @NamedAttributeNode("customer"))
+public class Invoice{
+}
+
+// dans le repo, utilisation de @EntityGraph avec le nom de l'entityGraph qu'on veut suivre
+// le type de requête qu'on veut effectuer : FETCH ou LOAD
+@EntityGraph(value = "invoice.customer", type = EntityGraph.EntityGraphType.FETCH)
+Iterable<Invoice> findAll();
+```
+
 ### Open Session / EntityManager in View, est-ce une bonne idée ?
 
 - chaque solution proposée au problème de déproxyfication à pour effet de ne plus déclencher aucune requête SQL lors de la transformation des entités en JSON
