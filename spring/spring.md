@@ -810,7 +810,31 @@ CREATE TABLE IF NOT EXISTS INVOICE_LINE  (
 ```
 
 ### Spring Data JPA : Jackson et l'anti-pattern Open Session In View (OSIV)
+
+- lorsqu'une entité contient elle-même une autre entité qui est chargé en *Lazy Loading*, cette dernière n'est pas récupéré par l'ORM, elle va être sous forme de **HibernateProxy**, qui ne contient que l'identifiant de l'entité
+- Jackson veut convertir cette sous-entité en JSON. Lorsqu'on accède aux propriétés d'un proxy Hibernate en lecture, l'ORM va vouloir relancerde nouvelles requêtes vers la base pour obtenir de nouvelles informations
+    - si la session (EntityManager) qui a servi a faire la lecture est fermée, il va y avoir une `LazyInitializationException` qui dit qu'il n'est pas possible d'effectuer ces requêtes hors session
+    - si la session est ouverte (ce qui est le cas avec Spring Boot, on parle de **OpenSessionInView** ou **OpenEntityManagerInView**), des requêtes complémentaires sont effectuées et le proxy est complété des nouvelles informations obtenues
+    - dans le cas où la session est ouverte, il y a quand même une erreur car Jackson essaie de convertir également les propriétés des proxy, comme **HibernateLazyInitializer**, alors que cette propriété n'intéresse pas le client. Il faut donc dire à Jackson de ne pas transformer cette propriété en ajoutant `@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})` sur tous les objets *Entity* qui posent problème (une autre propriété `handler` pose le même problème)
+    - en faisant cela, Jackson va déproxyfier tous les sous-objets et faire énormément de requêtes, ce qui va ramener probablement plus d'informations qu'on a besoin, ce qui va probablement dégrader les performances
+- une solution est d'utiliser le paradigme DTO (Data Transfer Object) qui va consister dans la couche de service à convertir les *Entity* en d'autres objets taillé sur mesure pour les interfaces utilisateurs avec que les propriétés uniquement nécessaires. Cette solution est très populaire mais assez verbeuse
+
 ### Nullifier les proxy avec Jackson Hibernate5Module
+
+- une autre solution, est de continuer à renvoyer des *Entity*, mais que leurs propriétés soient mises à null avant que ces entités soient transformées en JSON
+- pour cela, il faut ajouter la dépendance `jackson-datatype-hibernate5`, et ajouter un *Bean* de configuration `Hibernate5Module`
+- on peut maintenant enlever les `JsonIgnoreProperties`, car les proxys seront mis à null
+- avec cette solution, on ne récupère plus du tout les sous-entités. Pour choisir, ce qu'on veut récupérer, il y a 2 solutions :
+    - **initialisation des proxy à postériori** : déproxifier les proxys qui nous intéresse avant transformation en json. C'est la solution plus flexible mais moins performante
+    - **fetch à priori** : faire des requêtes plus adaptées, pour lire les informations qui nous intéresse lors de la requête original. C'est la solution la plus performante mais pas la plus flexible
+
+```java
+@Bean
+public Hibernate5Module hibernateModule(){
+    return new Hibernate5Module();
+}
+```
+
 ### Solution 1 : La déproxification à postériori (N+1 Select)
 ### Solution 2 : Les fetch à priori dans les repository (@Query ou @EntityGraph)
 ### Open Session / EntityManager in View, est-ce une bonne idée ?
