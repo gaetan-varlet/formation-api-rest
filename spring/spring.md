@@ -912,7 +912,27 @@ Iterable<Invoice> findAll();
 - d'un point de vue applicatif, il va falloir concevoir les applications différemments : on va voir comment concevoir les microservices et comment les faire interagir dans un environnement cloud compatible
 
 ### Découpage en microservices
+
+- monolithe : un seule livrable à déployer
+- découper l'applicaiton en plusieurs petites applications autonomes capables d'interagir avec les autres
+- logique à suivre pour faire ce découpage :
+    - la notion d'**Agrégat** va être importante, on peut éventuellement faire un microservice par Agrégat
+    - on peut aussi s'intéresser à la notion de montée en charge d'une partie de l'application
+    - également à la notion de montée de version de chaque partie
+    - plus il va y avoir de microservices, plus il va y avoir d'échanges en web services pour effectuer une opération, plus les performances s'en ressentent
+- il ne faut pas forcément faire un module maven par microservice
+    - l'organisation du code source est un problème distinct
+    - il est par exemple possible de converser un module core pour partager du code, et une application Spring Boot par module à déployer
+- chaque application va avoir son serveur d'application : il faut penser, en local, à es démarrer sur des ports différents
+- Martin Fowler, qui a popularisé le concept d'inversion de contrôle, conseille d'écrire dans un premier l'application sous forme de monolithe, avant de la découper en microservices
+
 ### Les entites métier et les données
+
+- les classes `Entity` sont utilisées par plusieurs microservices : ceux qui fournissent les sercives, et ceux qui les consomment. Il vaut mieux laisser les classes dans un module `core` pour éviter les dépendances entre microservices
+- précision à Spring Boot quels packages scannés avec l'annotation `@EntityScan("")` pour ne scanner que les packages contenant les entités nécessaires à ce microservice. En général, lorsqu'on travaille en **DDD**, les entités sont répartis dans des packages relatif à l'agrégat
+- il faut se servir des principes du **DDD**, et casser les relations entre objets qui ne font pas parti du même agrégat, car on ne peut plus mappper une propriété qui n'est pas géré par le microservice. Il est en revanche possible d'ajouter une propriété qui va référencer l'identifiant de cet objet
+- chaque microservice va être responsable de ses données et aura sa propre base
+
 ### Premier endpoint (micro)service
 ### Préparation du microservice consommateur
 ### Exploiter le service avec RestTemplate
