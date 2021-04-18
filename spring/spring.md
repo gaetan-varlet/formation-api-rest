@@ -934,7 +934,24 @@ Iterable<Invoice> findAll();
 - chaque microservice va être responsable de ses données et aura sa propre base
 
 ### Premier endpoint (micro)service
+
+- création d'un endpoint qui permet de récupérer les informations d'un client pour son identifiant
+- ce service sera appelé par le microservice Facture pour récupérer les informations du client associé à la facture
+
 ### Préparation du microservice consommateur
+
+- récupération du client correspondant à l'idClient de la facture
+- ajout d'une option à notre bean `Hibernate5Module` pour que la transformation en JSON par Jackson se fasse sur les propriétés annotées `@Transient`, car elle ne se fait pas par défaut avec *Hibernate5Module*
+
+```java
+@Bean
+public Hibernate5Module hibernateModule(){
+    Hibernate5Module module =  new Hibernate5Module();
+    module.disable(Hibernate5Module.Feature.USE_TRANSIENT_ANNOTATION);
+    return module;
+}
+```
+
 ### Exploiter le service avec RestTemplate
 ### Associations entre entites et API ReST
 ### Spring cloud et Client Side Service Discovery avec Netflix Eureka
