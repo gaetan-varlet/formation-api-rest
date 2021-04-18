@@ -935,8 +935,8 @@ Iterable<Invoice> findAll();
 
 ### Premier endpoint (micro)service
 
-- création d'un endpoint qui permet de récupérer les informations d'un client pour son identifiant
-- ce service sera appelé par le microservice Facture pour récupérer les informations du client associé à la facture
+- création d'un endpoint qui permet de récupérer les informations d'un client pour son identifiant dans le microservice *Client*
+- ce service sera appelé par le microservice *Facture* pour récupérer les informations du client associé à la facture
 
 ### Préparation du microservice consommateur
 
@@ -953,7 +953,25 @@ public Hibernate5Module hibernateModule(){
 ```
 
 ### Exploiter le service avec RestTemplate
+
+- récupération des informations sur le *Client* dans le microservice *Facture* en faisant une requête HTTP sur le microservice *Client*
+
 ### Associations entre entites et API ReST
+
+- Le problème des associations entre entités avec les API ReST
+    - association inter services (par exemple facture et client)
+        - s'il y a plusieurs clients, possibilité de faire une seule requête HTTP pour récupérer les infos de tous les client en une seule requête pour gagner du temps
+        - généralement, les microservices sont déployés au même endroit, ce qui fait que les temps de communication (serveur à serveur), est réduit
+    - association intra services (par exemple client et adresse)
+        - possibilité d'ajouter un `@EntityGraph` pour récupérer le sous-objet lors de la requête SQL
+        - cependant, cela récupérera le sous-objet à chaque fois qu'on appelle le microservice, ce qui n'est pas forcément nécessaire
+        - autre possibilité : créer un autre endpoint pour récupérer l'adresse du client
+        - si on veut récupérer l'id de l'adresse dans l'objet *Adresse* de l'objet *Client*, il faut configurer `Hibernate5Module` pour qu'il intialise l'objet *Adresse* (nul par défaut) en renseignant l'id récupéré dans dans la table *Client*
+
+```java
+module.enale(Hibernate5Module.Feature.SERIALIZE_IDENTIFIER_FOR_LAZY_NOT_LOADED_OBJECTS);
+```
+
 ### Spring cloud et Client Side Service Discovery avec Netflix Eureka
 ### Enregistrement des clients du discovery server
 ### Obtenir l'emplacement d'un microservice avec @LoadBalanced
