@@ -973,7 +973,56 @@ module.enale(Hibernate5Module.Feature.SERIALIZE_IDENTIFIER_FOR_LAZY_NOT_LOADED_O
 ```
 
 ### Spring cloud et Client Side Service Discovery avec Netflix Eureka
+
+- lors de  l'appel à des microservices, il ne faut pas que les URL soient marqués en dur, surtout dans un environnement cloud, où les emplacements serveurs sont inconnus et peuvent changer régulièrement
+- de plus, acec les microservices, avec la répartition de la charge (**Load Balancing**), un microservice va exister en plusieurs exemplaires sur plusieurs serveurs, donc derrière plusieurs URL
+- les URL changent aussi selon l'environnement (développement, qualification, production...)
+- pour résoudre ces problèmes, on va faire appel à la technique de **Service Discovery**, mis en oeuvre par un **discovery server**
+- **Spring Cloud** met en oeuvre une technique appelée **Client Side Service Discovery**, qui permet de rechercher et découvrir des URL dynamiquement, en fournissant un nom symbolique associé à ces URL (comme les serveurs DNS)
+- il existe de multiples solutions, Spring permet d'interagir avec la technologie de notre choix grâce à une couche d'abstraction
+- utilisation de la solution la plus populaire : **Eureka**, solution opensource de Netflix
+    - **Eureka Server** va gérer la partue *discovery server*
+    - **Eureka Client** va gérer la partie *microservice*
+- seul les microservices fournisseurs de services doivent s'enregistrer auprès du *discovery server*
+- le *Eureka Server* va être une application autonome qui ne sert qu'à faire office de *Service Discovery*
+    - création d'une application Spring Boot qui exploite la bibliothèque *Eureka Server*
+    - ajout de l'annotation `@EnableEurekaServer`, sur la classe contenant le main de l'application par exemple
+    - avant de démarrer l'application, il faut désactiver le fait que l'application, en plus d'être un serveur Eureka, est aussi un client Eureka, et va donc essayer de s'enregistrer auprès du serveur. Ajout de properties :
+    ```properties
+    eureka.client.register-with-eureka=false
+    eureka.client.fetch-registry=false
+    ```
+    - serveur d'application web, fonctionnant avec Tomcat : possibilité de changer le port et d'utiliser le port standard pour les *discovery server* : `server.port=8761`
+    - une interface utilisateur est également fournie à la racine du serveur, et donne des informations notamment la liste des clients du serveur actuellement enregistrés
+
 ### Enregistrement des clients du discovery server
+
+- seul les microservices fournisseurs de services doivent s'enregistrer auprès du *discovery server* (par exemple, Client et Produit)
+- le microservice *Facture*, qui consomme ses services, n'a pas besoin de s'enregistrer auprès du *discovery server*
+- toutefois, ce microservice peut s'enregistrer si on estime que ces services pourraient être exploités par une autre application
+- ajout d'une dépendance dans chaque microservice pour interagir avec le *discovery server* : **Eureka Discovery Client**
+- il n'est plus nécessaire d'ajouter l'annotation `@EnableEurekaClient` grâce à l'autoconfiguration
+- l'application va automatiquement essayer de s'enregistrer auprès du *discovery server*. Il faut juste préciser l'emplacement de ce serveur via la property : `eureka.client.service-url.default-zone=http://localhost:8761/eureka/`
+- ajout d'une property pour nommer l'application `spring.application.name=toto`, pour qu'on la reconnaisse sur le *discovery server*
+
 ### Obtenir l'emplacement d'un microservice avec @LoadBalanced
+
+- maintenant que les services sont connus du *discovery server*, il va aider les clients à les contacter via leur emplacement réel
+- dans les clients appelant ses microservices, au lieu de marquer l'hôte et le port du microservice, par exemple `http://localhost:8080/customer`, il faut marquer le nom de l'hôte en question à la place : `http://customer-service/customer`
+- il faut également ajouter l'annotation `@LoadBalanced` pour que ça fonctionne sur le `WebClient` utilisé pour faire les requêtes HTTP
+- le *discovery server* va alors être contacté pour obtenir l'adresse réelle sans rien avoir à faire
+
 ### Expérimenter le load balancing côté client
+
+- ce mécanisme permet également de mettre en place un *load balancing* de microservices
+- de base, une seule instance de chaque microservice est démarré
+- il est possible de démarrer via un IDE ou en ligne de commande une deuxième instance d'un microservice en changeant le port
+- notre microservice client va alors appeler l'une des instances, on parle de mécanisme de **répartition de charge**, qui est ici à l'initiative du client
+
 ### Programmation réactive et WebClient
+
+- la classe **WebClient**, qui est une alternative à **RestTemplate**, car ce dernier est voué à disparaître
+- **WebClient** exploite la programmation réactive
+- **Spring Reactive Web** apporte la bibliothèque **spring-boot-starter-webflux**
+- au lieu de renvoyer une liste d'objets, un service va envoyer un flux `Flux<T>` qui va être complété de manière asynchrone
+- possibilité de faire des requêtes HTTP en parallèle, grâce au multithreading
