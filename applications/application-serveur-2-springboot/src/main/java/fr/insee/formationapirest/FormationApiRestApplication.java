@@ -5,8 +5,6 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.representations.AccessToken;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -16,8 +14,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 @SpringBootApplication
 @EnableCaching
@@ -31,7 +27,7 @@ public class FormationApiRestApplication extends SpringBootServletInitializer {
 		// properties pour savoir où s'enregistrent les logs
 		System.setProperty("dossierLog", "./logs");
 		System.setProperty("nomFichierLog", "formation-api-rest");
-		//permet de colorer les logs sous Windows
+		// permet de colorer les logs sous Windows
 		System.setProperty("log4j.skipJansi", "false");
 		// permet de rendre rendre asynchrone toutes les logs sans toucher au fichier de conf log4j2.xml
 		System.setProperty("Log4jContextSelector", "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
@@ -46,18 +42,7 @@ public class FormationApiRestApplication extends SpringBootServletInitializer {
 			"spring.config.name="+NOM_FICHIER_PROPERTIES // définition de la property pour le fonctionnement sur les plateformes du CEI
 			).sources(FormationApiRestApplication.class);
 	}
-	
-	@Bean
-	@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-	public AccessToken getAccessToken() {
-		HttpServletRequest httpRequest = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-		KeycloakSecurityContext securityContext = (KeycloakSecurityContext) httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
-		if(securityContext != null) {
-			return securityContext.getToken(); 
-		} else {
-			return new AccessToken();
-		} 
-	}
+
 	
 	@Bean
 	@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
