@@ -34,61 +34,63 @@ public class VinController {
 	private static final Logger log = LoggerFactory.getLogger(VinController.class);
 
 	@Autowired
-	VinService vinService;
+	private VinService vinService;
 
 	@GetMapping("appellation")
-	public List<String> getListeAppellation(){
+	public List<String> getListeAppellation() {
 		return vinService.getListeAppellation();
 	}
 
 	@Operation(summary = "Obtenir tous les vins, ou éventuellement uniquement les vins d'une appellation avec le paramètre appellation")
 	@RequestMapping(method = RequestMethod.GET)
-	public List<Vin> findAll(@RequestParam(required=false) String appellation){
+	public List<Vin> findAll(@RequestParam(required = false) String appellation) {
 		return vinService.findAll(appellation);
 	}
 
 	@GetMapping("/csv")
-	public void getAllCsv(HttpServletResponse response) throws IOException{
+	public void getAllCsv(HttpServletResponse response) throws IOException {
 		String nomFichier = "ma-cave";
 
-		// en-tête qui permet de préciser au navigateur s'il doit afficher le contenu (inline) ou le télécharger (attachment)
-		response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", nomFichier+".csv"));
-		// aide le navigateur à savoir quel logiciel peut ouvrir le type de contenu téléchargé
+		// en-tête qui permet de préciser au navigateur s'il doit afficher le contenu
+		// (inline) ou le télécharger (attachment)
+		response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", nomFichier + ".csv"));
+		// aide le navigateur à savoir quel logiciel peut ouvrir le type de contenu
+		// téléchargé
 		// et suggère un logiciel pour l'ouvrir une fois le téléchargement terminé
-		response.setContentType("text/csv"); 
+		response.setContentType("text/csv");
 		response.setCharacterEncoding("UTF-8");
 
 		vinService.ecrireVinsDansCsv(response.getWriter(), vinService.findAll(null));
 	}
 
-	@RequestMapping(value="/pageable", method = RequestMethod.GET)
-	public Page<Vin> getAllPageable(Pageable p){
+	@RequestMapping(value = "/pageable", method = RequestMethod.GET)
+	public Page<Vin> getAllPageable(Pageable p) {
 		return vinService.pageable(p);
 	}
 
-	@RequestMapping(value= "/{id}", method = RequestMethod.GET)
-	public Vin getById(@PathVariable Integer id){
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	public Vin getById(@PathVariable Integer id) {
 		return vinService.getById(id);
 	}
 
-	@RequestMapping(value= "/{id}", method = RequestMethod.DELETE)
-	public void deleteById(@PathVariable Integer id){
+	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	public void deleteById(@PathVariable Integer id) {
 		vinService.deleteById(id);
 	}
 
-	@RequestMapping (method = RequestMethod.POST)
-	public ResponseEntity<Void> add(@RequestBody Vin vin){
-		Vin vinAjoute =  vinService.add(vin);
+	@RequestMapping(method = RequestMethod.POST)
+	public ResponseEntity<Void> add(@RequestBody Vin vin) {
+		Vin vinAjoute = vinService.add(vin);
 		URI location = ServletUriComponentsBuilder
-			.fromCurrentRequest()
-			.path("/{id}")
-			.buildAndExpand(vinAjoute.getId())
-			.toUri();
+				.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(vinAjoute.getId())
+				.toUri();
 		return ResponseEntity.created(location).build();
 	}
 
-	@RequestMapping (method = RequestMethod.PUT)
-	public Vin update(@RequestBody Vin vin){
+	@RequestMapping(method = RequestMethod.PUT)
+	public Vin update(@RequestBody Vin vin) {
 		return vinService.update(vin);
 	}
 
