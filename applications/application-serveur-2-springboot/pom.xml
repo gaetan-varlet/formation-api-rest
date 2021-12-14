@@ -166,6 +166,28 @@
 					<argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
 				</configuration>
 			</plugin>
+			<!-- génère un rapport sur la couverture de tests -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.7</version>
+				<executions>
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>default-report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- permet de générer un ZIP -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
