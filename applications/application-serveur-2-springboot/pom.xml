@@ -128,6 +128,12 @@
 			<artifactId>disruptor</artifactId>
 			<version>3.3.6</version>
 		</dependency>
+		<!-- permet d'espionner les requêtes et transactions avec la base -->
+		<dependency>
+			<groupId>p6spy</groupId>
+			<artifactId>p6spy</artifactId>
+			<version>3.9.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -150,6 +156,15 @@
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
+			</plugin>
+			<!-- permet de lancer les tests en UTF-8 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- permet la surcharge de maven-surefire-plugin tout en fonctionnant avec jacoco -->
+					<argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
+				</configuration>
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
