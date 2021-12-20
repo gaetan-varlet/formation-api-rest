@@ -34,7 +34,7 @@ public class FormationApiRestApplication extends SpringBootServletInitializer {
 		// pour des fichiers de properties à charger (ceux définis à la fin sont
 		// prioritaires)
 		return application.properties(
-				"spring.config.location=classpath:/toucan.properties, file:${catalina.base}/webapps/formation.properties",
+				"spring.config.location=classpath:/formation-api-rest.properties, file:${catalina.base}/webapps/formation.properties",
 				"spring.config.name=" + NOM_FICHIER_PROPERTIES
 		// définition de la property pour le fonctionnement sur les plateformes du CEI
 		).sources(FormationApiRestApplication.class);
