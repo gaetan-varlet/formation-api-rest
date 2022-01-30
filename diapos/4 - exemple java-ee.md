@@ -33,7 +33,7 @@
 		<plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-compiler-plugin</artifactId>
-			<version>3.8.1</version>
+			<version>3.9.0</version>
 			<configuration>
 				<release>11</release>
 			</configuration>
@@ -208,7 +208,7 @@ public class CalculJsonServlet extends HttpServlet {
 <dependency>
 	<groupId>com.fasterxml.jackson.core</groupId>
 	<artifactId>jackson-databind</artifactId>
-	<version>2.12.2</version>
+	<version>2.13.1</version>
 </dependency>
 ```
 
@@ -262,17 +262,17 @@ public class CalculJacksonServlet extends HttpServlet {
 <dependency>
 	<groupId>org.glassfish.jersey.containers</groupId>
 	<artifactId>jersey-container-servlet</artifactId>
-	<version>2.33</version>
+	<version>2.35</version>
 </dependency>
 <dependency>
 	<groupId>org.glassfish.jersey.media</groupId>
 	<artifactId>jersey-media-json-jackson</artifactId>
-	<version>2.33</version>
+	<version>2.35</version>
 </dependency>
 <dependency>
 	<groupId>org.glassfish.jersey.inject</groupId>
 	<artifactId>jersey-hk2</artifactId>
-	<version>2.33</version>
+	<version>2.35</version>
 </dependency>
 ```
 

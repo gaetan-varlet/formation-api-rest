@@ -1,42 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.6.1</version>
+		<version>2.6.3</version>
 		<relativePath />
-		<!-- lookup parent from repository -->
 	</parent>
+
 	<groupId>fr.insee</groupId>
 	<artifactId>application-serveur-2-springboot</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>2.0.0</version>
 	<name>application-serveur-2-springboot</name>
 	<description>Formation API Rest : API en Spring Boot</description>
 	<packaging>war</packaging>
 
 	<properties>
-		<formation.version>2.0</formation.version>
 		<java.version>11</java.version>
 	</properties>
 
 	<dependencies>
-		<!-- Indique à Spring Boot que l'on utilise log4j2 et pas logback qui est 
-			proposé par défaut -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-log4j2</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -54,22 +38,16 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.5.13</version>
+			<version>1.6.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-data-rest</artifactId>
-			<version>1.5.13</version>
+			<version>1.6.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ziplet</groupId>
@@ -114,19 +92,7 @@
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
-			<version>2.3.3</version>
-		</dependency>
-		<!-- ajout de la dépendance pour colorer les logs sous Windows -->
-		<dependency>
-			<groupId>org.fusesource.jansi</groupId>
-			<artifactId>jansi</artifactId>
-			<version>1.18</version>
-		</dependency>
-		<!-- ajout de la dépendance pour rendre asynchrone toutes les logs sans toucher au fichier de conf log4j2.xml  -->
-		<dependency>
-			<groupId>com.lmax</groupId>
-			<artifactId>disruptor</artifactId>
-			<version>3.3.6</version>
+			<version>2.3.6</version>
 		</dependency>
 		<!-- permet d'espionner les requêtes et transactions avec la base -->
 		<dependency>
@@ -144,7 +110,6 @@
 				<filtering>true</filtering>
 			</resource>
 		</resources>
-
 		<!-- définit le nom du WAR -->
 		<finalName>ROOT</finalName>
 		<plugins>
@@ -190,6 +155,14 @@
 			<!-- permet de générer un ZIP -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.3.0</version>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/resources/assembly-web.xml</descriptor>
+					</descriptors>
+					<!-- définit le nom du ZIP, par défaut même nom que le WAR -->
+					<finalName>formation-api</finalName>
+				</configuration>
 				<executions>
 					<execution>
 						<id>make-assembly</id>
@@ -197,12 +170,6 @@
 						<goals>
 							<goal>single</goal>
 						</goals>
-						<configuration>
-							<descriptors>
-								<descriptor>src/main/resources/assembly-web.xml</descriptor>
-							</descriptors>
-							<finalName>formation-api</finalName>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
