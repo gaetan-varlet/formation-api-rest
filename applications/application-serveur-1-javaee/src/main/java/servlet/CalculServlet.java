@@ -9,16 +9,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@SuppressWarnings("serial")
 @WebServlet("/calcul")
 public class CalculServlet extends HttpServlet {
-	
-	public void doGet( HttpServletRequest request, HttpServletResponse response )
-			throws ServletException, IOException{
+
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		int nombre1 = Integer.parseInt(request.getParameter("nombre1"));
 		int nombre2 = Integer.parseInt(request.getParameter("nombre2"));
-		int somme = nombre1+nombre2;
-		int produit = nombre1*nombre2;
+		int somme = nombre1 + nombre2;
+		int produit = nombre1 * nombre2;
 
 		response.setContentType("text/html");
 		response.setCharacterEncoding("UTF-8");
@@ -31,8 +30,8 @@ public class CalculServlet extends HttpServlet {
 		out.println("</head>");
 		out.println("<body>");
 		out.println("<p>Calcul avec affichage de la réponse dans la servlet :</p>");
-		out.println("<p>La somme de "+nombre1+" et "+nombre2+" est égale à "+somme+".</p>");
-		out.println("<p>Le produit de "+nombre1+" et "+nombre2+" est égal à "+produit+".</p>");
+		out.println("<p>La somme de " + nombre1 + " et " + nombre2 + " est égale à " + somme + ".</p>");
+		out.println("<p>Le produit de " + nombre1 + " et " + nombre2 + " est égal à " + produit + ".</p>");
 		out.println("</body>");
 		out.println("</html>");
 	}
