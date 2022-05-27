@@ -27,6 +27,7 @@ public class FormationApiRestApplication extends SpringBootServletInitializer {
 		SpringApplication.run(FormationApiRestApplication.class, args);
 	}
 
+	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		// spring.config.name permet de définir le nom du fichier de properties lu
 		// automatiquement par springboot sous src/main/resources
