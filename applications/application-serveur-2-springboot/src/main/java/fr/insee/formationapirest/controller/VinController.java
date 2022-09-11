@@ -12,11 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -42,7 +44,7 @@ public class VinController {
 	}
 
 	@Operation(summary = "Obtenir tous les vins, ou éventuellement uniquement les vins d'une appellation avec le paramètre appellation")
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public List<Vin> findAll(@RequestParam(required = false) String appellation) {
 		return vinService.findAll(appellation);
 	}
@@ -63,22 +65,22 @@ public class VinController {
 		vinService.ecrireVinsDansCsv(response.getWriter(), vinService.findAll(null));
 	}
 
-	@RequestMapping(value = "/pageable", method = RequestMethod.GET)
+	@GetMapping("pageable")
 	public Page<Vin> getAllPageable(Pageable p) {
 		return vinService.pageable(p);
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	@GetMapping("{id}")
 	public Vin getById(@PathVariable Integer id) {
 		return vinService.getById(id);
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	@DeleteMapping("{id}")
 	public void deleteById(@PathVariable Integer id) {
 		vinService.deleteById(id);
 	}
 
-	@RequestMapping(method = RequestMethod.POST)
+	@PostMapping
 	public ResponseEntity<Void> add(@RequestBody Vin vin) {
 		Vin vinAjoute = vinService.add(vin);
 		URI location = ServletUriComponentsBuilder
@@ -89,7 +91,7 @@ public class VinController {
 		return ResponseEntity.created(location).build();
 	}
 
-	@RequestMapping(method = RequestMethod.PUT)
+	@PutMapping
 	public Vin update(@RequestBody Vin vin) {
 		return vinService.update(vin);
 	}

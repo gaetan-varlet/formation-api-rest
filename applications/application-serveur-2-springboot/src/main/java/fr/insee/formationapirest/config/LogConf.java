@@ -26,7 +26,7 @@ public class LogConf implements HttpTraceRepository{
     @Override
     public List<HttpTrace> findAll() {
         // méthode appelée sur l'url /httptrace : on ne renvoie rien
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
