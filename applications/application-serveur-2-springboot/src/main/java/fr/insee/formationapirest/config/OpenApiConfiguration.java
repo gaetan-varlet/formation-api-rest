@@ -22,27 +22,28 @@ public class OpenApiConfiguration {
 	@Value("${keycloak.realm:}")
 	private String realmName;
 
-	private final String SCHEMEKEYCLOAK = "oAuthScheme";
+	private static final String SCHEMEKEYCLOAK = "oAuthScheme";
+	private static final String REALMS = "/realms/";
 
 	@Bean
 	public OpenAPI customOpenAPIKeycloak() {
 		// configuration pour récupérer un jeton auprès de Keycloak
 		final OpenAPI openapi = new OpenAPI().info(new Info().title("Swagger Formation API REST"));
 		openapi.components(new Components().addSecuritySchemes(SCHEMEKEYCLOAK, new SecurityScheme()
-				.type(SecurityScheme.Type.OAUTH2).in(SecurityScheme.In.HEADER).description("Authentification keycloak")
+				.type(SecurityScheme.Type.OAUTH2).in(SecurityScheme.In.HEADER)
+				.description("Authentification keycloak")
 				.flows(new OAuthFlows().authorizationCode(new OAuthFlow()
-						.authorizationUrl(keycloakUrl + "/realms/" + realmName + "/protocol/openid-connect/auth")
-						.tokenUrl(keycloakUrl + "/realms/" + realmName + "/protocol/openid-connect/token")
-						.refreshUrl(keycloakUrl + "/realms/" + realmName + "/protocol/openid-connect/token")))));
+						.authorizationUrl(keycloakUrl + REALMS + realmName + "/protocol/openid-connect/auth")
+						.tokenUrl(keycloakUrl + REALMS + realmName + "/protocol/openid-connect/token")
+						.refreshUrl(keycloakUrl + REALMS + realmName + "/protocol/openid-connect/token")))));
 		return openapi;
 	}
 
 	@Bean
 	public OperationCustomizer ajouterKeycloak() {
 		// configuration pour que Swagger utilise le jeton récupéré auprès de Keycloak
-		return (operation, handlerMethod) -> {
-			return operation.addSecurityItem(new SecurityRequirement().addList(SCHEMEKEYCLOAK));
-		};
+		return (operation, handlerMethod) -> operation
+				.addSecurityItem(new SecurityRequirement().addList(SCHEMEKEYCLOAK));
 	}
 
 }
