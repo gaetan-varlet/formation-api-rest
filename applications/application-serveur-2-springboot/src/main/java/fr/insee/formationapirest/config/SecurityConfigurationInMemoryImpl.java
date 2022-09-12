@@ -19,35 +19,37 @@ import org.springframework.security.web.authentication.session.NullAuthenticated
 public class SecurityConfigurationInMemoryImpl {
 
 	@Bean
-    public InMemoryUserDetailsManager userDetailsService() {
-        UserDetails user1 = User.withUsername("admin").password("{noop}admin").roles("ADMIN_TOUCAN", "CONSULTANT_TOUCAN").build();
+	public InMemoryUserDetailsManager userDetailsService() {
+		UserDetails user1 = User.withUsername("admin").password("{noop}admin")
+				.roles("ADMIN_TOUCAN", "CONSULTANT_TOUCAN").build();
 		UserDetails user2 = User.withUsername("consul").password("{noop}consul").roles("CONSULTANT_TOUCAN").build();
-        return new InMemoryUserDetailsManager(user1, user2);
-    }
+		return new InMemoryUserDetailsManager(user1, user2);
+	}
 
 	@Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		// désactivation CSRF car API
 		http.csrf().disable();
 		// désactivation des cookies de session
 		http.sessionManagement().sessionAuthenticationStrategy(new NullAuthenticatedSessionStrategy())
-		.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		http.authorizeRequests(authz -> authz
-			// configuration pour Swagger
-			.antMatchers("/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-			// autorisation des requetes OPTIONS
-			.antMatchers(HttpMethod.OPTIONS).permitAll()
-			// configuration des autres requêtes
-			.antMatchers("/url1", "/url2").permitAll()
-			.antMatchers("/vin", "/vin/**").permitAll()
-			.antMatchers("/mon-nom").authenticated()
-			.antMatchers("/environnement").hasRole("ADMIN_TOUCAN")
-			.anyRequest().permitAll());
+				// configuration pour Swagger
+				.antMatchers("/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+				// autorisation des requetes OPTIONS
+				.antMatchers(HttpMethod.OPTIONS).permitAll()
+				// configuration des autres requêtes
+				.antMatchers("/url1", "/url2").permitAll()
+				.antMatchers("/vin", "/vin/**").permitAll()
+				.antMatchers("/mon-nom").authenticated()
+				.antMatchers("/environnement").hasRole("ADMIN_TOUCAN")
+				.anyRequest().permitAll());
 		// mode basic
 		http.httpBasic();
-		// autorisation d'afficher des frames dans l'appli pour afficher la console h2 (risque de clickjacking)
+		// autorisation d'afficher des frames dans l'appli pour afficher la console h2
+		// (risque de clickjacking)
 		http.headers().frameOptions().sameOrigin();
-        return http.build();
-    }
+		return http.build();
+	}
 
 }

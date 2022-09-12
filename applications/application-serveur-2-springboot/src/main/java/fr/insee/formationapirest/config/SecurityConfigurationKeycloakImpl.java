@@ -25,29 +25,28 @@ import org.springframework.security.web.authentication.session.NullAuthenticated
 public class SecurityConfigurationKeycloakImpl {
 
 	@Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		// désactivation CSRF car API
 		http.csrf().disable();
 		// désactivation des cookies de session
 		http.sessionManagement().sessionAuthenticationStrategy(new NullAuthenticatedSessionStrategy())
-			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		// autoriser l'authentification par jeton JWT
-		http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+		http.oauth2ResourceServer(oauth2 -> oauth2
+				.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 		http.authorizeRequests(authz -> authz
-			// configuration pour Swagger
-			.antMatchers("/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-			// autorisation des requetes OPTIONS
-			.antMatchers(HttpMethod.OPTIONS).permitAll().antMatchers("/url1", "/url2").permitAll()
-			// configuration des autres requêtes
-			.antMatchers("/vin", "/vin/**").permitAll().antMatchers("/mon-nom").authenticated()
-			.antMatchers("/environnement").hasRole("ADMIN_TOUCAN")
-			.anyRequest().denyAll());
-		// autorisation d'afficher des frames dans l'appli pour afficher la console h2 (risque de clickjacking)
-		http.headers().frameOptions().sameOrigin();
-        return http.build();
-    }
+				// configuration pour Swagger
+				.antMatchers("/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+				// autorisation des requetes OPTIONS
+				.antMatchers(HttpMethod.OPTIONS).permitAll().antMatchers("/url1", "/url2").permitAll()
+				// configuration des autres requêtes
+				.antMatchers("/vin", "/vin/**").permitAll().antMatchers("/mon-nom").authenticated()
+				.antMatchers("/environnement").hasRole("ADMIN_TOUCAN")
+				.anyRequest().denyAll());
+		return http.build();
+	}
 
-	// personnalisation pour avoir les rôles Keycloak et preffered_username comme principal
+	// config pour avoir les rôles Keycloak et preffered_username comme principal
 	private JwtAuthenticationConverter jwtAuthenticationConverter() {
 		JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
 		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter());
