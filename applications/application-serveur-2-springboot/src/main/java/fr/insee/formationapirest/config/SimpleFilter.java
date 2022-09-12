@@ -25,7 +25,7 @@ public class SimpleFilter implements Filter {
 
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 //		HttpServletResponse httpResponse = (HttpServletResponse) response;
-		log.info("Début de la requête " + httpRequest.getRequestURI());
+		log.info("Début de la requête {}", httpRequest.getRequestURI());
 		
 //		KeycloakSecurityContext securityContext = (KeycloakSecurityContext) httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
 //		if(securityContext !=null) {
@@ -40,6 +40,6 @@ public class SimpleFilter implements Filter {
 //			httpResponse.sendError(403, "accès interdit");
 //		}
 
-		log.info("Fin de la requête " + httpRequest.getRequestURI());
+		log.info("Fin de la requête {}", httpRequest.getRequestURI());
 	}
 }
