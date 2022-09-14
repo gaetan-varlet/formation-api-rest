@@ -34,15 +34,17 @@ public class SecurityConfigurationKeycloakImpl {
 		// autoriser l'authentification par jeton JWT
 		http.oauth2ResourceServer(oauth2 -> oauth2
 				.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+		// gestion des rôles : toutes les requêtes sont authentifiées sans rôle particulié
+		// les droits supplémentaires sont gérés dans les controllers
+		String[] urlsSwagger = { "/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**" };
+		String[] urlsDivers = { "/info", "/healthcheck" };
 		http.authorizeRequests(authz -> authz
-				// configuration pour Swagger
-				.antMatchers("/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-				// autorisation des requetes OPTIONS
-				.antMatchers(HttpMethod.OPTIONS).permitAll().antMatchers("/url1", "/url2").permitAll()
-				// configuration des autres requêtes
-				.antMatchers("/vin", "/vin/**").permitAll().antMatchers("/mon-nom").authenticated()
-				.antMatchers("/environnement").hasRole("ADMIN_TOUCAN")
-				.anyRequest().denyAll());
+				.antMatchers(HttpMethod.OPTIONS).permitAll()
+				.antMatchers(urlsSwagger).permitAll()
+				.antMatchers(urlsDivers).permitAll()
+				.antMatchers("/vin", "/vin/**").permitAll()
+				.antMatchers("/mon-nom").authenticated()
+				.anyRequest().authenticated());
 		return http.build();
 	}
 
@@ -59,20 +61,35 @@ public class SecurityConfigurationKeycloakImpl {
 			@Override
 			@SuppressWarnings({ "unchecked" })
 			public Collection<GrantedAuthority> convert(Jwt source) {
-				return ((Map<String, List<String>>) source.getClaim("realm_access")).get("roles").stream()
-						.map(s -> new GrantedAuthority() {
-							@Override
-							public String getAuthority() {
-								return "ROLE_" + s;
-							}
-
-							@Override
-							public String toString() {
-								return getAuthority();
-							}
-						}).collect(Collectors.toList());
+				String oidcClaimRole = "realm_access.roles";
+				String[] claimPath = oidcClaimRole.split("\\.");
+				Map<String, Object> claims = source.getClaims();
+				try {
+					for (int i = 0; i < claimPath.length - 1; i++) {
+						claims = (Map<String, Object>) claims.get(claimPath[i]);
+					}
+					if (claims == null) {
+						return Collections.emptyList();
+					}
+					List<String> roles = (List<String>) claims
+							.getOrDefault(claimPath[claimPath.length - 1], Collections.emptyList());
+					return roles.stream()
+							.map(s -> new GrantedAuthority() {
+								@Override
+								public String getAuthority() {
+									return "ROLE_" + s;
+								}
+								@Override
+								public String toString() {
+									return getAuthority();
+								}
+							})
+							.collect(Collectors.toList());
+				} catch (ClassCastException e) {
+					// role path not correctly found, assume that no role for this user
+					return Collections.emptyList();
+				}
 			}
 		};
 	}
-
 }

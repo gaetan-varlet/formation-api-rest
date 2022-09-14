@@ -22,13 +22,16 @@ public class OpenApiConfiguration {
 	@Value("${keycloak.realm:}")
 	private String realmName;
 
+	@Value("${info.versionApplication}")
+	private String version;
+
 	private static final String SCHEMEKEYCLOAK = "oAuthScheme";
 	private static final String REALMS = "/realms/";
 
 	@Bean
 	public OpenAPI customOpenAPIKeycloak() {
 		// configuration pour récupérer un jeton auprès de Keycloak
-		final OpenAPI openapi = new OpenAPI().info(new Info().title("Swagger Formation API REST"));
+		final OpenAPI openapi = new OpenAPI().info(new Info().title("Swagger Formation API REST").version(version));
 		openapi.components(new Components().addSecuritySchemes(SCHEMEKEYCLOAK, new SecurityScheme()
 				.type(SecurityScheme.Type.OAUTH2).in(SecurityScheme.In.HEADER)
 				.description("Authentification keycloak")
