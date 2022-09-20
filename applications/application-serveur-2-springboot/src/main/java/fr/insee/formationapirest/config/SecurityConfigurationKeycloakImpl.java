@@ -45,7 +45,8 @@ public class SecurityConfigurationKeycloakImpl {
 				.antMatchers(urlsDivers).permitAll()
 				.antMatchers("/vin", "/vin/**").permitAll()
 				.antMatchers("/mon-nom").authenticated()
-				.anyRequest().authenticated());
+				.antMatchers("/environnement").hasRole("ADMIN_TOUCAN")
+				.anyRequest().permitAll());
 		return http.build();
 	}
 
