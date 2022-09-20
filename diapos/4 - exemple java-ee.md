@@ -17,7 +17,7 @@
 
 ----
 
-- passez en Java 11 et ajoutez l'API Servlet dans le **pom.xml**
+- passez en Java 17 et ajoutez l'API Servlet dans le **pom.xml**
 
 ```xml
 <dependencies>
@@ -37,6 +37,11 @@
 			<configuration>
 				<release>11</release>
 			</configuration>
+		</plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-war-plugin</artifactId>
+			<version>3.3.2</version>
 		</plugin>
 	</plugins>
 </build>
