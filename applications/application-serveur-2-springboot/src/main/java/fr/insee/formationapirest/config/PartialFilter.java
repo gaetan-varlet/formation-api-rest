@@ -22,12 +22,10 @@ public class PartialFilter implements Filter {
 			throws IOException, ServletException {
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
-		log.info("Filtre uniquement pour les requêtes sur le vin (requête) : "
-				+ req.getMethod() + ", " + req.getRequestURI());
+		log.info("Filtre uniquement pour les requêtes sur le vin (requête) : {}, {}", req.getMethod(), req.getRequestURI());
 
 		chain.doFilter(request, response);
 
-		log.info("Filtre uniquement pour les requêtes sur le vin (Content-Type de la réponse) : "
-				+ res.getContentType());
+		log.info("Filtre uniquement pour les requêtes sur le vin (Content-Type de la réponse) : {}", res.getContentType());
 		}
 }
