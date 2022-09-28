@@ -332,7 +332,7 @@ Le starter `spring-boot-starter-web` permet de faire cela
 - il est possible de configurer l'IDE pour rebuilder le projet automatiquement lorsqu'on fait une modification
 - Spring DevTools permet de rafraîchir l'application de manière globale
 - ces solutions fonctionnent en phase développement mais pas en production où un JAR est déployé
-- il est possible de redéfinir la property `spring.resources.static-locations`, qui indique par défaut tous les emplacements qui sont considérés par Sring Boot pour servir du contenu statique (notamment /resources, /static). On va ajouter un emplacement qui se trouve en dehors du JAR, qui se trouve sur la machine. Exemple : `spring.resources.static-locations=file:C://temp/toto/,classpath:/static/`. Les modifications du fichier sont alors prises en compte
+- il est possible de redéfinir la property `spring.resources.static-locations`, qui indique par défaut tous les emplacements qui sont considérés par Spring Boot pour servir du contenu statique (notamment /resources, /static). On va ajouter un emplacement qui se trouve en dehors du JAR, qui se trouve sur la machine. Exemple : `spring.resources.static-locations=file:C://temp/toto/,classpath:/static/`. Les modifications du fichier sont alors prises en compte
 
 ### Spring MVC : Le controleur frontal (Front Controller)
 
