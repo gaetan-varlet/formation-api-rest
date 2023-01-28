@@ -4,10 +4,10 @@
 
 à creuser :
 - tester base postgre en mémoire
-- vérifier nécessité d'utiliser `springdoc-openapi-data-rest` pour utiliser les pageable
-- changer assertion junit par assertJ
+- déploiement sur Kubernetes
 
 TODO :
+- changer assertion junit par assertJ
 - ajouter classe pour logguer des properties au démarrage du serveur
 - ajouter conf pour puppet6 avec un JAR
 - zippage des réponses HTTP via property
