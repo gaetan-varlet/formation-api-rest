@@ -36,8 +36,7 @@ public class SecurityConfigurationKeycloakImpl {
         http.oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter())));
         // gestion des rôles : toutes les requêtes sont authentifiées sans rôle
-        // particulié
-        // les droits supplémentaires sont gérés dans les controllers
+        // particulié les droits supplémentaires sont gérés dans les controllers
         String[] urlsSwagger = { "/", "/swagger-ui.html", "/swagger-ui/**",
                 "/v3/api-docs/**" };
         String[] urlsDivers = { "/info", "/healthcheck" };
