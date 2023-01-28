@@ -1,6 +1,6 @@
 package fr.insee.formationapirest.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -50,8 +50,8 @@ public class VinServiceTest {
 	@Test
 	public void recupererTousLesVins() {
 		List<Vin> vinRetournes = vinService.findAll(null);
-		assertEquals(2, vinRetournes.size());
-		assertEquals("Château 1", vinRetournes.get(0).getChateau());
+		assertThat(vinRetournes).hasSize(2);
+		assertThat(vinRetournes.get(0).getChateau()).isEqualTo("Château 1");
 	}
 
 	@Test
