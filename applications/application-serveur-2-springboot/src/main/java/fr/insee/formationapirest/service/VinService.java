@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.opencsv.CSVWriter;
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVWriter;
 
@@ -31,7 +30,7 @@ public class VinService {
 	@Autowired
 	private VinRepository vinRepository;
 
-	public List<String> getListeAppellation(){
+	public List<String> getListeAppellation() {
 		return vinRepository.getListeAppellationJpa();
 	}
 
@@ -66,7 +65,8 @@ public class VinService {
 
 	public Vin add(Vin vin) {
 		if (controleValiditeVin(vin)) {
-			// si l'id n'est pas renseigné ou si l'id renseigné n'existe pas, alors on crée le vin
+			// si l'id n'est pas renseigné ou si l'id renseigné n'existe pas, alors on crée
+			// le vin
 			if (vin.getId() == null || !vinRepository.existsById(vin.getId())) {
 				return vinRepository.save(vin);
 			} else {
@@ -92,45 +92,46 @@ public class VinService {
 
 	protected boolean controleValiditeVin(Vin vin) {
 		return Optional.ofNullable(vin)
-			.filter(this::isChateauValid)
-			.filter(this::isAppellationValid)
-			.filter(this::isPrixValid)
-			.isPresent();
+				.filter(this::isChateauValid)
+				.filter(this::isAppellationValid)
+				.filter(this::isPrixValid)
+				.isPresent();
 	}
 
 	protected boolean isChateauValid(Vin vin) {
 		return Optional.ofNullable(vin.getChateau())
-			.filter(c -> c.length() >= 1 && c.length() <= 50)
-			.isPresent();
+				.filter(c -> c.length() >= 1 && c.length() <= 50)
+				.isPresent();
 	}
 
 	protected boolean isAppellationValid(Vin vin) {
 		return Optional.ofNullable(vin.getAppellation())
-			.filter(a -> a.length() >= 1 && a.length() <= 50)
-			.isPresent();
+				.filter(a -> a.length() >= 1 && a.length() <= 50)
+				.isPresent();
 	}
 
 	protected boolean isPrixValid(Vin vin) {
 		return Optional.ofNullable(vin.getPrix())
-			.filter(p -> p >= 0)
-			.isPresent();
+				.filter(p -> p >= 0)
+				.isPresent();
 	}
 
 	public void ecrireVinsDansCsv(Writer writer, List<Vin> listeAEcrire) throws IOException {
 		// Création du writer openCSV qui va écrire dans le writer fourni en paramètre
-		ICSVWriter csvWriter = new CSVWriterBuilder(writer)
-			.withSeparator(';') // séparateur point-virgule (virgule par défaut)
-				.withQuoteChar(CSVWriter.DEFAULT_QUOTE_CHARACTER) // caractère autour de chaque attribut (doubles quotes par défaut)
-				.build();
-
-		listeAEcrire.forEach(vin -> {
-			List<String> ligne = new ArrayList<>();
-			ligne.add(vin.getChateau());
-			ligne.add(vin.getAppellation());
-			ligne.add(String.valueOf(vin.getPrix()));
-			csvWriter.writeNext(ligne.toArray(new String[ligne.size()]));
-		});
-		csvWriter.close();
+		try (ICSVWriter csvWriter = new CSVWriterBuilder(writer)
+				// séparateur point-virgule (virgule par défaut)
+				.withSeparator(';')
+				// caractère autour de chaque attribut (doubles quotes par défaut)
+				.withQuoteChar(ICSVWriter.DEFAULT_QUOTE_CHARACTER)
+				.build()) {
+			listeAEcrire.forEach(vin -> {
+				List<String> ligne = new ArrayList<>();
+				ligne.add(vin.getChateau());
+				ligne.add(vin.getAppellation());
+				ligne.add(String.valueOf(vin.getPrix()));
+				csvWriter.writeNext(ligne.toArray(new String[ligne.size()]));
+			});
+		}
 	}
 
 	@Cacheable("longService")

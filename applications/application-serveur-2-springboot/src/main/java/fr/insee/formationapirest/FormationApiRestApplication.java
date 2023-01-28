@@ -3,7 +3,7 @@ package fr.insee.formationapirest;
 import java.security.Principal;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,32 +19,23 @@ import org.springframework.web.context.WebApplicationContext;
 @EnableCaching
 public class FormationApiRestApplication extends SpringBootServletInitializer {
 
-	private static final String NOM_FICHIER_PROPERTIES = "formation-api-rest";
-
 	public static void main(String[] args) {
-		// définition des system properties pour le local
-		System.setProperty("spring.config.name", NOM_FICHIER_PROPERTIES);
 		SpringApplication.run(FormationApiRestApplication.class, args);
 	}
 
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		// spring.config.name permet de définir le nom du fichier de properties lu
-		// automatiquement par springboot sous src/main/resources
-		// spring.config.location permet de définir les chemins où spring va chercher
-		// pour des fichiers de properties à charger (ceux définis à la fin sont
-		// prioritaires)
+		// spring.config.location défintit les chemins où spring va chercher les
+		// fichiers de properties à charger (ceux définis à la fin sont prioritaires)
 		return application.properties(
-				"spring.config.location=classpath:/formation-api-rest.properties, file:${catalina.base}/webapps/formation.properties",
-				"spring.config.name=" + NOM_FICHIER_PROPERTIES
-		// définition de la property pour le fonctionnement sur les plateformes du CEI
-		).sources(FormationApiRestApplication.class);
+				"spring.config.location=classpath:/formation-api-rest.properties, file:${catalina.base}/webapps/formation.properties")
+				.sources(FormationApiRestApplication.class);
 	}
 
 	@Bean
 	@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-	// renvoie le principal mis dans la requête par Keycloak ou un principal avec un
-	// "name" null sinon
+	// renvoie le principal mis dans la requête par Keycloak
+	// ou un principal avec un "name" null sinon
 	public Principal getPrincipal(HttpServletRequest httpRequest) {
 		return Optional.ofNullable(httpRequest.getUserPrincipal()).orElse(() -> null);
 	}

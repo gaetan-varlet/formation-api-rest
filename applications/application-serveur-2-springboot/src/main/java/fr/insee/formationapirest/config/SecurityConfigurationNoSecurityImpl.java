@@ -14,12 +14,12 @@ public class SecurityConfigurationNoSecurityImpl {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.csrf().disable();
-		http.headers().frameOptions().disable();
+        http.csrf().disable();
+        http.headers().frameOptions().disable();
         http.sessionManagement().sessionAuthenticationStrategy(new NullAuthenticatedSessionStrategy())
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		http.authorizeRequests().antMatchers("/**").permitAll();
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.authorizeHttpRequests().requestMatchers("/**").permitAll();
         return http.build();
     }
-    
+
 }

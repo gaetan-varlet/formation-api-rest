@@ -3,8 +3,8 @@ package fr.insee.formationapirest.controller;
 import java.io.IOException;
 import java.security.Principal;
 
-import javax.annotation.security.RolesAllowed;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
