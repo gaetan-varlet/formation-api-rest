@@ -2,10 +2,15 @@
 
 :arrow_forward: [Diaporama](https://gaetan-varlet.github.io/formation-api-rest/)
 
-à creuser :
-- tester base postgre en mémoire
-- déploiement sur Kubernetes
-
 TODO :
 - ajouter classe pour logguer des properties au démarrage du serveur
 - ajouter conf pour puppet6 avec un JAR
+
+à creuser :
+- tester base postgre en mémoire
+- nouveautés Spring Boot 3 à étudier :
+    - Spring Boot Observation
+    - @HttpExchange : @GetExchange...
+- déploiement sur Kubernetes
+- queryDSL
+- vérifier le fonctionnement de Spring Actuator avec Spring Boot 3
