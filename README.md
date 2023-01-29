@@ -7,6 +7,5 @@
 - déploiement sur Kubernetes
 
 TODO :
-- changer assertions Junit par AssertJ
 - ajouter classe pour logguer des properties au démarrage du serveur
 - ajouter conf pour puppet6 avec un JAR

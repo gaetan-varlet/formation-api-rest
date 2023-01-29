@@ -1,8 +1,6 @@
 package fr.insee.formationapirest.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -56,31 +54,31 @@ public class VinServiceTest {
 
 	@Test
 	public void controleValiditeVinTest() {
-		assertFalse(vinService.controleValiditeVin(null));
-		assertTrue(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", 100d)));
-		assertTrue(vinService.controleValiditeVin(new Vin(null, "Château Lascombes", "Margaux", 100d)));
+		assertThat(vinService.controleValiditeVin(null)).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", 100d))).isTrue();
+		assertThat(vinService.controleValiditeVin(new Vin(null, "Château Lascombes", "Margaux", 100d))).isTrue();
 
-		assertFalse(vinService.controleValiditeVin(new Vin(1, null, "Margaux", 100d)));
-		assertFalse(vinService.controleValiditeVin(new Vin(1, "", "Margaux", 100d)));
-		assertTrue(vinService.controleValiditeVin(new Vin(1, "C", "Margaux", 100d)));
-		assertTrue(vinService.controleValiditeVin(
-				new Vin(1, "12345678901234567890123456789012345678901234567890", "Margaux", 100d)));
-		assertFalse(vinService.controleValiditeVin(
-				new Vin(1, "123456789012345678901234567890123456789012345678901", "Margaux", 100d)));
+		assertThat(vinService.controleValiditeVin(new Vin(1, null, "Margaux", 100d))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1, "", "Margaux", 100d))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1, "C", "Margaux", 100d))).isTrue();
+		assertThat(vinService.controleValiditeVin(
+				new Vin(1, "12345678901234567890123456789012345678901234567890", "Margaux", 100d))).isTrue();
+		assertThat(vinService.controleValiditeVin(
+				new Vin(1, "123456789012345678901234567890123456789012345678901", "Margaux", 100d))).isFalse();
 
-		assertFalse(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", null, 100d)));
-		assertFalse(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "", 100d)));
-		assertTrue(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "M", 100d)));
-		assertTrue(vinService.controleValiditeVin(
-				new Vin(1, "Château Lascombes", "12345678901234567890123456789012345678901234567890", 100d)));
-		assertFalse(vinService.controleValiditeVin(
-				new Vin(1, "Château Lascombes", "123456789012345678901234567890123456789012345678901", 100d)));
-
-		assertFalse(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", null)));
-		assertFalse(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", -5d)));
-		assertFalse(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", -0.1d)));
-		assertTrue(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", 0d)));
-		assertTrue(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", 0.1d)));
+		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", null, 100d))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "", 100d))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "M", 100d))).isTrue();
+		assertThat(vinService.controleValiditeVin(
+				new Vin(1, "Château Lascombes", "12345678901234567890123456789012345678901234567890", 100d))).isTrue();
+		assertThat(vinService.controleValiditeVin(
+				new Vin(1, "Château Lascombes", "123456789012345678901234567890123456789012345678901", 100d)))
+				.isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", null))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", -5d))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", -0.1d))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", 0d))).isTrue();
+		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", 0.1d))).isTrue();
 	}
 
 }
