@@ -4,7 +4,9 @@
 
 TODO :
 - ajouter classe pour logguer des properties au démarrage du serveur
+- mettre à jour le POM pour créer un JAR au lieu du WAR
 - ajouter conf pour puppet6 avec un JAR
+- ajouter le plugin pour le formattage de code
 
 à creuser :
 - tester base postgre en mémoire
