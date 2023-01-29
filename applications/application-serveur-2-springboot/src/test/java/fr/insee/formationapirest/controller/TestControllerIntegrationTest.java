@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@TestPropertySource(locations = "classpath:formation-api-rest.properties")
+@TestPropertySource(locations = "classpath:application.properties")
 public class TestControllerIntegrationTest {
 
 	@Autowired

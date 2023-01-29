@@ -15,7 +15,6 @@
 	<version>2.0.0</version>
 	<name>application-serveur-2-springboot</name>
 	<description>Formation API Rest : API en Spring Boot</description>
-	<packaging>war</packaging>
 
 	<properties>
 		<java.version>17</java.version>
@@ -105,7 +104,6 @@
 				<filtering>true</filtering>
 			</resource>
 		</resources>
-		<!-- définit le nom du WAR -->
 		<finalName>ROOT</finalName>
 		<plugins>
 			<plugin>
@@ -144,27 +142,6 @@
 						<phase>verify</phase>
 						<goals>
 							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- permet de générer un ZIP -->
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.4.2</version>
-				<configuration>
-					<descriptors>
-						<descriptor>src/main/resources/assembly-web.xml</descriptor>
-					</descriptors>
-					<!-- définit le nom du ZIP, par défaut même nom que le WAR -->
-					<finalName>formation-api</finalName>
-				</configuration>
-				<executions>
-					<execution>
-						<id>make-assembly</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
 						</goals>
 					</execution>
 				</executions>

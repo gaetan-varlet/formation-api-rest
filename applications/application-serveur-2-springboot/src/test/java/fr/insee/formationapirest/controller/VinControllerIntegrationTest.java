@@ -29,7 +29,7 @@ import fr.insee.formationapirest.model.Vin;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 // précise le nom du fichier de properties s'il est différent du nom par défaut
-@TestPropertySource(locations = "classpath:formation-api-rest.properties")
+@TestPropertySource(locations = "classpath:application.properties")
 // permet de rafraîchir la base entre chaque test
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 // @Sql({"/utilisateur.sql"})
