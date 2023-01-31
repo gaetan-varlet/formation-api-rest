@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.WebApplicationContext;
 
+import fr.insee.formationapirest.config.PropertiesLogger;
 import jakarta.servlet.http.HttpServletRequest;
 
 @SpringBootApplication
@@ -19,7 +20,9 @@ import jakarta.servlet.http.HttpServletRequest;
 public class FormationApiRestApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
-		SpringApplication.run(FormationApiRestApplication.class, args);
+		SpringApplication sa = new SpringApplication(FormationApiRestApplication.class);
+		sa.addListeners(new PropertiesLogger());
+		sa.run(args);
 	}
 
 	@Bean
