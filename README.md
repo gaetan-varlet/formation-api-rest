@@ -11,5 +11,10 @@ TODO :
     - Spring Boot Observation
     - @HttpExchange : @GetExchange...
 - déploiement sur Kubernetes
-- queryDSL
 - vérifier le fonctionnement de Spring Actuator avec Spring Boot 3
+- queryDSL
+- utilisation de Spring Data Specifications
+  - https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#specifications
+  - https://reflectoring.io/spring-data-specifications/
+  - https://www.baeldung.com/spring-data-criteria-queries
+- tester MyBatis en complément de JPA, pour les jointures
