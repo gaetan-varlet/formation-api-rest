@@ -144,8 +144,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<!-- permet la surcharge de maven-surefire-plugin tout en fonctionnant avec
-					jacoco -->
+					<!-- permet la surcharge du plugin tout en fonctionnant avec jacoco -->
 					<argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
 				</configuration>
 			</plugin>
