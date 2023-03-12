@@ -1,4 +1,4 @@
-Feature: Obtenir les vins
+Feature: Créer des vins
 
     Scenario Outline: créer un vin avec des informations erronées (<testCase>)
         Given je veux créer un vin avec les attributs suivants

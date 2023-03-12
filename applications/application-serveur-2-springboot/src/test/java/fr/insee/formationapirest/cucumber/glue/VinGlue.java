@@ -46,7 +46,9 @@ public class VinGlue {
         try {
             List<Map<String, String>> line = dataTable.asMaps();
             vinService.add(transformMapToVin(line.get(0)));
+            exception = null;
         } catch (Exception e) {
+            vins = null;
             exception = e.getMessage();
         }
     }
@@ -81,10 +83,9 @@ public class VinGlue {
 
     @Then("le vin du chateau {string} de l'appellation {string} à {double}€ est renvoyé")
     public void verifVins(String chateau, String appellation, Double prix) {
-        List<Vin> vinsFiltres = vins.stream().filter(v -> v.getChateau().equals(chateau)).toList();
+        List<Vin> vinsFiltres = vins.stream()
+                .filter(v -> v.getChateau().equals(chateau) && v.getAppellation().equals(appellation)).toList();
         assertThat(vinsFiltres).hasSize(1);
-        assertThat(vinsFiltres.get(0).getChateau()).isEqualTo(chateau);
-        assertThat(vinsFiltres.get(0).getAppellation()).isEqualTo(appellation);
         assertThat(vinsFiltres.get(0).getPrix()).isEqualTo(prix);
     }
 
