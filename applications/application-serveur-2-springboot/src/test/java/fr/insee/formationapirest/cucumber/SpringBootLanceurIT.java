@@ -10,6 +10,6 @@ import io.cucumber.spring.CucumberContextConfiguration;
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:application.properties")
 @CucumberContextConfiguration
-public class SpringBootLanceurTest {
+public class SpringBootLanceurIT {
 
 }

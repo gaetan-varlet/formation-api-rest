@@ -149,6 +149,14 @@
 					<argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
 				</configuration>
 			</plugin>
+			<!-- permet de lancer les tests d'intégration -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
+				</configuration>
+			</plugin>
 			<!-- génère un rapport sur la couverture de tests -->
 			<plugin>
 				<groupId>org.jacoco</groupId>

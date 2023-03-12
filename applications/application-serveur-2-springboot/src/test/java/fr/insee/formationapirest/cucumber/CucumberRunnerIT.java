@@ -17,5 +17,5 @@ import org.junit.platform.suite.api.Suite;
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "fr.insee.formationapirest")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty, json:target/cucumber.json, html:target/reports/cucumber/rapport.html,"
                 + " usage:target/usage.jsonx, junit:target/junit.xml")
-public class CucumberRunnerTest {
+public class CucumberRunnerIT {
 }
