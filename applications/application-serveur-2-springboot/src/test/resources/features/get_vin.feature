@@ -14,22 +14,22 @@ Feature: Obtenir les vins
     Scenario: obtenir tous les vins quand il y a un vin en base
         When je récupère tous les vins
         Then le nombre de vins est 2
-        Then le vin du chateau "Château 1" à 10.5€ est renvoyé
-        Then le vin du chateau "Château 2" à 25€ est renvoyé
+        Then le vin du chateau "Château 1" de l'appellation "Saint-Julien" à 10.5€ est renvoyé
+        Then le vin du chateau "Château 2" de l'appellation "Pomerol" à 25€ est renvoyé
 
     Scenario Outline: obtenir tous les vins d'une appellation existante
-        When je récupère tous les vins de l'appellation "<app>"
+        When je récupère tous les vins de l'appellation "<appellation>"
         Then le nombre de vins est <nombre_vins>
-        Then le vin du chateau "<chateau>" à <prix>€ est renvoyé
+        Then le vin du chateau "<chateau>" de l'appellation "<appellation>" à <prix>€ est renvoyé
         Examples: appellation existante
-            | app          | nombre_vins | chateau   | prix |
+            | appellation  | nombre_vins | chateau   | prix |
             | Pomerol      | 1           | Château 2 | 25   |
             | Saint-Julien | 1           | Château 1 | 10.5 |
 
     Scenario Outline: obtenir tous les vins d'une appellation qui n'existe pas
-        When je récupère tous les vins de l'appellation "<app>"
+        When je récupère tous les vins de l'appellation "<appellation>"
         Then le nombre de vins est 0
         Examples: appellation inexistante
-            | app     |
-            | toto    |
-            | pomerol |
+            | appellation |
+            | toto        |
+            | pomerol     |
