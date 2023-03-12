@@ -48,7 +48,6 @@ public class VinGlue {
             vinService.add(transformMapToVin(line.get(0)));
             exception = null;
         } catch (Exception e) {
-            vins = null;
             exception = e.getMessage();
         }
     }
