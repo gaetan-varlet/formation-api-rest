@@ -8,39 +8,33 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import io.cucumber.java.Before;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
-import lombok.RequiredArgsConstructor;
+import io.cucumber.java8.En;
 
-@RequiredArgsConstructor
-public class SecurityGlue {
-
-    private final MockMvc mockMvc;
+public class SecurityGlue implements En {
 
     private String rolePrefix = "ROLE_";
     private ResultActions result;
 
-    @Before("@WithRoleAdmin")
-    public void setupRoleAdmin() {
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("admin", "N/A",
-                AuthorityUtils.createAuthorityList(rolePrefix + "ADMIN_TOUCAN")));
-    }
+    public SecurityGlue(MockMvc mockMvc) {
 
-    @Before("@WithRoleToto")
-    public void setupRoleToto() {
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("admin", "N/A",
-                AuthorityUtils.createAuthorityList(rolePrefix + "TOTO")));
-    }
+        Before("@WithRoleAdmin", () -> {
+            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("admin", "N/A",
+                    AuthorityUtils.createAuthorityList(rolePrefix + "ADMIN_TOUCAN")));
+        });
 
-    @When("je fais une requête HTTP en GET sur l'url {string}")
-    public void requeteGet(String url) throws Exception {
-        result = mockMvc.perform(MockMvcRequestBuilders.get(url));
-    }
+        Before("@WithRoleToto", () -> {
+            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("admin", "N/A",
+                    AuthorityUtils.createAuthorityList(rolePrefix + "TOTO")));
+        });
 
-    @Then("j'obtiens un code retour HTTP {int}")
-    public void testCodeReponse(int codeReponse) throws Exception {
-        result.andExpect(MockMvcResultMatchers.status().is(codeReponse));
+        When("je fais une requête HTTP en GET sur l'url {string}", (String url) -> {
+            result = mockMvc.perform(MockMvcRequestBuilders.get(url));
+        });
+
+        Then("j'obtiens un code retour HTTP {int}", (Integer codeReponse) -> {
+            result.andExpect(MockMvcResultMatchers.status().is(codeReponse));
+        });
+
     }
 
 }
