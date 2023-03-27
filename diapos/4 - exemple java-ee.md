@@ -213,7 +213,7 @@ public class CalculJsonServlet extends HttpServlet {
 <dependency>
 	<groupId>com.fasterxml.jackson.core</groupId>
 	<artifactId>jackson-databind</artifactId>
-	<version>2.13.1</version>
+	<version>2.14.2</version>
 </dependency>
 ```
 
