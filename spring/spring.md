@@ -735,7 +735,7 @@ userRepository.save(user);
 ```java
 @Entity
 public class User {
-    @Id // import javax.persistence.Id;
+    @Id // import jakarta.persistence.Id;
     private Integer id;
     private String nom;
     private String prenom;

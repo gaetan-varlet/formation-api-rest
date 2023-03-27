@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
@@ -17,7 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @SpringBootApplication
 @EnableCaching
-public class FormationApiRestApplication extends SpringBootServletInitializer {
+public class FormationApiRestApplication {
 
 	public static void main(String[] args) {
 		SpringApplication sa = new SpringApplication(FormationApiRestApplication.class);
