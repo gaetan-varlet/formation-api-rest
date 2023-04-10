@@ -1,4 +1,4 @@
-package fr.insee.formationapirest.cucumber.glue;
+package fr.insee.formationapirest.integrationtests.glue;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;

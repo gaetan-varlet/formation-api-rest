@@ -1,15 +1,29 @@
 package fr.insee.formationapirest.repository;
 
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import fr.insee.formationapirest.model.Vin;
 
-@Repository
-public interface VinRepository extends JpaRepository<Vin, Integer>, VinRepositoryCustom {
+public interface VinRepository {
 
-    List<Vin> findByAppellation(String appellation);
+    List<Vin> findAll();
+
+    List<Vin> findByAppellation(String app);
+
+    boolean existsById(Integer id);
+
+    Optional<Vin> findById(Integer id);
+
+    Vin save(Vin vin);
+
+    void deleteById(Integer id);
+
+    Page<Vin> findAll(Pageable p);
+
+    List<String> getListeAppellationJpa();
 
 }

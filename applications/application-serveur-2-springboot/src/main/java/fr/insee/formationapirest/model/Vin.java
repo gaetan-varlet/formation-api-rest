@@ -7,10 +7,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "vin")
 @XmlRootElement
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Vin {
 
 	@Id
@@ -21,52 +29,5 @@ public class Vin {
 	private String chateau;
 	private String appellation;
 	private Double prix;
-
-	public Vin() {
-	}
-
-	public Vin(Integer id, String chateau, String appellation, Double prix) {
-		this.id = id;
-		this.chateau = chateau;
-		this.appellation = appellation;
-		this.prix = prix;
-	}
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	public String getChateau() {
-		return chateau;
-	}
-
-	public void setChateau(String chateau) {
-		this.chateau = chateau;
-	}
-
-	public String getAppellation() {
-		return appellation;
-	}
-
-	public void setAppellation(String appellation) {
-		this.appellation = appellation;
-	}
-
-	public Double getPrix() {
-		return prix;
-	}
-
-	public void setPrix(Double prix) {
-		this.prix = prix;
-	}
-
-	@Override
-	public String toString() {
-		return "Vin [id=" + id + ", chateau=" + chateau + ", appellation=" + appellation + ", prix=" + prix + "]";
-	}
 
 }

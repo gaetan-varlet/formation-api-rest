@@ -1,4 +1,4 @@
-package fr.insee.formationapirest.cucumber.glue;
+package fr.insee.formationapirest.integrationtests.glue;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
