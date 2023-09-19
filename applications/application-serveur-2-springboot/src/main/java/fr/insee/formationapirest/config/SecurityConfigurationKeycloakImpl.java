@@ -66,7 +66,9 @@ public class SecurityConfigurationKeycloakImpl {
         String[] publicUrls = { "/vin", "/vin/**" };
         String[] restrictedUrls = { "/mon-nom" };
         String[] adminUrls = { "/environnement" };
-
+        // autorisation des requetes OPTIONS
+        authorize.requestMatchers(antMatcher(HttpMethod.OPTIONS)).permitAll();
+        // gestions de nos endpoints
         for (String url : urlsSwagger) {
             authorize.requestMatchers(antMatcher(HttpMethod.GET, url)).permitAll();
         }
@@ -86,8 +88,6 @@ public class SecurityConfigurationKeycloakImpl {
         if (h2Enable) {
             authorize.requestMatchers(toH2Console()).permitAll();
         }
-        // autorisation des requetes OPTIONS
-        authorize.requestMatchers(antMatcher(HttpMethod.OPTIONS)).permitAll();
         // interdiction de toutes les autres requêtes
         authorize.anyRequest().denyAll();
     }
