@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
@@ -36,6 +37,10 @@ public class SecurityConfigurationKeycloakImpl {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // fonctionnement du filtre CORS avec Spring Security
+        // chargement de la configuration CORS définie dans un Bean
+        // CORS doit être traité en premier, sinon Spring Secu rejettera la demande
+        http.cors(Customizer.withDefaults());
         // désactivation CSRF car API (ne pas faire dans le cas d'une appli avec JSP)
         http.csrf(csrf -> csrf.disable());
         // désactivation des cookies de session
@@ -63,11 +68,9 @@ public class SecurityConfigurationKeycloakImpl {
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authorize) {
         String[] urlsSwagger = { "/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**" };
         String[] urlsDivers = { "/info", "/healthcheck" };
-        String[] publicUrls = { "/vin", "/vin/**" };
-        String[] restrictedUrls = { "/mon-nom" };
+        String[] publicUrls = { "/vin", "/vin/**", "/hello" };
+        String[] restrictedUrls = { "/mon-nom", "/hello-secured" };
         String[] adminUrls = { "/environnement" };
-        // autorisation des requetes OPTIONS
-        authorize.requestMatchers(antMatcher(HttpMethod.OPTIONS)).permitAll();
         // gestions de nos endpoints
         for (String url : urlsSwagger) {
             authorize.requestMatchers(antMatcher(HttpMethod.GET, url)).permitAll();

@@ -33,10 +33,8 @@ public class SecurityConfigurationInMemoryImpl {
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-                // désactivation CSRF car API (ne pas faire dans le cas d'une appli avec JSP)
+                http.cors(Customizer.withDefaults());
                 http.csrf(csrf -> csrf.disable());
-                // désactivation des cookies de session
-                // (ne pas faire dans le cas d'une appli avec JSP)
                 http.sessionManagement(
                                 session -> session.sessionAuthenticationStrategy(
                                                 new NullAuthenticatedSessionStrategy())

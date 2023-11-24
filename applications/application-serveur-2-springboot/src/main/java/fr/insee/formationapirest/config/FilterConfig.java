@@ -1,31 +1,28 @@
 package fr.insee.formationapirest.config;
 
+import java.util.List;
+
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 public class FilterConfig {
 
-	// Configuration du filtre pour la gestion du CORS
 	@Bean
-	public FilterRegistrationBean<CorsFilter> corsFilter() {
-		CorsConfiguration config = new CorsConfiguration();
-		// config.setAllowCredentials(true);
-		config.addAllowedOrigin("*");
-		config.addAllowedHeader("*");
-		config.addAllowedMethod("*");
-		config.setMaxAge(3600L);
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", config);
-		FilterRegistrationBean<CorsFilter> registrationBean = new FilterRegistrationBean<>();
-		registrationBean.setFilter(new CorsFilter(source));
-		registrationBean.setOrder(0);
-		return registrationBean;
-	}
+	public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedMethods(List.of("*"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setMaxAge(3600L);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
 	@Bean
 	public FilterRegistrationBean<PartialFilter> loggingFilter() {
