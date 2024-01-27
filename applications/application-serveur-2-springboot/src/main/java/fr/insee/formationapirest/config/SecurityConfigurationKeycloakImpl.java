@@ -42,7 +42,7 @@ public class SecurityConfigurationKeycloakImpl {
         // CORS doit être traité en premier, sinon Spring Secu rejettera la demande
         http.cors(Customizer.withDefaults());
         // désactivation CSRF car API (ne pas faire dans le cas d'une appli avec JSP)
-        http.csrf(csrf -> csrf.disable());
+        http.csrf(AbstractHttpConfigurer::disable);
         // désactivation des cookies de session
         // (ne pas faire dans le cas d'une appli avec JSP)
         http.sessionManagement(

@@ -34,7 +34,7 @@ public class SecurityConfigurationInMemoryImpl {
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 http.cors(Customizer.withDefaults());
-                http.csrf(csrf -> csrf.disable());
+                http.csrf(AbstractHttpConfigurer::disable);
                 http.sessionManagement(
                                 session -> session.sessionAuthenticationStrategy(
                                                 new NullAuthenticatedSessionStrategy())

@@ -19,7 +19,7 @@ public class SecurityConfigurationNoSecurityImpl {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults());
-        http.csrf(csrf -> csrf.disable());
+        http.csrf(AbstractHttpConfigurer::disable);
         http.headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin));
         http.sessionManagement(session -> session.sessionAuthenticationStrategy(
                 new NullAuthenticatedSessionStrategy())
