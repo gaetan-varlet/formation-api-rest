@@ -118,25 +118,30 @@ public class SecurityConfigurationKeycloakImpl {
                     if (claims == null) {
                         return Collections.emptyList();
                     }
-                    List<String> roles = (List<String>) claims
-                            .getOrDefault(claimPath[claimPath.length - 1], Collections.emptyList());
-                    return roles.stream()
-                            .map(s -> new GrantedAuthority() {
-                                @Override
-                                public String getAuthority() {
-                                    return "ROLE_" + s;
-                                }
-
-                                @Override
-                                public String toString() {
-                                    return getAuthority();
-                                }
-                            })
-                            .collect(Collectors.toList());
+                    List<String> roles =
+                            (List<String>)
+                                    claims.getOrDefault(
+                                            claimPath[claimPath.length - 1],
+                                            Collections.emptyList());
+                    return roles.stream().map(this::getGrantedAuthority).toList();
                 } catch (ClassCastException e) {
                     // role path not correctly found, assume that no role for this user
                     return Collections.emptyList();
                 }
+            }
+
+            private GrantedAuthority getGrantedAuthority(String s) {
+                return new GrantedAuthority() {
+                    @Override
+                    public String getAuthority() {
+                        return "ROLE_" + s;
+                    }
+
+                    @Override
+                    public String toString() {
+                        return getAuthority();
+                    }
+                };
             }
         };
     }
