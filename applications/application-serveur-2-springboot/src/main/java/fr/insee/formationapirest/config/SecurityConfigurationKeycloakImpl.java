@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -18,6 +17,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -118,11 +118,9 @@ public class SecurityConfigurationKeycloakImpl {
                     if (claims == null) {
                         return Collections.emptyList();
                     }
-                    List<String> roles =
-                            (List<String>)
-                                    claims.getOrDefault(
-                                            claimPath[claimPath.length - 1],
-                                            Collections.emptyList());
+                    List<String> roles = (List<String>) claims.getOrDefault(
+                            claimPath[claimPath.length - 1],
+                            Collections.emptyList());
                     return roles.stream().map(this::getGrantedAuthority).toList();
                 } catch (ClassCastException e) {
                     // role path not correctly found, assume that no role for this user
