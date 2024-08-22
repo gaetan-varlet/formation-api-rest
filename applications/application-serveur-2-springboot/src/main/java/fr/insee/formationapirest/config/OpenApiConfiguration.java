@@ -10,6 +10,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.OAuthFlows;
+import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
@@ -31,11 +32,16 @@ public class OpenApiConfiguration {
 	@Bean
 	public OpenAPI customOpenAPIKeycloak() {
 		// configuration pour récupérer un jeton auprès de Keycloak
+		Scopes scopes = new Scopes();
+		scopes.put("role-as-group", "obtenir les rôles");
+		scopes.put("profile", "obtenir le nom, prénom, preferred username...");
+		scopes.put("email", "obtenir l'email");
+
 		final OpenAPI openapi = new OpenAPI().info(new Info().title("Swagger Formation API REST").version(version));
 		openapi.components(new Components().addSecuritySchemes(SCHEMEKEYCLOAK, new SecurityScheme()
 				.type(SecurityScheme.Type.OAUTH2).in(SecurityScheme.In.HEADER)
 				.description("Authentification keycloak")
-				.flows(new OAuthFlows().authorizationCode(new OAuthFlow()
+				.flows(new OAuthFlows().authorizationCode(new OAuthFlow().scopes(scopes)
 						.authorizationUrl(keycloakUrl + REALMS + realmName + "/protocol/openid-connect/auth")
 						.tokenUrl(keycloakUrl + REALMS + realmName + "/protocol/openid-connect/token")
 						.refreshUrl(keycloakUrl + REALMS + realmName + "/protocol/openid-connect/token")))));

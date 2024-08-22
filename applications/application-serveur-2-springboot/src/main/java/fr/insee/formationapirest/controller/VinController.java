@@ -57,8 +57,8 @@ public class VinController {
 		// (inline) ou le télécharger (attachment)
 		response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", nomFichier + ".csv"));
 		// aide le navigateur à savoir quel logiciel peut ouvrir le type de contenu
-		// téléchargé
-		// et suggère un logiciel pour l'ouvrir une fois le téléchargement terminé
+		// téléchargé et suggère un logiciel pour l'ouvrir une fois le téléchargement
+		// terminé
 		response.setContentType("text/csv");
 		response.setCharacterEncoding("UTF-8");
 
