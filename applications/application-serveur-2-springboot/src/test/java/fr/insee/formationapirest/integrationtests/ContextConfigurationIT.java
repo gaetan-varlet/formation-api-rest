@@ -11,7 +11,8 @@ import io.cucumber.spring.CucumberContextConfiguration;
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
         "spring.datasource.driver-class-name=org.h2.Driver",
-        "spring.datasource.url=jdbc:h2:mem:testdb"
+        "spring.datasource.url=jdbc:h2:mem:testdb",
+        "temperature.base-url=http://localhost:8082",
 })
 @CucumberContextConfiguration
 public class ContextConfigurationIT {
