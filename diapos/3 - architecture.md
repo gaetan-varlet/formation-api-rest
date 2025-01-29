@@ -4,11 +4,13 @@
 
 ## L'architecture REST
 
-- 2 grands types d'architectures pour les API :
-    - **SOAP** (Simple Object Access Protocol) dévelopé par Microsoft 
-    - **REST** créé en 2000 par Roy Fielding dans sa thèse
+2 grands types d'architectures pour les API :
+
+- **SOAP** (Simple Object Access Protocol) dévelopé par Microsoft
+- **REST** créé en 2000 par Roy Fielding dans sa thèse
 
 API REST :
+
 - doit être sans état, ou **stateless** en anglais : aucune donnée n'est conservée par le serveur entre 2 requêtes. Cela peut permettre de traiter les requêtes via des instances de multiples serveurs
 - **modèle de maturité de Richardson** : quatre grands niveaux d’évaluation d’une API (dernier niveau => API RESTful)
 
@@ -41,8 +43,8 @@ API REST :
 
 ## Intérêts : rapidité, partage d'informations instantané entre applications
 
-- rapidité : démo avec mode ralenti dans Chrome
+- application plus fluide, rafraichissement d'une partie de la page au lieu du chargement complet de la page
 - partage d'informations : appel de l'API plutôt que des échanges de fichiers
-    - pas d'attente de recevoir un fichier pour avoir une information à jour
-    - pas besoin de gérer la lecture d'un fichier et l'import de données
-    - pas de redondance de données : économie de stockage et pas d'écarts entre les différentes sources
+  - pas d'attente de recevoir un fichier pour avoir une information à jour
+  - pas besoin de gérer la lecture d'un fichier et l'import de données
+  - pas de redondance de données : économie de stockage et pas d'écarts entre les différentes sources
