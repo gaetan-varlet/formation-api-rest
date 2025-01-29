@@ -40,13 +40,13 @@ Corps de requête
 - Méthode : précise le type de requête (HEAD, GET, POST...)
 - URL : adresse de la page sur le serveur
 - Version du protocole HTTP
-- il y a plusieurs en-tête sous la forme `clé: valeur` 
-    - [liste des headers](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers)
-    - **Host** spéficie le nom de domaine du site
-    - **Cookie** permet d'envoyer au serveur les cookies qui ont été enregistrés sur l'ordinateur du client à la demande du serveur. Les cookies sont des fichiers textes contenant des informations sur la navigation effectuée sur les pages du site.
-    - **Content-Type** spécifie le type MIME du corps de la requête
-    - **Content-Length** spécifie la longueur du corps de la requête
-    - **Accept** spécifie le type de contenu accepté par le client (par exemple text/html)
+- il y a plusieurs en-tête sous la forme `clé: valeur`
+  - [liste des headers](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers)
+  - **Host** spéficie le nom de domaine du site
+  - **Cookie** permet d'envoyer au serveur les cookies qui ont été enregistrés sur l'ordinateur du client à la demande du serveur. Les cookies sont des fichiers textes contenant des informations sur la navigation effectuée sur les pages du site.
+  - **Content-Type** spécifie le type MIME du corps de la requête
+  - **Content-Length** spécifie la longueur du corps de la requête
+  - **Accept** spécifie le type de contenu accepté par le client (par exemple text/html)
 - le corps de la requête peut contenir le contenu d'un formulaire HTML passé en POST sous la forme `variable1=valeur1&variable2=valeur2`
 
 ----
@@ -66,6 +66,7 @@ say=Hi&to=Mom
 ```
 
 Dans une requête POST, il faut spécifier le type de données. Pour un formulaire HTML, il y a 2 valeurs possibles :
+
 - application/x-www-form-urlencoded (valeur par défaut)
 - multipart/form-data (utilisé pour l'upload de fichiers)
 
@@ -81,13 +82,14 @@ En-tête de réponse
 
 Corps de réponse
 ```
+
 - Version HTTP du serveur
 - Code-réponse : le code retournée, par exemple 200, 404, 500
 - Texte-réponse : le texte associé par exemple “OK”, “NOT FOUND”, “INTERNAL ERROR”
 - les en-têtes :
-    - **Date** : date de génération de la réponse
-    - **Server** : spécifie le modèle du serveur HTTP
-    - **Set-Cookie** : demande au navigateur d'enregistrer un cookie
+  - **Date** : date de génération de la réponse
+  - **Server** : spécifie le modèle du serveur HTTP
+  - **Set-Cookie** : demande au navigateur d'enregistrer un cookie
 - le corps de la réponse contient le contenu du fichier, par exemple HTML
 
 ----
@@ -112,6 +114,7 @@ Content-Type: text/html
 ## Les codes de statut de réponse HTTP
 
 [documentation Mozilla](https://developer.mozilla.org/fr/docs/Web/HTTP/Status)
+
 - 1xx : information
 - 2xx : succès
 - 3xx : redirection
@@ -127,6 +130,7 @@ Content-Type: text/html
 - permet aussi de préciser le jeu de caractères (**charset**) que le navigateur doit utiliser pour afficher le contenu. Par défaut, il s'agit du jeu de caractères *ISO-8859-1* nommé aussi *Latin-1*.
 
 La bonne pratique est d'utiliser l'UTF-8 comme encodage des fichiers contenant le code source et comme jeu de caractères en-tête de la réponse HTTP. Exemple pour ajouter des en-têtes en Java :
+
 ```java
 response.setContentType("text/html");
 
@@ -143,11 +147,13 @@ response.setCharacterEncoding("UTF-8");
 ```http
 https://mon-api/{variable-de-chemin}?parametre-de-requete-1=valeur&parametre-de-requete-2=valeur
 ```
+
 - **variables de chemin** : souvent utilisé pour les variables obligatoires
 - **paramètres de requête** :
-    - `?` à la fin de l'URL suivi de `clé=valeur`, puis `&` pour séparer les autres paramètres de requête
-    - souvent utilisé pour les variables non obligatoires notamment pour du filtrage
+  - `?` à la fin de l'URL suivi de `clé=valeur`, puis `&` pour séparer les autres paramètres de requête
+  - souvent utilisé pour les variables non obligatoires notamment pour du filtrage
 
 Par exemple :
-- **https://api.insee.fr/entreprises/sirene/V3/siren/{siren}** retourne les informations sur le siren avec recherche de la totalité des périodes historiques
-- **https://api.insee.fr/entreprises/sirene/V3/siren/{siren}?date={date}** même chose avec le paramètre date qui renvoie uniquement la période comprenant cette date
+
+- **`https://api.insee.fr/entreprises/sirene/V3/siren/{siren}`** retourne les informations sur le siren avec recherche de la totalité des périodes historiques
+- **`https://api.insee.fr/entreprises/sirene/V3/siren/{siren}?date={date}`** même chose avec le paramètre date qui renvoie uniquement la période comprenant cette date
