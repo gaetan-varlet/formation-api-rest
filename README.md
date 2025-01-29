@@ -6,8 +6,24 @@ TODO :
 
 - ajouter le plugin pour le formattage de code
 - déploiement sur Kubernetes
+- diapo `/3/5` : ajouter sur le schéma un serveur Apache pour modéliser une appli JS
+- diapo `/4/1` sur la mise en place d'une appli Java EE
+  - passer à Java 21
+  - vérfier les versions de bibilothèques utilisées dans ce projet
+  - tester si l'artifact maven fonctionne toujours, voir s'il n'y en a pas un plus récent pour faire du java 17-21 ?
+  - passer à Spring Boot ?
+- diapos `/7/...` sur la BDD
+  - passer au type IDENTITY au lieu de SEQUENCE
+  - passer au schema public ?
+- diapos `/11/...` sur les filtres
+  - supprimer filtre dynamique
+  - utiliser DTO à la place
+- diapos `/12/...` sur les requêtes SQL spéciales
+  - ajouter un premier exemple avec @Query en JPQL, puis en nativeQuery, et un exemple avec `@Modifying`
+- diapo `/14/5` sur la création de fichier CSV
+  - mettre en avant la méthode fourni par spring avec ResponseEntity au lieu d'utiliser HttpServletResponse
 
-à creuser :
+A creuser :
 
 - utilisation d'**OpenFeign** pour faire des requêtes HTTP
 - base postgre en mémoire (chercher si c'est possible)
