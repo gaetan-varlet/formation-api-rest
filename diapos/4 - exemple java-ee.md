@@ -211,13 +211,14 @@ public class CalculJsonServlet extends HttpServlet {
 
 ```xml
 <dependency>
-	<groupId>com.fasterxml.jackson.core</groupId>
-	<artifactId>jackson-databind</artifactId>
-	<version>2.14.2</version>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.14.2</version>
 </dependency>
 ```
 
 - Jackson va transformer un objet au format JavaBean en un objet au format JSON. Il peut aussi transformer les collections :
+
 ```json
 {"somme":15,"produit":56} // objet Java
 [{"somme":15,"produit":56},{"somme":15,"produit":56}] // liste de 2 objets Java
@@ -225,7 +226,7 @@ public class CalculJsonServlet extends HttpServlet {
 
 ----
 
-- créez la classe **Calcul.java** pour définir un objet	avec 2 attributs *somme* et *produit* de type *Integer*
+- créez la classe **Calcul.java** pour définir un objet avec 2 attributs *somme* et *produit* de type *Integer*, et créer les getters et setters
 - créez la servlet **CalculJacksonServlet.java** dans le dossier *src/main/java*, dans le package *servlet* :
 
 ```java
@@ -233,7 +234,6 @@ package servlet;
 
 @WebServlet("/calcul-jackson")
 public class CalculJacksonServlet extends HttpServlet {
-	
     public void doGet( HttpServletRequest request, HttpServletResponse response )
 			throws ServletException, IOException{
 		int nombre1 = Integer.parseInt(request.getParameter("nombre1"));
