@@ -9,6 +9,7 @@ Un service web est une technologie permettant à des applications de dialoguer �
 Une **API REST**, pour *REpresentational State Transfer*,  est une API basée sur le protocole **HTTP**, où chaque ressource est accessible via un identifiant unique (URI).
 
 Exemple : [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
+
 - obtenir la liste des utilisateurs : [https://jsonplaceholder.typicode.com/users](https://jsonplaceholder.typicode.com/users)
 
 ----
@@ -25,15 +26,15 @@ Exemple : [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
 ```java
 @XmlRootElement
 public class Personne {
-	private String prenom;
-	private Integer age;
-	private Adresse adresse;
+  private String prenom;
+  private Integer age;
+  private Adresse adresse;
 }
 
 @XmlRootElement
-public class Adresse {	
-	private String nomCommune;
-	private String codePostal;
+public class Adresse {
+  private String nomCommune;
+  private String codePostal;
 }
 ```
 
@@ -43,7 +44,7 @@ public class Adresse {
 
 ```json
 {
-  "prenom": "Gaëtan",
+  "prenom": "Bob",
   "age": 30,
   "adresse": {
     "nomCommune": "Montrouge",
@@ -55,7 +56,7 @@ public class Adresse {
 ```json
 [
   {
-    "prenom": "Gaëtan",
+    "prenom": "Bob",
     "age": 30,
     "adresse": {
       "nomCommune": "Montrouge",
@@ -63,7 +64,7 @@ public class Adresse {
     }
   },
   {
-    "prenom": "Thibaut",
+    "prenom": "Albert",
     "age": 23,
     "adresse": {
       "nomCommune": "Saint-Quentin",
@@ -84,7 +85,7 @@ public class Adresse {
         <nomCommune>Montrouge</nomCommune>
     </adresse>
     <age>30</age>
-    <prenom>Gaëtan</prenom>
+    <prenom>Bob</prenom>
 </personne>
 ```
 
@@ -96,7 +97,7 @@ public class Adresse {
             <nomCommune>Montrouge</nomCommune>
         </adresse>
         <age>30</age>
-        <prenom>Gaëtan</prenom>
+        <prenom>Bob</prenom>
     </personne>
     <personne>
         <adresse>
@@ -104,7 +105,7 @@ public class Adresse {
             <nomCommune>Saint-Quentin</nomCommune>
         </adresse>
         <age>23</age>
-        <prenom>Thibaut</prenom>
+        <prenom>Albert</prenom>
     </personne>
 </personnes>
 ```
