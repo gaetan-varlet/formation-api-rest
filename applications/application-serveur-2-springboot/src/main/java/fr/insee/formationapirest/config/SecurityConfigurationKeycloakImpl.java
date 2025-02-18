@@ -80,7 +80,7 @@ public class SecurityConfigurationKeycloakImpl {
             authorize.requestMatchers(toH2Console()).permitAll();
         }
         // interdiction de toutes les autres requêtes
-        authorize.anyRequest().denyAll();
+        authorize.anyRequest().authenticated();
     }
 
 }
