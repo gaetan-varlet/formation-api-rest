@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.1</version>
+		<version>3.4.2</version>
 		<relativePath />
 	</parent>
 
@@ -19,7 +19,7 @@
 	<properties>
 		<java.version>21</java.version>
 		<cucumber.version>7.17.0</cucumber.version>
-		<wiremock-spring-boot.version>3.4.0</wiremock-spring-boot.version>
+		<wiremock-spring-boot.version>3.8.1</wiremock-spring-boot.version>
 	</properties>
 
 	<dependencies>
