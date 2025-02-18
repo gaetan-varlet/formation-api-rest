@@ -12,9 +12,6 @@ TODO :
   - vérfier les versions de bibilothèques utilisées dans ce projet
   - tester si l'artifact maven fonctionne toujours, voir s'il n'y en a pas un plus récent pour faire du java 17-21 ?
   - passer à Spring Boot ?
-- diapos `/7/...` sur la BDD
-  - passer au type IDENTITY au lieu de SEQUENCE
-  - passer au schema public ?
 - diapos `/11/...` sur les filtres
   - supprimer filtre dynamique
   - utiliser DTO à la place
