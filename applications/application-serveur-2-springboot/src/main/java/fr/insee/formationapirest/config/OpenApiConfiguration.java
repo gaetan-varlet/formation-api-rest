@@ -35,7 +35,6 @@ public class OpenApiConfiguration {
 		Scopes scopes = new Scopes();
 		scopes.put("role-as-group", "obtenir les rôles");
 		scopes.put("profile", "obtenir le nom, prénom, preferred username...");
-		scopes.put("email", "obtenir l'email");
 
 		final OpenAPI openapi = new OpenAPI().info(new Info().title("Swagger Formation API REST").version(version));
 		openapi.components(new Components().addSecuritySchemes(SCHEMEKEYCLOAK, new SecurityScheme()
