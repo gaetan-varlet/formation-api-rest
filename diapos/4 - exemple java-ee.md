@@ -5,9 +5,7 @@
 ## Création d'une application web classique avec Maven
 
 - créez un nouveau projet maven en choisissant l'option "skip archetype" et packaging "war", ou avec la commande maven : `mvn archetype:generate -DgroupId=fr.insee -DartifactId=toto -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false`
-
 - créez un fichier **web.xml** dans le dossier *src/main/webapp/WEB-INF/*
-
 ```xml
 <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -16,7 +14,6 @@
     version="3.1">
 </web-app>
 ```
-
 - utilisez un **Tomcat 9**
 
 ----
