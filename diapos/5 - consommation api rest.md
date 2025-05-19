@@ -11,7 +11,8 @@
 - en JavaScript : consommer son API pour faire une IHM en JavaScript
 - en bash : `curl https://jsonplaceholder.typicode.com/posts/1`
 - en Libre Office
-- en SAS
+- en SAS, en R
+- en Python
 - etc...
 
 ----

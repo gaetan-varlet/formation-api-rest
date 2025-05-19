@@ -5,15 +5,19 @@
 ## Création d'une application web classique avec Maven
 
 - créez un nouveau projet maven en choisissant l'option "skip archetype" et packaging "war", ou avec la commande maven : `mvn archetype:generate -DgroupId=fr.insee -DartifactId=toto -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false`
+
 - créez un fichier **web.xml** dans le dossier *src/main/webapp/WEB-INF/*
+
 ```xml
 <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
          http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
-	version="3.1">
+    version="3.1">
 </web-app>
 ```
+
+- utilisez un **Tomcat 9**
 
 ----
 
@@ -58,7 +62,7 @@ package servlet;
 
 @WebServlet("/calcul-avec-jsp")
 public class CalculAvecJspServlet extends HttpServlet {
-	
+
 	public void doGet( HttpServletRequest request, HttpServletResponse response )
 			throws ServletException, IOException{
 		int nombre1 = Integer.parseInt(request.getParameter("nombre1"));
@@ -95,7 +99,7 @@ public class CalculAvecJspServlet extends HttpServlet {
 </html>
 ```
 
-- déployez le projet à la racine de votre Tomcat 9 et appellez l'URL [http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4](http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4)
+- déployez le projet à la racine de votre Tomcat et appellez l'URL [http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4](http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4)
 
 ----
 

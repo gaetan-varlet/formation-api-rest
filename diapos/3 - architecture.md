@@ -27,7 +27,7 @@ API REST :
 
 ----
 
-## L'architecture d'une application web classique à l'Insee
+## L'architecture d'une application web historique à l'Insee
 
 ![Architecture legacy](diapos/images/archi-legacy.png "Architecture legacy")
 
