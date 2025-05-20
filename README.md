@@ -8,7 +8,7 @@ TODO :
 - déploiement sur Kubernetes
 - diapo `/3/5` : ajouter sur le schéma un serveur Apache pour modéliser une appli JS
 - diapo `/4/1` sur la mise en place d'une appli Java EE
-  - passer à Java 21
+  - passer à Java 21 et Tomcat 10
   - vérfier les versions de bibilothèques utilisées dans ce projet
   - tester si l'artifact maven fonctionne toujours, voir s'il n'y en a pas un plus récent pour faire du java 17-21 ?
   - passer à Spring Boot ?
