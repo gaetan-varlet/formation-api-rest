@@ -1,7 +1,6 @@
 package fr.insee.formationapirest.config;
 
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -61,19 +60,19 @@ public class SecurityConfigurationKeycloakImpl {
         String[] adminUrls = { "/environnement" };
         // gestions de nos endpoints
         for (String url : urlsSwagger) {
-            authorize.requestMatchers(antMatcher(HttpMethod.GET, url)).permitAll();
+            authorize.requestMatchers(HttpMethod.GET, url).permitAll();
         }
         for (String url : urlsDivers) {
-            authorize.requestMatchers(antMatcher(HttpMethod.GET, url)).permitAll();
+            authorize.requestMatchers(HttpMethod.GET, url).permitAll();
         }
         for (String url : publicUrls) {
-            authorize.requestMatchers(antMatcher(HttpMethod.GET, url)).permitAll();
+            authorize.requestMatchers(HttpMethod.GET, url).permitAll();
         }
         for (String url : restrictedUrls) {
-            authorize.requestMatchers(antMatcher(url)).authenticated();
+            authorize.requestMatchers(url).authenticated();
         }
         for (String url : adminUrls) {
-            authorize.requestMatchers(antMatcher(url)).hasRole("ADMIN_TOUCAN");
+            authorize.requestMatchers(url).hasRole("ADMIN_TOUCAN");
         }
         // H2
         if (h2Enable) {
