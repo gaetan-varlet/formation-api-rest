@@ -43,11 +43,9 @@ public class SecurityConfigurationInMemoryImpl {
                 // gestion des droits (TODO à revoir avec Spring Secu 6.1)
                 String[] urlsSwagger = { "/", "/swagger-ui.html", "/swagger-ui/**",
                                 "/v3/api-docs/**" };
-                String[] urlsDivers = { "/info", "/healthcheck" };
                 http.authorizeHttpRequests(authz -> authz
                                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
                                 .requestMatchers(urlsSwagger).permitAll()
-                                .requestMatchers(urlsDivers).permitAll()
                                 .requestMatchers(toH2Console()).permitAll()
                                 // configuration des autres requêtes
                                 .requestMatchers("/url1", "/url2").permitAll()

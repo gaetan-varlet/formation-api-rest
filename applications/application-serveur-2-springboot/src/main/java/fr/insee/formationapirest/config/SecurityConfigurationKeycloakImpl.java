@@ -54,15 +54,11 @@ public class SecurityConfigurationKeycloakImpl {
     private void authorizedUrls(
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authorize) {
         String[] urlsSwagger = { "/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**" };
-        String[] urlsDivers = { "/info", "/healthcheck" };
         String[] publicUrls = { "/vin", "/vin/**", "/hello" };
         String[] restrictedUrls = { "/mon-nom", "/hello-secured" };
         String[] adminUrls = { "/environnement" };
         // gestions de nos endpoints
         for (String url : urlsSwagger) {
-            authorize.requestMatchers(HttpMethod.GET, url).permitAll();
-        }
-        for (String url : urlsDivers) {
             authorize.requestMatchers(HttpMethod.GET, url).permitAll();
         }
         for (String url : publicUrls) {
