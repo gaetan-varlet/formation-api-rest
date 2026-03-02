@@ -11,7 +11,6 @@ import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -27,7 +26,7 @@ public class PropertiesLogger implements ApplicationListener<ApplicationEnvironm
             Set.of("password", "pwd", "jeton", "token", "secret");
 
     @Override
-    public void onApplicationEvent(@NonNull ApplicationEnvironmentPreparedEvent event) {
+    public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
         Environment environment = event.getEnvironment();
 
         log.info("============================================================================");
@@ -69,6 +68,6 @@ public class PropertiesLogger implements ApplicationListener<ApplicationEnvironm
                         .anyMatch(key.toLowerCase()::contains)) {
             return "******";
         }
-        return environment.getProperty(key);
+        return Objects.requireNonNull(environment.getProperty(key));
     }
 }

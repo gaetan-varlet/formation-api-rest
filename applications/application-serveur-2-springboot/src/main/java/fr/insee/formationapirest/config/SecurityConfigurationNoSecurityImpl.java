@@ -1,7 +1,5 @@
 package fr.insee.formationapirest.config;
 
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +23,7 @@ public class SecurityConfigurationNoSecurityImpl {
         http.sessionManagement(session -> session.sessionAuthenticationStrategy(
                 new NullAuthenticatedSessionStrategy())
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.authorizeHttpRequests(authorize -> authorize.requestMatchers(antMatcher("/**")).permitAll());
+        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/**").permitAll());
         return http.build();
     }
 

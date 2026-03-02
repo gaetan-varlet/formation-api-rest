@@ -1,7 +1,5 @@
 package fr.insee.formationapirest.config;
 
-import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +24,7 @@ public class SecurityConfigurationKeycloakImpl {
     private boolean h2Enable;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) {
         // fonctionnement du filtre CORS avec Spring Security
         // chargement de la configuration CORS définie dans un Bean
         // CORS doit être traité en premier, sinon Spring Secu rejettera la demande
@@ -72,7 +70,7 @@ public class SecurityConfigurationKeycloakImpl {
         }
         // H2
         if (h2Enable) {
-            authorize.requestMatchers(toH2Console()).permitAll();
+            authorize.requestMatchers("/h2-console/**").permitAll();
         }
         // interdiction de toutes les autres requêtes
         authorize.anyRequest().authenticated();

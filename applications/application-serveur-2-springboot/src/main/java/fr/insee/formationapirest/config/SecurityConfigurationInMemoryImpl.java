@@ -1,7 +1,5 @@
 package fr.insee.formationapirest.config;
 
-import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,7 +44,7 @@ public class SecurityConfigurationInMemoryImpl {
                 http.authorizeHttpRequests(authz -> authz
                                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
                                 .requestMatchers(urlsSwagger).permitAll()
-                                .requestMatchers(toH2Console()).permitAll()
+                                .requestMatchers("/h2-console/**").permitAll()
                                 // configuration des autres requêtes
                                 .requestMatchers("/url1", "/url2").permitAll()
                                 .requestMatchers("/vin", "/vin/**").permitAll()
