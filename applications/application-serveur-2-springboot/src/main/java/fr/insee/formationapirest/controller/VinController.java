@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -66,7 +67,7 @@ public class VinController {
 	}
 
 	@GetMapping("pageable")
-	public Page<Vin> getAllPageable(Pageable p) {
+	public Page<Vin> getAllPageable(@ParameterObject Pageable p) {
 		return vinService.pageable(p);
 	}
 
