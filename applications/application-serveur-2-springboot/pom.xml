@@ -18,7 +18,7 @@
 
 	<properties>
 		<java.version>25</java.version>
-		<cucumber.version>7.32.0</cucumber.version>
+		<cucumber.version>7.34.3</cucumber.version>
 		<wiremock-spring-boot.version>4.0.8</wiremock-spring-boot.version>
 	</properties>
 
