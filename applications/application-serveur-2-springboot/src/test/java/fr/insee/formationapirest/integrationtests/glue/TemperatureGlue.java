@@ -11,14 +11,20 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 @Slf4j
 public class TemperatureGlue implements En {
 
+    Double temperatureApi;
     Double temperature;
 
     public TemperatureGlue(TemperatureService temperatureService) {
+
+        Given("La température dans la cave est {double}", (Double temp) -> {
+            temperatureApi = temp;
+        });
+
         When(
                 "je récupère la température",
                 () -> {
                     try {
-                        stubFor(get("/temperature").willReturn(ok("5")));
+                        stubFor(get("/temperature").willReturn(ok(temperatureApi.toString())));
                         temperature = temperatureService.getTemperature();
                     } catch (Exception e) {
                         temperature = null;
