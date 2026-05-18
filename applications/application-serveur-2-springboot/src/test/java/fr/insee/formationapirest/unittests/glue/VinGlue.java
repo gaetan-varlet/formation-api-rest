@@ -34,7 +34,10 @@ public class VinGlue implements En {
     }
 
     private Vin transformMapToVin(Map<String, String> line) {
-        return Vin.builder().chateau(line.get("chateau")).appellation(line.get("appellation"))
-                .prix(Double.valueOf(line.get("prix"))).build();
+        return Vin.builder()
+                .chateau(line.get("chateau"))
+                .appellation(line.get("appellation"))
+                .prix(Double.valueOf(line.get("prix")))
+                .build();
     }
 }
