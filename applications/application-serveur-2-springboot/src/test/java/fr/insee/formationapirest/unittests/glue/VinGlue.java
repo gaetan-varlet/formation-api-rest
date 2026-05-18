@@ -28,6 +28,9 @@ public class VinGlue implements En {
         When("je récupère tous les vins", () -> {
             vins = vinService.findAll(null);
         });
+        When("je récupère tous les vins de l'appellation {string}", (String appellation) -> {
+            vins = vinService.findAll(appellation);
+        });
         Then("le nombre de vins est {int}", (Integer nbExcepted) -> {
             assertThat(vins).hasSize(nbExcepted);
         });
