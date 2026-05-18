@@ -10,7 +10,9 @@ import fr.insee.formationapirest.repository.VinRepositoryCustomImpl;
 import fr.insee.formationapirest.service.VinService;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java8.En;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class VinGlue implements En {
 
     private List<Vin> vins;
@@ -18,27 +20,17 @@ public class VinGlue implements En {
 
     public VinGlue(VinRepositoryCustomImpl vinRepository, VinService vinService) {
 
-        Before(() -> {
-            // clearDatabase
-            vinRepository.findAll().forEach(v -> vinRepository.deleteById(v.getId()));
-        });
-
         Given("il n'y a pas de données en base", () -> {
             vinRepository.findAll().forEach(v -> vinRepository.deleteById(v.getId()));
-        });
-
-        Given("des vins avec les attributs suivants", (DataTable dataTable) -> {
-            List<Map<String, String>> dataAsMaps = dataTable.asMaps();
-            List<Vin> toSave = dataAsMaps.stream().map(this::transformMapToVin).toList();
-            toSave.forEach(v -> vinRepository.save(v));
         });
 
         Given("je veux créer un vin avec les attributs suivants", (DataTable dataTable) -> {
             try {
                 List<Map<String, String>> line = dataTable.asMaps();
-                vinService.add(transformMapToVin(line.get(0)));
+                vinService.add(transformMapToVin(line.getFirst()));
                 exception = null;
             } catch (Exception e) {
+                log.debug("ERREUR lors de la recherche d'anomalies", e);
                 exception = e.getMessage();
             }
         });
@@ -65,7 +57,7 @@ public class VinGlue implements En {
                             .filter(v -> v.getChateau().equals(chateau) && v.getAppellation().equals(appellation))
                             .toList();
                     assertThat(vinsFiltres).hasSize(1);
-                    assertThat(vinsFiltres.get(0).getPrix()).isEqualTo(prix);
+                    assertThat(vinsFiltres.getFirst().getPrix()).isEqualTo(prix);
                 });
     }
 

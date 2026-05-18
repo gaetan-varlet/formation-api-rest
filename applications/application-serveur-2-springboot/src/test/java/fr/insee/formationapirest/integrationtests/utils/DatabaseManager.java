@@ -110,7 +110,7 @@ public class DatabaseManager {
         log.info("CLEAR DATABASE");
         entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
 
-        String schema = "PUBLIC";
+        String schema = "FORMATION";
         List<String> tables = tablesSchema(schema);
         truncateTables(schema, tables);
         restartIds(schema, tables);

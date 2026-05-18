@@ -1,7 +1,7 @@
 Feature: Obtenir les vins
 
     Background: création d'un jeu de données pour vérifier les données renvoyées
-        Given des vins avec les attributs suivants
+        Given les vins
             | chateau   | appellation  | prix |
             | Château 1 | Saint-Julien | 10.5 |
             | Château 2 | Pomerol      | 25   |

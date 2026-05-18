@@ -12,8 +12,7 @@ import io.cucumber.spring.CucumberContextConfiguration;
 // permet de faire des requêtes HTTP avec MockMvc
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE)
 @TestPropertySource(properties = {
-        "spring.datasource.driver-class-name=org.h2.Driver",
-        "spring.datasource.url=jdbc:h2:mem:testdb",
+        "logging.level.fr.insee=${log.level:TRACE}",
         "temperature.base-url=http://localhost:8082",
 })
 @CucumberContextConfiguration
