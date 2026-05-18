@@ -24,10 +24,6 @@ public class VinRepoMock implements VinRepository {
         return this.vins.stream().filter(v -> v.getAppellation().equals(app)).toList();
     }
 
-    public void clear() {
-        vins = new ArrayList<>();
-    }
-
     @Override
     public boolean existsById(Integer id) {
         throw new UnsupportedOperationException("Unimplemented method 'existsById'");
