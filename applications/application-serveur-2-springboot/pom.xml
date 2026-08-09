@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.6</version>
+		<version>4.1.0</version>
 		<relativePath />
 	</parent>
 
@@ -18,8 +18,8 @@
 
 	<properties>
 		<java.version>25</java.version>
-		<cucumber.version>7.34.3</cucumber.version>
-		<wiremock-spring-boot.version>4.0.8</wiremock-spring-boot.version>
+		<cucumber.version>7.34.6</cucumber.version>
+		<wiremock-spring-boot.version>4.2.2</wiremock-spring-boot.version>
 	</properties>
 
 	<dependencies>
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>3.0.0</version>
+			<version>3.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -56,7 +56,7 @@
 		<dependency>
 			<groupId>com.opencsv</groupId>
 			<artifactId>opencsv</artifactId>
-			<version>5.9</version>
+			<version>5.12.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
