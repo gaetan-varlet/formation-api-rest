@@ -67,10 +67,7 @@ public class VinService {
 
 	public Vin add(Vin vin) {
 		if (controleValiditeVin(vin)) {
-			// si l'id n'est pas renseigné ou si l'id renseigné n'existe pas, alors on crée
-			// le vin
-			if (vin.getId() == null || !vinRepository.existsById(vin.getId())) {
-				vin.setId(null);
+			if (vin.getId() == null) {
 				return vinRepository.save(vin);
 			} else {
 				throw new VinInvalideException(
