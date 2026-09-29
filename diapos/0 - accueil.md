@@ -1,5 +1,5 @@
-# Formation API REST
+# Formation API REST avec Spring Boot
 
 [Gaëtan Varlet](https://github.com/gaetan-varlet)
 
-mars 2026
+septembre 2026
