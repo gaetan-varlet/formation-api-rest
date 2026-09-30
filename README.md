@@ -20,6 +20,10 @@ TODO :
 - diapo `/14/5` sur la création de fichier CSV
   - mettre en avant la méthode fourni par spring avec ResponseEntity au lieu d'utiliser HttpServletResponse
 
+- Base H2 : activer le mode postgre et voir ce que ça change concrétement
+  - `jdbc:h2:~/test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH`
+  - doc : `https://www.h2database.com/html/features.html`
+
 A creuser :
 
 - utilisation d'**OpenFeign** pour faire des requêtes HTTP
