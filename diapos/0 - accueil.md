@@ -2,4 +2,4 @@
 
 [Gaëtan Varlet](https://github.com/gaetan-varlet)
 
-septembre 2026
+octobre 2026
