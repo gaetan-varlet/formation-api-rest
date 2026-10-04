@@ -27,17 +27,9 @@ API REST :
 
 ----
 
-## L'architecture d'une application web historique à l'Insee
+## Architecture monolithique VS architecture découplée
 
-![Architecture legacy](diapos/images/archi-legacy.png "Architecture legacy")
-
-----
-
-## L'architecture d'une application basée sur une API
-
-**JavaScript** pour le 'front-ent', **API Java** pour le 'back-end'
-
-![Architecture API](diapos/images/archi-api.png "Architecture API")
+![Architecture monolithique VS architecture découplée](diapos/images/archi-legacy-vs-api.jpg.png "Architecture monolithique VS architecture découplée")
 
 ----
 
