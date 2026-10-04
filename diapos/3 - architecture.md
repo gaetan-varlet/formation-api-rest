@@ -20,10 +20,19 @@ API REST :
 
 ----
 
-- **niveau 0** : API qu'on ne peut pas vraiment qualifié de REST, davantage proche de SOAP. Utilisation d'"HTTP" comme protocole d'échange. Un seul point d'entrée, comme `/api`, et une seule méthode HTTP, `POST`, pour toutes les requêtes
-- **niveau 1** : chaque ressource doit être distinguée par une URI distincte
-- **niveau 2** : utilisation des verbes HTTP et codes retours HTTP adéquats
-- **niveau 3** : notion d'HATEOAS (Hypertext As The Engine Of Application State) : ajout de liens dans les ressources retournées par l'API (par exemple pour mettre à jour la ressource, ou avoir l'URI d'un objet lié)
+- **Niveau 0 — Le tunnel HTTP :**  
+  HTTP sert uniquement de protocole de transport. L'API utilise un endpoint unique (ex. `/api`) et souvent une seule méthode (généralement `POST`) pour exécuter des fonctions distantes (style SOAP)
+
+- **Niveau 1 — Les ressources (URI distinctes) :**  
+  Découpage de l'application en entités individuelles adressables par une URI propre (ex. `/clients/42`, `/commandes/15`). En revanche, les verbes et codes HTTP ne sont pas encore normalisés (ex. utilisation de `POST /clients/42/supprimer`)
+
+- **Niveau 2 — Les verbes et statuts HTTP (Standard actuel) :**  
+  Utilisation standard de la sémantique HTTP :
+  - Verbes adaptés aux opérations : `GET` (lecture), `POST` (création), `PUT` / `PATCH` (mise à jour), `DELETE` (suppression)
+  - Codes retour explicites (`200 OK`, `201 Created`, `204 No Content`, `400 Bad Request`, `404 Not Found`)
+
+- **Niveau 3 — Les contrôles hypermédias (HATEOAS) :**  
+  *Hypermedia As The Engine Of Application State*. La réponse contient les données brutes **et** des liens navigables indiquant les actions possibles depuis l'état courant
 
 ----
 
