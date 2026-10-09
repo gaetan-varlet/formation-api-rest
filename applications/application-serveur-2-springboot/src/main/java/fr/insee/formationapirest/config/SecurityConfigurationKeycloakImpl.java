@@ -42,7 +42,7 @@ public class SecurityConfigurationKeycloakImpl {
         // gestion des rôles
         http.authorizeHttpRequests(this::authorizedUrls);
         // autorisation d'afficher des frames dans l'appli pour afficher la console h2
-        // (risque de clickjacking)
+        // (risque de clickjacking, à faire uniquement en local)
         if (h2Enable) {
             http.headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin));
         }
@@ -68,7 +68,7 @@ public class SecurityConfigurationKeycloakImpl {
         for (String url : adminUrls) {
             authorize.requestMatchers(url).hasRole("ADMIN_TOUCAN");
         }
-        // H2
+        // console h2 à activer uniquement en local
         if (h2Enable) {
             authorize.requestMatchers("/h2-console/**").permitAll();
         }
