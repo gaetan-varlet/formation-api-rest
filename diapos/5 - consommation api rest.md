@@ -22,7 +22,7 @@
 - XMLHttpRequest
 - Jquery
 - Axios
-- Fetch
+- Fetch (standard actuel)
 
 ----
 
