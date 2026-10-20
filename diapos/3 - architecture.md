@@ -33,9 +33,9 @@ API REST :
 
 ----
 
-## Architecture monolithique VS architecture découplée
+## Architecture traditionnelle VS architecture découplée
 
-![Architecture monolithique VS architecture découplée](diapos/images/archi-legacy-vs-api.jpg "Architecture monolithique VS architecture découplée")
+![Architecture traditionnelle VS architecture découplée](diapos/images/archi-legacy-vs-api.jpg "Architecture traditionnelle VS architecture découplée")
 
 ----
 
