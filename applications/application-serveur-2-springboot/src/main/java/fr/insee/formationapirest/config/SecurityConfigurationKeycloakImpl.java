@@ -37,8 +37,8 @@ public class SecurityConfigurationKeycloakImpl {
                 session -> session.sessionAuthenticationStrategy(
                         new NullAuthenticatedSessionStrategy())
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        // autoriser l'authentification par jeton JWT
-        http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> Customizer.withDefaults()));
+        // authentification JWT : Bearer classique ou en DPoP (jeton lié à la clé du client, inutilisable s'il fuite)
+        http.oauth2ResourceServer( oauth2 -> oauth2.jwt(Customizer.withDefaults()).dPoP(Customizer.withDefaults()));
         // gestion des rôles
         http.authorizeHttpRequests(this::authorizedUrls);
         // autorisation d'afficher des frames dans l'appli pour afficher la console h2
