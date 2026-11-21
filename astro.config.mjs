@@ -130,17 +130,23 @@ export default defineConfig({
 						{ slug: 'api-rest/annotations' },
 						{ slug: 'api-rest/gestion-erreurs' },
 						{ slug: 'api-rest/contrats-api' },
-						{ slug: 'api-rest/requetes-sql' },
 						{ slug: 'api-rest/swagger' },
 					],
 				},
 				{
-					label: 'Fichiers, Streaming & Performance',
+					label: 'Accès aux données & SQL',
+					items: [
+						{ slug: 'acces-donnees/jpa-avance' },
+						{ slug: 'acces-donnees/jdbc-sql' },
+						{ slug: 'acces-donnees/benchmark-sql' },
+					],
+				},
+				{
+					label: 'Fichiers, Streaming & Cache',
 					items: [
 						{ slug: 'fichiers-performance/reception-fichier' },
 						{ slug: 'fichiers-performance/export-csv' },
 						{ slug: 'fichiers-performance/streaming' },
-						{ slug: 'fichiers-performance/benchmark-sql' },
 						{ slug: 'fichiers-performance/cache' },
 					],
 				},
