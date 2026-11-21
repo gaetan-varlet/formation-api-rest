@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.1.0</version>
+		<version>4.2.0</version>
 		<relativePath />
 	</parent>
 
@@ -18,8 +18,8 @@
 
 	<properties>
 		<java.version>25</java.version>
-		<cucumber.version>7.34.6</cucumber.version>
-		<wiremock-spring-boot.version>4.2.2</wiremock-spring-boot.version>
+		<cucumber.version>8.1.0</cucumber.version>
+		<wiremock-spring-boot.version>4.4.3</wiremock-spring-boot.version>
 	</properties>
 
 	<dependencies>
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>3.1.0</version>
+			<version>3.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -129,13 +129,6 @@
 	</dependencies>
 
 	<build>
-		<!-- permet d'injecter des properties Maven dans le fichier de properties de l'application -->
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
 		<finalName>ROOT</finalName>
 		<plugins>
 			<plugin>
@@ -170,18 +163,11 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<!-- permet la surcharge du plugin tout en fonctionnant avec jacoco -->
-					<argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
-				</configuration>
 			</plugin>
 			<!-- permet de lancer les tests d'intégration -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
-				</configuration>
 			</plugin>
 			<!-- génère un rapport sur la couverture de tests -->
 			<plugin>
