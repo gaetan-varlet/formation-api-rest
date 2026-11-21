@@ -1,0 +1,220 @@
+---
+title: "Création des méthodes CRUD de VinController"
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Création du controller `VinController`
+
+Créons un contrôleur REST exposant la ressource `/vin`, avec une première méthode pour récupérer tous les vins :
+
+```java title="VinController.java"
+package fr.insee.formationapirest.controller;
+
+import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/vin")
+@RequiredArgsConstructor
+public class VinController {
+
+    private final VinRepository vinRepository;
+
+    @GetMapping
+    public List<Vin> getAll() {
+        return vinRepository.findAll();
+    }
+}
+```
+
+Testez en accédant à [http://localhost:8080/vin](http://localhost:8080/vin) pour obtenir la liste des vins en JSON.
+
+*(Note : `@GetMapping`, `@PostMapping`, `@PutMapping` et `@DeleteMapping` sont des raccourcis de `@RequestMapping(method = ...)` détaillés dans la page [Zoom sur les principales annotations](/formation-api-rest/api-rest/annotations/).)*
+
+## Opérations CRUD par identifiant et création
+
+<Tabs>
+<TabItem label="GET /{id}">
+
+Récupère un vin par son identifiant :
+
+```java
+@GetMapping("/{id}")
+public Vin getById(@PathVariable Integer id) {
+    return vinRepository.findById(id).orElse(null);
+}
+```
+
+Test : [http://localhost:8080/vin/1](http://localhost:8080/vin/1)
+
+</TabItem>
+<TabItem label="POST (création)">
+
+Crée un nouveau vin (en vérifiant que l'identifiant n'est pas fourni) :
+
+```java
+@PostMapping
+public Vin add(@RequestBody Vin vin) {
+    if (vin.getId() == null) {
+        return vinRepository.save(vin);
+    }
+    return null;
+}
+```
+
+Requête `POST` sur `http://localhost:8080/vin` avec un corps JSON :
+
+```json
+{
+  "chateau": "Château Gloria",
+  "appellation": "Saint-Julien",
+  "prix": 25
+}
+```
+
+</TabItem>
+<TabItem label="PUT (mise à jour)">
+
+Met à jour un vin existant :
+
+```java
+@PutMapping
+public Vin update(@RequestBody Vin vin) {
+    if (vin.getId() != null && vinRepository.existsById(vin.getId())) {
+        return vinRepository.save(vin);
+    }
+    return null;
+}
+```
+
+</TabItem>
+<TabItem label="DELETE /{id}">
+
+Supprime un vin par son identifiant :
+
+```java
+@DeleteMapping("/{id}")
+public void deleteById(@PathVariable Integer id) {
+    // Renvoie un code HTTP 200 par défaut, que l'id existe ou non
+    vinRepository.deleteById(id);
+}
+```
+
+</TabItem>
+</Tabs>
+
+:::note[Gestion des codes d'erreur HTTP]
+Ici, retourner `null` renvoie un code HTTP `200 OK` avec un corps vide (et `deleteById` renvoie aussi `200`). Pour renvoyer de vrais codes `404 Not Found` ou `400 Bad Request`, nous verrons comment utiliser les exceptions et `@RestControllerAdvice` dans le chapitre [Gestion des erreurs](/formation-api-rest/api-rest/gestion-erreurs/).
+:::
+
+## Filtrage sur un attribut via paramètre de requête
+
+Spring Data JPA permet de déclarer des méthodes dont la requête SQL est générée automatiquement à partir du nom de la méthode ([liste des mots-clés Spring Data JPA](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)) :
+
+```java title="VinRepository.java"
+// Génère automatiquement : ... WHERE appellation = ?
+List<Vin> findByAppellation(String app);
+```
+
+On l'utilise ensuite dans `VinController` avec `@RequestParam(required = false)` :
+
+```java title="VinController.java"
+@GetMapping
+public List<Vin> getAll(@RequestParam(required = false) String appellation) {
+    if (appellation != null) {
+        return vinRepository.findByAppellation(appellation);
+    }
+    return vinRepository.findAll();
+}
+```
+
+- Tous les vins : [http://localhost:8080/vin](http://localhost:8080/vin)
+- Filtré sur Margaux : [http://localhost:8080/vin?appellation=Margaux](http://localhost:8080/vin?appellation=Margaux)
+
+## Refactoring : mise en place d'une couche `@Service`
+
+**Objectif :** supprimer le lien direct entre la couche `Controller` (HTTP) et la couche `Repository` (BDD). Toute la logique métier doit passer par la couche `Service`.
+
+```java title="VinService.java"
+@Service
+@RequiredArgsConstructor
+public class VinService {
+
+    private final VinRepository vinRepository;
+
+    public List<Vin> getAll() {
+        return vinRepository.findAll();
+    }
+}
+```
+
+```java title="VinController.java"
+@RestController
+@RequestMapping("/vin")
+@RequiredArgsConstructor
+public class VinController {
+
+    private final VinService vinService;
+
+    @GetMapping
+    public List<Vin> getAll() {
+        return vinService.getAll();
+    }
+}
+```
+
+## Pagination et tri (`Pageable`)
+
+Spring Data gère nativement la pagination et le tri via les paramètres de requête suivants :
+
+- **`page`** : numéro de la page à récupérer (`0` par défaut).
+- **`size`** : nombre d'éléments par page (`20` par défaut).
+- **`sort`** :
+  - champs sur lesquels trier au format `propriete,propriete(,ASC|DESC)` (`ASC` par défaut) ;
+  - pour appliquer des ordres de tri différents selon les champs, répétez le paramètre `sort` : `?sort=firstname&sort=lastname,desc`.
+
+```java title="VinService.java"
+public Page<Vin> pageable(Pageable p) {
+    return vinRepository.findAll(p);
+}
+```
+
+```java title="VinController.java"
+@GetMapping("/pageable")
+public Page<Vin> getAllPageable(@ParameterObject Pageable p) {
+    return vinService.pageable(p);
+}
+```
+
+*(L'annotation `@ParameterObject` de `springdoc-openapi` permet à Swagger UI d'afficher directement les champs `page`, `size` et `sort` plutôt qu'un objet JSON brut.)*
+
+- Page 0 de 2 éléments triés de manière décroissante par appellation puis prix :  
+  [http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC](http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC)
+- Page de 20 éléments triés par appellation croissante puis par prix décroissant :  
+  [http://localhost:8080/vin/pageable?sort=appellation&sort=prix,DESC](http://localhost:8080/vin/pageable?sort=appellation&sort=prix,DESC)
+
+## Renvoyer une `ResponseEntity`
+
+`ResponseEntity<T>` représente la réponse HTTP complète : code de statut, en-têtes et corps ([exemples sur Baeldung](https://www.baeldung.com/spring-response-entity)).
+
+Par exemple, pour respecter les conventions REST lors d'une création (`POST`), on renvoie un code **`201 Created`** accompagné de l'en-tête **`Location`** pointant vers la ressource créée :
+
+```java title="VinController.java"
+@PostMapping
+public ResponseEntity<Void> add(@RequestBody Vin vin) {
+    Vin vinAjoute = vinService.add(vin);
+    URI location = ServletUriComponentsBuilder
+        .fromCurrentRequest()
+        .path("/{id}")
+        .buildAndExpand(vinAjoute.getId())
+        .toUri();
+    return ResponseEntity.created(location).build();
+}
+```
+
+- Code HTTP renvoyé : **`201 Created`**.
+- En-tête ajouté à la réponse : `Location: http://localhost:8080/vin/5`.
