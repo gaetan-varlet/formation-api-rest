@@ -53,3 +53,26 @@
 		font-size: var(--sl-text-sm);
 	}
 }
+
+/*
+ * Grille côte à côte à 2 colonnes (empilée sur mobile) pour comparer deux blocs de code
+ * (ex. rendu JSON vs XML dans introduction.mdx).
+ * `minmax(0, 1fr)` évite qu'un bloc `<pre>` large ne déborde de sa colonne.
+ */
+.sl-markdown-content .compare-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 1rem;
+	align-items: start;
+}
+
+/* Annule la marge haute ajoutée par le sélecteur `* + *` de Starlight pour garder les 2 colonnes alignées */
+.sl-markdown-content .compare-grid > * {
+	margin-top: 0;
+}
+
+@media (min-width: 50rem) {
+	.sl-markdown-content .compare-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}

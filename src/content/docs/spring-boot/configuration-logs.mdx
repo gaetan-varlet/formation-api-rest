@@ -2,7 +2,7 @@
 title: "Configuration des logs"
 ---
 
-import { Steps } from '@astrojs/starlight/components';
+import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## Configuration de Logback
 
@@ -34,26 +34,10 @@ logging.charset.file=UTF-8
 
 ## Écrire des logs dans son code Java
 
-On utilise la façade **SLF4J** (jamais `System.out.println` dans une application).
+On utilise la façade **SLF4J** (jamais `System.out.println` dans une application). Avec **Lombok**, l'annotation `@Slf4j` génère automatiquement l'attribut `log` à la compilation, ce qui évite la déclaration manuelle via `LoggerFactory` :
 
-Classiquement, on déclare un `Logger` statique dans la classe :
-
-```java title="TestController.java"
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class TestController {
-    private static final Logger log = LoggerFactory.getLogger(TestController.class);
-
-    public String helloWorld() {
-        log.info("Passage dans le controller helloWorld");
-        return "Hello World !";
-    }
-}
-```
-
-:::tip[Alternative concise avec Lombok : `@Slf4j`]
-Avec Lombok, l'annotation `@Slf4j` sur la classe génère automatiquement l'attribut `log` à la compilation :
+<Tabs>
+<TabItem label="Avec Lombok (@Slf4j)">
 
 ```java title="TestController.java"
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +53,29 @@ public class TestController {
     }
 }
 ```
-:::
+
+</TabItem>
+<TabItem label="Java standard (SLF4J)">
+
+```java title="TestController.java"
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@RestController
+public class TestController {
+
+    private static final Logger log = LoggerFactory.getLogger(TestController.class);
+
+    @GetMapping("/hello")
+    public String helloWorld() {
+        log.info("Passage dans le controller helloWorld");
+        return "Hello World !";
+    }
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Logger les requêtes SQL
 
@@ -80,11 +86,13 @@ spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 ```
 
-*(Limite : les paramètres `?` des requêtes préparées ne sont pas affichés directement dans la requête.)*
+**Limites :**
+- Les valeurs des paramètres `?` des requêtes préparées ne sont pas affichées directement dans la requête.
+- Les requêtes SQL qui ne passent pas par Hibernate (`JdbcTemplate`, `JdbcClient`, JDBC direct…) ne sont pas logguées.
 
 ### Approche détaillée avec p6spy
 
-**p6spy** intercepte le driver JDBC pour afficher les requêtes SQL complètes avec leurs **valeurs de paramètres** et le temps d'exécution.
+**p6spy** intercepte le driver JDBC pour afficher **toutes** les requêtes SQL complètes avec leurs **valeurs de paramètres** et le temps d'exécution.
 
 <Steps>
 

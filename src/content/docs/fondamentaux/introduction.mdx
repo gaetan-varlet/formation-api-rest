@@ -29,23 +29,25 @@ Exemple public pour tester : [JSONPlaceholder](https://jsonplaceholder.typicode.
 ```java title="Personne.java"
 @XmlRootElement
 public class Personne {
-  private String prenom;
-  private Integer age;
-  private Adresse adresse;
+    private String prenom;
+    private Integer age;
+    private Adresse adresse;
 }
 
 @XmlRootElement
 public class Adresse {
-  private String nomCommune;
-  private String codePostal;
+    private String nomCommune;
+    private String codePostal;
 }
 ```
 
 ### Comparaison des rendus JSON et XML
 
 <Tabs>
-  <TabItem label="JSON - Objet">
-```json
+  <TabItem label="Objet (Personne)">
+  <div class="compare-grid">
+
+```json title="JSON"
 {
   "prenom": "Bob",
   "age": 30,
@@ -55,9 +57,24 @@ public class Adresse {
   }
 }
 ```
+
+```xml title="XML"
+<personne>
+    <adresse>
+        <codePostal>92120</codePostal>
+        <nomCommune>Montrouge</nomCommune>
+    </adresse>
+    <age>30</age>
+    <prenom>Bob</prenom>
+</personne>
+```
+
+  </div>
   </TabItem>
-  <TabItem label="JSON - Liste">
-```json
+  <TabItem label="Collection (List<Personne>)">
+  <div class="compare-grid">
+
+```json title="JSON"
 [
   {
     "prenom": "Bob",
@@ -77,21 +94,8 @@ public class Adresse {
   }
 ]
 ```
-  </TabItem>
-  <TabItem label="XML - Objet">
-```xml
-<personne>
-    <adresse>
-        <codePostal>92120</codePostal>
-        <nomCommune>Montrouge</nomCommune>
-    </adresse>
-    <age>30</age>
-    <prenom>Bob</prenom>
-</personne>
-```
-  </TabItem>
-  <TabItem label="XML - Liste">
-```xml
+
+```xml title="XML"
 <personnes>
     <personne>
         <adresse>
@@ -111,5 +115,7 @@ public class Adresse {
     </personne>
 </personnes>
 ```
+
+  </div>
   </TabItem>
 </Tabs>
