@@ -2,16 +2,36 @@
 title: "Présentation de l'univers Spring"
 ---
 
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
 ## L'univers Spring
 
 Spring est un framework libre pour concevoir des applications Java. Il s'occupe de la plomberie et de l'exécution globale de l'application, ce qui permet aux développeurs de se concentrer sur la configuration du projet et les traitements métiers.
 
-- **Spring Core** : cœur de Spring qui gère la création et le cycle de vie des objets via les annotations (`@Autowired`, `@Controller`, `@Service`, `@Repository`, etc.).
-- **Spring MVC** : permet de construire des applications web et API REST basées sur l'API Servlet.
-- **Spring Data** : simplifie et unifie l'accès aux bases de données.
-- **Spring Batch** : permet de gérer les traitements par lots (*batchs*).
-- **Spring Security** : fournit les mécanismes d'authentification, d'autorisation et de protection des requêtes.
-- **Spring Boot** : permet de créer facilement et rapidement des applications Spring prêtes à démarrer (avec un serveur Tomcat embarqué par défaut).
+Plutôt qu'un bloc monolithique, Spring est un **écosystème modulaire** composé de briques complémentaires :
+
+<div class="card-grid-3">
+<CardGrid>
+  <Card title="Spring Boot" icon="rocket">
+    Le point d'entrée moderne : assemble et auto-configure les briques ci-dessous pour démarrer une application rapidement, avec un serveur Tomcat embarqué par défaut.
+  </Card>
+  <Card title="Spring Core" icon="puzzle">
+    Le cœur du framework : gère la création et le cycle de vie des objets (*beans*) via l'injection de dépendances (`@Autowired`, `@Service`, `@Repository`, `@Controller`…).
+  </Card>
+  <Card title="Spring MVC" icon="laptop">
+    La couche web : permet de construire des applications web et des API REST basées sur l'API Servlet.
+  </Card>
+  <Card title="Spring Data" icon="setting">
+    La couche d'accès aux données : simplifie et unifie les échanges avec les bases de données (SQL/JPA, NoSQL…).
+  </Card>
+  <Card title="Spring Security" icon="approve-check">
+    La sécurité applicative : fournit l'authentification, la gestion des rôles/autorisations et la protection des requêtes HTTP.
+  </Card>
+  <Card title="Spring Batch" icon="list-format">
+    Les traitements par lots (*batchs*) : lecture, transformation et écriture de gros volumes de données de manière robuste.
+  </Card>
+</CardGrid>
+</div>
 
 ## Cycle de vie et versionnage de Spring Boot
 

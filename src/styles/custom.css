@@ -27,3 +27,29 @@
 	width: 0.85em;
 	height: 0.85em;
 }
+
+/*
+ * Variante à 3 colonnes sur grand écran pour les grilles <CardGrid> denses (ex. L'univers Spring).
+ * À utiliser en enveloppant <CardGrid> dans <div class="card-grid-3"> afin de préserver la grille
+ * par défaut à 2 colonnes sur la page d'accueil.
+ */
+@media (min-width: 64rem) {
+	.card-grid-3 .card-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1rem;
+	}
+
+	/* Réduit légèrement les marges internes et la taille du texte pour que 3 cartes tiennent confortablement */
+	.card-grid-3 .card {
+		padding: 1.1rem;
+	}
+
+	.card-grid-3 .card .title {
+		font-size: var(--sl-text-base);
+		gap: 0.65rem;
+	}
+
+	.card-grid-3 .card .body {
+		font-size: var(--sl-text-sm);
+	}
+}
