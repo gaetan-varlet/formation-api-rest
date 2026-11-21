@@ -1,0 +1,126 @@
+---
+title: "Configuration des logs"
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+## Configuration de Logback
+
+Spring Boot utilise **Logback** par défaut. Les niveaux et le format de sortie se configurent directement dans `src/main/resources/application.properties` :
+
+```properties title="src/main/resources/application.properties"
+# Niveaux de logs (ERROR, WARN, INFO, DEBUG, TRACE)
+logging.level.root=INFO
+logging.level.fr.insee=DEBUG
+# Coloration syntaxique des logs dans la console
+spring.output.ansi.enabled=ALWAYS
+```
+
+:::note[Écrire les logs dans un fichier (facultatif)]
+Dans la majorité des cas (conteneurs Docker/Kubernetes, `systemd`, collecteurs centralisés), **écrire uniquement dans la console suffit** : la sortie standard est automatiquement captée par la plateforme ou l'outil de centralisation des logs.
+
+Si vous devez tout de même écrire dans un fichier avec rotation automatique :
+
+```properties title="src/main/resources/application.properties"
+# Écriture dans un fichier
+logging.file.name=./logs/application.log
+logging.logback.rollingpolicy.file-name-pattern=${LOG_FILE}.%d{yyyy-MM-dd}.%i.log
+# Taille maximum d'un fichier de log (valeur par défaut : 10MB)
+logging.logback.rollingpolicy.max-file-size=10MB
+# Encodage du fichier de log
+logging.charset.file=UTF-8
+```
+:::
+
+## Écrire des logs dans son code Java
+
+On utilise la façade **SLF4J** (jamais `System.out.println` dans une application).
+
+Classiquement, on déclare un `Logger` statique dans la classe :
+
+```java title="TestController.java"
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class TestController {
+    private static final Logger log = LoggerFactory.getLogger(TestController.class);
+
+    public String helloWorld() {
+        log.info("Passage dans le controller helloWorld");
+        return "Hello World !";
+    }
+}
+```
+
+:::tip[Alternative concise avec Lombok : `@Slf4j`]
+Avec Lombok, l'annotation `@Slf4j` sur la classe génère automatiquement l'attribut `log` à la compilation :
+
+```java title="TestController.java"
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RestController
+public class TestController {
+
+    @GetMapping("/hello")
+    public String helloWorld() {
+        log.info("Passage dans le controller helloWorld");
+        return "Hello World !";
+    }
+}
+```
+:::
+
+## Logger les requêtes SQL
+
+### Approche simple (intégrée à Hibernate)
+
+```properties title="src/main/resources/application.properties"
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+```
+
+*(Limite : les paramètres `?` des requêtes préparées ne sont pas affichés directement dans la requête.)*
+
+### Approche détaillée avec p6spy
+
+**p6spy** intercepte le driver JDBC pour afficher les requêtes SQL complètes avec leurs **valeurs de paramètres** et le temps d'exécution.
+
+<Steps>
+
+1. **Ajouter la dépendance dans `pom.xml`**
+
+   ```xml title="pom.xml"
+   <!-- Permet d'espionner les requêtes et transactions avec la base -->
+   <dependency>
+       <groupId>p6spy</groupId>
+       <artifactId>p6spy</artifactId>
+       <version>3.9.1</version>
+   </dependency>
+   ```
+
+2. **Adapter le driver et le préfixe `jdbc:p6spy:` dans `application.properties`**
+
+   ```properties title="src/main/resources/application.properties"
+   # Driver proxy p6spy
+   spring.datasource.driver-class-name=com.p6spy.engine.spy.P6SpyDriver
+   # Fixe l'URL de la BDD H2 via p6spy
+   spring.datasource.url=jdbc:p6spy:h2:mem:testdb
+   ```
+
+3. **Créer le fichier `spy.properties` dans `src/main/resources/`**
+
+   ```properties title="src/main/resources/spy.properties"
+   driverlist=org.h2.Driver
+   appender=com.p6spy.engine.spy.appender.Slf4JLogger
+   # MultiLineFormat améliore la lisibilité dans les logs
+   logMessageFormat=com.p6spy.engine.spy.appender.MultiLineFormat
+   # excludecategories=error,info,debug,statement,result,resultset,batch,commit,rollback,outage
+   excludecategories=info,debug,result,resultset,batch
+   ```
+
+</Steps>
+
+:::caution[Usage réservé au développement]
+N'activez pas `p6spy` (ni `show-sql`) en production : l'interception et l'affichage de toutes les requêtes avec leurs données en clair dégradent les performances et peuvent exposer des informations sensibles dans les logs.
+:::
