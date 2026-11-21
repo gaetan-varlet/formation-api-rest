@@ -1,0 +1,137 @@
+---
+title: "L'injection de dépendances"
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Comment fonctionne Spring ? (IoC et Beans)
+
+Dans du code Java classique, une classe crée elle-même les objets dont elle a besoin avec `new MonService()`.
+
+Avec **Spring** (qui est un conteneur d'**Inversion de Contrôle**, ou **IoC**), la logique s'inverse : **c'est le framework qui instancie les objets au démarrage (on les appelle des *beans*) et les injecte là où ils sont demandés**. Votre code ne s'occupe plus de la plomberie de création.
+
+:::note[Et le principe d'Inversion des Dépendances (le « D » de SOLID) ?]
+L'idée est de dépendre d'un **contrat (une interface)** plutôt que d'une implémentation concrète : si `GestionPaiement` dépend d'une interface `MethodePaiement`, vous pouvez passer de `PaiementParCarte` à `PaiementPayPal` sans réécrire le service — Spring injecte simplement l'implémentation souhaitée.
+:::
+
+## Déclarer un bean dans Spring
+
+Pour que Spring crée et gère un objet au démarrage, on annote la classe (ou une méthode `@Bean` pour les classes externes) :
+
+| Annotation | Rôle |
+| --- | --- |
+| `@Component` | Composant générique détecté automatiquement par Spring |
+| `@Service` | Spécialisation de `@Component` pour la **couche métier** |
+| `@Repository` | Spécialisation pour l'**accès aux données** (traduit aussi les exceptions techniques de BDD) |
+| `@RestController` | Spécialisation pour exposer des **endpoints REST HTTP** |
+| `@Configuration` + `@Bean` | Permet d'enregistrer un bean issu d'une bibliothèque externe (ex. `RestClient`, `Clock`) |
+
+```java
+@Service
+public class CalculService {
+    public int additionner(int a, int b) {
+        return a + b;
+    }
+}
+
+@RestController
+@RequiredArgsConstructor
+public class CalculController {
+    // Spring détecte CalculService et l'injecte automatiquement ici
+    private final CalculService calculService;
+}
+```
+
+:::tip[Cycle de vie par défaut : Singleton]
+Par défaut, Spring crée **une seule instance** de chaque bean au démarrage et la partage dans toute l'application.
+:::
+
+## L'évolution dans l'histoire Java / Spring
+
+La façon d'injecter ces dépendances a beaucoup évolué pour gagner en testabilité et en lisibilité :
+
+<Tabs>
+<TabItem label="1. Manuel (new)">
+
+```java
+// Java pur sans Spring : la classe crée elle-même ses dépendances
+public class MonComposant {
+    private MonService monService;
+
+    public MonComposant() {
+        this.monService = new MonService(); // couplage fort
+    }
+}
+```
+
+- **Avantage :** très simple à comprendre.
+- **Inconvénient :** couplage fort, impossible de remplacer `MonService` par un bouchon en test unitaire.
+- **Verdict :** à proscrire.
+
+</TabItem>
+<TabItem label="2. Champ (@Autowired)">
+
+```java
+@RestController
+public class MonController {
+    @Autowired
+    private MonService monService; // injection par réflexion
+}
+```
+
+- **Avantage :** code très concis (approche historique de Spring).
+- **Inconvénient :** champ impossible à passer en `final`, dépendances cachées, tests unitaires hors Spring plus pénibles.
+- **Verdict :** déconseillé aujourd'hui (toléré sur un POC).
+
+</TabItem>
+<TabItem label="3. Constructeur">
+
+```java
+@RestController
+public class MonController {
+    private final MonService monService;
+
+    // @Autowired facultatif s'il n'y a qu'un seul constructeur
+    public MonController(MonService monService) {
+        this.monService = monService;
+    }
+}
+```
+
+- **Avantage :** champ `final`, testable en pur Java (`new MonController(mock)`), empêche les dépendances circulaires.
+- **Inconvénient :** un peu verbeux dès qu'il y a plusieurs dépendances.
+- **Verdict :** **approche officielle recommandée** par Spring.
+
+</TabItem>
+<TabItem label="4. Constructeur + Lombok">
+
+```java
+@RestController
+@RequiredArgsConstructor
+public class MonController {
+    private final MonService monService;
+    // Lombok génère le constructeur pour tous les champs final à la compilation !
+}
+```
+
+- **Avantage :** le meilleur des deux mondes — immuabilité (`final`) et testabilité, avec la concision d'un champ.
+- **Inconvénient :** nécessite la dépendance **Lombok**.
+- **Verdict :** **standard *de facto*** dans la majorité des projets Spring Boot modernes.
+
+</TabItem>
+</Tabs>
+
+| Approche | `final` possible | Testable sans Spring | Concision | Recommandation |
+| --- | --- | --- | --- | --- |
+| `new` manuel | Oui | Non | Moyenne | À proscrire |
+| `@Autowired` sur champ | Non | Difficile | Élevée | Déconseillé |
+| Constructeur | Oui | Oui | Moyenne | Recommandé (Spring) |
+| `@RequiredArgsConstructor` (Lombok) | Oui | Oui | Élevée | **Standard moderne** |
+
+## Pourquoi déclarer ses dépendances en `final` ?
+
+En pratique, mettre `final` sur vos dépendances injectées vous évite surtout des erreurs concrètes au quotidien :
+
+- **Indispensable avec Lombok (`@RequiredArgsConstructor`) :** Lombok n'ajoute au constructeur généré **que les champs `final`**. Si vous oubliez `final` sur un service, il reste `null` au démarrage → **`NullPointerException`** dès la première requête.
+- **Détection des oublis dès la compilation :** dans un test unitaire ou une création manuelle (`new MonController(...)`), `final` garantit qu'aucune dépendance obligatoire n'a été oubliée dans le constructeur.
+- **Contrat clair pour l'équipe :** en lisant la classe, on sait immédiatement que cette dépendance est requise au démarrage et ne changera pas en cours de route (un bean Spring étant partagé par toute l'application).
