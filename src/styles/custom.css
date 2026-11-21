@@ -1,0 +1,13 @@
+/*
+ * Styles personnalisés Starlight (chargés via `customCss` dans astro.config.mjs).
+ * Utiliser ce fichier pour ajuster l'affichage global sans modifier les pages Markdown.
+ */
+
+/*
+ * Centre uniquement les images placées seules dans un paragraphe (schémas, captures).
+ * `:only-child` évite d'affecter d'éventuelles icônes ou badges inline accompagnés de texte.
+ */
+.sl-markdown-content p > img:only-child {
+	display: block;
+	margin-inline: auto;
+}

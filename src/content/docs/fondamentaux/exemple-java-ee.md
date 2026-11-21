@@ -279,7 +279,7 @@ public class CalculJacksonServlet extends HttpServlet {
 - `@Produces(MediaType.APPLICATION_JSON)` permet de transformer l'objet Java en JSON et de d'écrire dans la réponse que l'on produit du JSON
 - `@GET` permet de dire que la ressource est accessible en GET
 
-- créez la ressource **CalculResource.java** dans le dossier *src/main/java*, dans le package *resource* :
+Créez la classe **CalculResource.java** dans le dossier *src/main/java*, dans le package *resource* :
 
 ```java
 package resources;

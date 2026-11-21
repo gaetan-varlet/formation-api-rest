@@ -3,3 +3,92 @@
 Support de formation sur le développement d'API REST avec Spring Boot, généré avec [Astro Starlight](https://starlight.astro.build/).
 
 :arrow_forward: [Documentation en ligne](https://gaetan-varlet.github.io/formation-api-rest/)
+
+---
+
+## Démarrer en local (première fois)
+
+### 1. Prérequis
+
+- **Node.js** (version LTS récente)
+- **pnpm** (gestionnaire de paquets utilisé par le projet via `pnpm-lock.yaml`)
+  - Si `pnpm` n'est pas encore installé : `npm install -g pnpm` (ou `corepack enable`)
+
+### 2. Installer et lancer le serveur de développement
+
+```bash
+# Cloner le dépôt (si ce n'est pas déjà fait)
+git clone https://github.com/gaetan-varlet/formation-api-rest.git
+cd formation-api-rest
+
+# Installer les dépendances
+pnpm install
+
+# Lancer le serveur local avec rechargement à chaud
+pnpm dev
+```
+
+Le site est ensuite accessible dans le navigateur à l'adresse affichée dans le terminal, par exemple :
+`http://localhost:4321/formation-api-rest/`
+
+> **Important :** le site est configuré avec `base: '/formation-api-rest'` dans `astro.config.mjs` (pour GitHub Pages). En local, il faut donc bien conserver `/formation-api-rest/` dans l'URL.
+
+---
+
+## Commandes utiles
+
+| Commande | Rôle |
+| --- | --- |
+| `pnpm dev` | Démarre le serveur de développement local (rechargement à chaud). |
+| `pnpm build` | Génère le site statique dans `dist/`, optimise les images et construit l'index de recherche Pagefind. |
+| `pnpm preview` | Sert localement le dossier `dist/` généré par `pnpm build` (utile pour tester la recherche et le rendu final avant de pousser). |
+
+---
+
+## Mettre à jour le contenu et le site
+
+### Modifier ou ajouter une page
+
+- Les pages du cours sont dans `src/content/docs/` (fichiers `.md` ou `.mdx`).
+- Chaque page doit avoir au minimum un `title` dans son frontmatter YAML (`---`).
+- **Niveaux de titres :** Starlight génère automatiquement le `<h1>` à partir du `title`. Dans le corps de la page, commencez toujours par `##` (`H2`) puis `###` (`H3`).
+- **Ordre des pages :** l'ordre affiché dans le menu latéral et les boutons *Précédent / Suivant* est défini explicitement dans le tableau `sidebar` de `astro.config.mjs` (et non par l'ordre alphabétique des fichiers). Si vous créez une nouvelle page, ajoutez son `slug` dans `astro.config.mjs`.
+
+### Ajouter une image
+
+- Placez les images dans `src/assets/images/` et référencez-les en chemin relatif depuis le Markdown (ex. `../../../assets/images/mon-schema.png`).
+- Astro + `sharp` les convertissent et les optimisent automatiquement en WebP lors du `pnpm build`.
+- Les styles globaux se trouvent dans `src/styles/custom.css`.
+
+### Mettre à jour les dépendances (Astro / Starlight)
+
+```bash
+# Vérifier les mises à jour disponibles
+pnpm outdated
+
+# Mettre à jour selon les plages de package.json (ou cibler un paquet précis)
+pnpm update
+
+# Vérifier que le build complet passe toujours
+pnpm build
+```
+
+Pensez à commiter `pnpm-lock.yaml` (et `package.json` si modifié) après une mise à jour.
+
+---
+
+## Déploiement
+
+Le déploiement sur GitHub Pages est **automatique** via le workflow `.github/workflows/deploy.yml` :
+
+- À chaque `git push` sur la branche `main`, GitHub Actions exécute le build Astro et déploie le site.
+- Il est aussi possible de le déclencher manuellement depuis l'onglet **Actions** du dépôt GitHub (*Deploy to GitHub Pages* → *Run workflow*).
+
+---
+
+## Points d'attention
+
+- **Tester le build avant de pousser :** lancez `pnpm build` en local avant de pousser sur `main` pour détecter immédiatement une image manquante, une erreur de syntaxe MDX ou un `slug` invalide dans `astro.config.mjs`.
+- **Recherche locale (Pagefind) :** l'index de recherche n'est généré que lors de `pnpm build`. Pour tester la barre de recherche en local, utilisez `pnpm build && pnpm preview`.
+- **Liens internes :** si vous écrivez un lien absolu vers une autre page du cours, préfixez-le par `/formation-api-rest/...` (en cohérence avec `base` dans `astro.config.mjs`).
+- **Thèmes clair et sombre :** Starlight propose un sélecteur de thème clair/sombre — vérifiez le contraste des schémas/images dans les deux modes (ou utilisez des images `light` / `dark` comme sur `src/content/docs/index.mdx`).

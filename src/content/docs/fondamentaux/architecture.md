@@ -31,7 +31,7 @@ API REST :
 
 ![Architecture traditionnelle VS architecture découplée](../../../assets/images/archi-legacy-vs-api.jpg "Architecture traditionnelle VS architecture découplée")
 
-## Intérêts : rapidité, partage d'informations instantané entre applications
+Intérêts de l'architecture découplée : rapidité, partage d'informations instantané entre applications
 
 - application plus fluide, rafraichissement d'une partie de la page au lieu du chargement complet de la page
 - partage d'informations : appel de l'API plutôt que des échanges de fichiers

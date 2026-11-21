@@ -45,7 +45,7 @@ Corps de requête
   - **Accept** spécifie le type de contenu accepté par le client (par exemple text/html)
 - le corps de la requête peut contenir le contenu d'un formulaire HTML passé en POST sous la forme `variable1=valeur1&variable2=valeur2`
 
-## Exemple de requête HTTP
+### Exemple de requête HTTP
 
 ```http
 GET / HTTP/1.1
@@ -66,6 +66,22 @@ Dans une requête POST, il faut spécifier le type de données. Pour un formulai
 
 Il faut également spécifier la longueur du corps.
 
+### Structure d'une requête HTTP
+
+```http
+https://mon-api/{variable-de-chemin}?parametre-de-requete-1=valeur&parametre-de-requete-2=valeur
+```
+
+- **variables de chemin** : souvent utilisé pour les variables obligatoires
+- **paramètres de requête** :
+  - `?` à la fin de l'URL suivi de `clé=valeur`, puis `&` pour séparer les autres paramètres de requête
+  - souvent utilisé pour les variables non obligatoires notamment pour du filtrage
+
+Par exemple :
+
+- **`https://api.insee.fr/entreprises/sirene/V3/siren/{siren}`** retourne les informations sur le siren avec recherche de la totalité des périodes historiques
+- **`https://api.insee.fr/entreprises/sirene/V3/siren/{siren}?date={date}`** même chose avec le paramètre date qui renvoie uniquement la période comprenant cette date
+
 ## La réponse HTTP
 
 ```http
@@ -84,7 +100,7 @@ Corps de réponse
   - **Set-Cookie** : demande au navigateur d'enregistrer un cookie
 - le corps de la réponse contient le contenu du fichier, par exemple HTML
 
-## Exemple de réponse HTTP
+### Exemple de réponse HTTP
 
 ```http
 HTTP/1.1 200 OK
@@ -99,7 +115,7 @@ Content-Type: text/html
 <!DOCTYPE html... (suivi des 29769 octets de la page web demandée)
 ```
 
-## Les codes de statut de réponse HTTP
+### Les codes de statut de réponse HTTP
 
 [documentation Mozilla](https://developer.mozilla.org/fr/docs/Web/HTTP/Status)
 
@@ -125,19 +141,3 @@ response.setContentType("text/html;charset=UTF-8");
 response.setContentType("text/html");
 response.setCharacterEncoding("UTF-8");
 ```
-
-## Structure d'une requête HTTP
-
-```http
-https://mon-api/{variable-de-chemin}?parametre-de-requete-1=valeur&parametre-de-requete-2=valeur
-```
-
-- **variables de chemin** : souvent utilisé pour les variables obligatoires
-- **paramètres de requête** :
-  - `?` à la fin de l'URL suivi de `clé=valeur`, puis `&` pour séparer les autres paramètres de requête
-  - souvent utilisé pour les variables non obligatoires notamment pour du filtrage
-
-Par exemple :
-
-- **`https://api.insee.fr/entreprises/sirene/V3/siren/{siren}`** retourne les informations sur le siren avec recherche de la totalité des périodes historiques
-- **`https://api.insee.fr/entreprises/sirene/V3/siren/{siren}?date={date}`** même chose avec le paramètre date qui renvoie uniquement la période comprenant cette date
