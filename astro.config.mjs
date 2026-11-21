@@ -176,6 +176,7 @@ export default defineConfig({
 					items: [
 						{ slug: 'deploiement/actuator' },
 						{ slug: 'deploiement/scheduling' },
+						{ slug: 'deploiement/packaging-environnements' },
 						{ slug: 'deploiement/kubernetes' },
 						{ slug: 'deploiement/jar-vm' },
 						{ slug: 'deploiement/war-vm' },
