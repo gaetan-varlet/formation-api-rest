@@ -6,11 +6,15 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## Qu'est-ce qu'un service web ?
 
-Un service web est une technologie permettant à des applications de dialoguer à distance via Internet. On parle d'interface de programmation applicative, souvent désignée par le terme **API** pour *Application Programming Interface*. L'application **offre des services** à d'autres logiciels.
+Un service web permet à des applications de dialoguer à distance sur le réseau. On parle d'**API** (*Application Programming Interface*, en français « interface de programmation applicative ») : une application **expose des services** consommables par d'autres logiciels.
 
-:::note[Qu'est-ce qu'une API REST ?]
-Une **API REST** (*REpresentational State Transfer*) est une API basée sur le protocole **HTTP**, où chaque ressource est accessible via un identifiant unique (**URI**).
-:::
+Historiquement, deux grandes approches coexistent pour concevoir des API (c'est l'architecture **REST**, théorisée par Roy Fielding en 2000, qui est aujourd'hui la norme sur le web) :
+
+| Critère | SOAP (*Simple Object Access Protocol*) | REST (*REpresentational State Transfer*) |
+| --- | --- | --- |
+| **Protocole** | Générique (peut passer par HTTP ou d'autres protocoles, mais n'exploite pas les spécificités de HTTP) | S'appuie directement sur le protocole **HTTP** |
+| **Format** | **XML** uniquement (structure imposée) | Libre (**JSON** majoritaire, XML, texte, binaire…) |
+| **Approche** | Appels d'opérations sur une adresse unique (ex. `getUser`, `createUser`) | Manipulation de **ressources** identifiées par des **URI** (ex. `/users/1`) |
 
 Exemple public pour tester : [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
 - Obtenir la liste des utilisateurs : [https://jsonplaceholder.typicode.com/users](https://jsonplaceholder.typicode.com/users)
