@@ -1,0 +1,149 @@
+---
+title: "Gestion des erreurs avec exceptions et codes HTTP"
+---
+
+import { Badge, Steps } from '@astrojs/starlight/components';
+
+## Création des exceptions métier
+
+L'objectif est de renvoyer les codes HTTP adéquats (`404 Not Found`, `400 Bad Request`, etc.) lorsque le client fait une erreur, plutôt que de retourner `null` avec un `200 OK`.
+
+Créez un package **`exception`** contenant deux exceptions héritant de `RuntimeException` et annotées avec `@ResponseStatus` :
+
+```java title="VinInconnuException.java"
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class VinInconnuException extends RuntimeException {
+    public VinInconnuException(String message) {
+        super(message);
+    }
+}
+```
+
+```java title="VinInvalideException.java"
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+public class VinInvalideException extends RuntimeException {
+    public VinInvalideException(String message) {
+        super(message);
+    }
+}
+```
+
+## Utilisation dans les services
+
+Mettez à jour `VinService` pour lever ces exceptions dès qu'un cas d'erreur se présente (par exemple lors de la suppression d'un vin) :
+
+```java title="VinService.java"
+public void deleteById(Integer id) {
+    if (id == null || !vinRepository.existsById(id)) {
+        throw new VinInconnuException("Le vin avec l'id " + id + " n'existe pas");
+    }
+    vinRepository.deleteById(id);
+}
+```
+
+:::tip[Astuce pour `getById`]
+Comme `findById(id)` retourne un `Optional<Vin>`, vous pouvez directement écrire en une instruction :
+
+```java
+return vinRepository.findById(id)
+    .orElseThrow(() -> new VinInconnuException("Le vin avec l'id " + id + " n'existe pas"));
+```
+:::
+
+## TP : À vous de jouer
+
+Complétez `VinService` pour gérer les cas d'erreur métier sur le CRUD :
+
+<Steps>
+
+1. **Sécuriser la lecture (`getById`)**
+
+   - Si `id` est `null` ou négatif/nul (`id <= 0`), levez `VinInvalideException` <Badge text="400 Bad Request" variant="caution" />
+   - Si aucun vin ne correspond en base, levez `VinInconnuException` <Badge text="404 Not Found" variant="danger" />
+
+2. **Valider lors de la création et de la mise à jour (`add` / `update`)**
+
+   - Vérifiez que `chateau` et `appellation` contiennent entre **1 et 50 caractères** et que `prix` est positif ou nul (`prix >= 0`), sinon levez `VinInvalideException` <Badge text="400 Bad Request" variant="caution" />
+   - En mise à jour, vérifiez aussi que le vin ciblé existe, sinon levez `VinInconnuException` <Badge text="404 Not Found" variant="danger" />
+
+   *(Au chapitre [Contrats d'API](/formation-api-rest/api-rest/contrats-api/), vous verrez comment automatiser ces contrôles de format avec `@Valid`.)*
+
+3. **Tester les cas d'erreur**
+
+   Vérifiez les codes retour dans Swagger UI ou Insomnia :
+   - `GET /vin/-1` → <Badge text="400" variant="caution" />
+   - `GET /vin/999` → <Badge text="404" variant="danger" />
+   - `POST /vin` avec un prix négatif ou un château vide → <Badge text="400" variant="caution" />
+
+</Steps>
+
+<details>
+<summary>Voir une proposition de correction complète (VinService.java)</summary>
+
+```java title="VinService.java"
+@Service
+@RequiredArgsConstructor
+public class VinService {
+
+    private final VinRepository vinRepository;
+
+    public Vin getById(Integer id) {
+        verifierIdValide(id);
+        return vinRepository.findById(id)
+                .orElseThrow(() -> new VinInconnuException("Le vin avec l'id " + id + " n'existe pas"));
+    }
+
+    public Vin add(Vin vin) {
+        if (vin == null || vin.getId() != null) {
+            throw new VinInvalideException("L'id ne doit pas être renseigné lors d'une création");
+        }
+        validerVin(vin);
+        return vinRepository.save(vin);
+    }
+
+    public Vin update(Vin vin) {
+        if (vin == null) {
+            throw new VinInvalideException("Le vin ne peut pas être null");
+        }
+        verifierIdValide(vin.getId());
+        validerVin(vin);
+        if (!vinRepository.existsById(vin.getId())) {
+            throw new VinInconnuException("Le vin avec l'id " + vin.getId() + " n'existe pas");
+        }
+        return vinRepository.save(vin);
+    }
+
+    public void deleteById(Integer id) {
+        verifierIdValide(id);
+        if (!vinRepository.existsById(id)) {
+            throw new VinInconnuException("Le vin avec l'id " + id + " n'existe pas");
+        }
+        vinRepository.deleteById(id);
+    }
+
+    private void verifierIdValide(Integer id) {
+        if (id == null || id <= 0) {
+            throw new VinInvalideException("L'id du vin doit être strictement positif");
+        }
+    }
+
+    private void validerVin(Vin vin) {
+        if (estTexteInvalide(vin.getChateau()) || estTexteInvalide(vin.getAppellation())
+                || vin.getPrix() == null || vin.getPrix() < 0) {
+            throw new VinInvalideException("Les données du vin sont invalides");
+        }
+    }
+
+    private boolean estTexteInvalide(String texte) {
+        return texte == null || texte.isBlank() || texte.length() > 50;
+    }
+}
+```
+
+</details>
+
+## Centralisation et bonnes pratiques de log (`@RestControllerAdvice`)
+
+:::caution[Section en construction]
+À venir : centralisation de la gestion des exceptions avec `@RestControllerAdvice` et bonnes pratiques associées pour **logger proprement les erreurs** (distinguer les erreurs client `4xx` des erreurs serveur `5xx`, éviter les doublons de stacktraces dans les logs, etc.).
+:::
