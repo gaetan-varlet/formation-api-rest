@@ -2,24 +2,27 @@
 title: "Introduction"
 ---
 
-## Qu'est ce qu'un service web ?
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Un service web est une technologie permettant à des applications de dialoguer à distance via Internet. On parle d'interface de programmation applicative, souvent désignée par le terme **API** pour *application programming interface*. L'application **offre des services** à d'autres logiciels.
+## Qu'est-ce qu'un service web ?
 
-Une **API REST**, pour *REpresentational State Transfer*,  est une API basée sur le protocole **HTTP**, où chaque ressource est accessible via un identifiant unique (URI).
+Un service web est une technologie permettant à des applications de dialoguer à distance via Internet. On parle d'interface de programmation applicative, souvent désignée par le terme **API** pour *Application Programming Interface*. L'application **offre des services** à d'autres logiciels.
 
-Exemple : [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
+:::note[Qu'est-ce qu'une API REST ?]
+Une **API REST** (*REpresentational State Transfer*) est une API basée sur le protocole **HTTP**, où chaque ressource est accessible via un identifiant unique (**URI**).
+:::
 
-- obtenir la liste des utilisateurs : [https://jsonplaceholder.typicode.com/users](https://jsonplaceholder.typicode.com/users)
+Exemple public pour tester : [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
+- Obtenir la liste des utilisateurs : [https://jsonplaceholder.typicode.com/users](https://jsonplaceholder.typicode.com/users)
 
 ## Les formats de données XML et JSON
 
-- les formats JSON et XML  permettent de stocker des données textuelles de manière structurée.
-- le JSON est plus léger
+- Les formats **JSON** et **XML** permettent de stocker et d'échanger des données textuelles de manière structurée.
+- Le **JSON** est plus léger et aujourd'hui le standard largement majoritaire pour les API REST.
 
-### Objet Java
+### Objet Java source
 
-```java
+```java title="Personne.java"
 @XmlRootElement
 public class Personne {
   private String prenom;
@@ -34,8 +37,10 @@ public class Adresse {
 }
 ```
 
-### Rendu en JSON
+### Comparaison des rendus JSON et XML
 
+<Tabs>
+  <TabItem label="JSON - Objet">
 ```json
 {
   "prenom": "Bob",
@@ -46,7 +51,8 @@ public class Adresse {
   }
 }
 ```
-
+  </TabItem>
+  <TabItem label="JSON - Liste">
 ```json
 [
   {
@@ -67,9 +73,8 @@ public class Adresse {
   }
 ]
 ```
-
-### Rendu en XML
-
+  </TabItem>
+  <TabItem label="XML - Objet">
 ```xml
 <personne>
     <adresse>
@@ -80,7 +85,8 @@ public class Adresse {
     <prenom>Bob</prenom>
 </personne>
 ```
-
+  </TabItem>
+  <TabItem label="XML - Liste">
 ```xml
 <personnes>
     <personne>
@@ -101,3 +107,5 @@ public class Adresse {
     </personne>
 </personnes>
 ```
+  </TabItem>
+</Tabs>

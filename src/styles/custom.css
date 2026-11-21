@@ -11,3 +11,19 @@
 	display: block;
 	margin-inline: auto;
 }
+
+/*
+ * Style discret pour l'icône SVG des liens externes (ajoutée par rehypeExternalLinks dans astro.config.mjs).
+ */
+.sl-markdown-content a .external-link-icon {
+	display: inline-flex;
+	align-items: center;
+	margin-inline-start: 0.3em;
+	vertical-align: -0.12em;
+	opacity: 0.75;
+}
+
+.sl-markdown-content a .external-link-icon svg {
+	width: 0.85em;
+	height: 0.85em;
+}

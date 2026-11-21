@@ -1,0 +1,326 @@
+---
+title: "Un premier exemple de mise en place d'une API en Java EE"
+---
+
+import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+:::note[Objectif pédagogique]
+Cet exercice part volontairement de **Java EE / Servlets « à l'ancienne »** (Tomcat 9, `web.xml`, `javax.servlet`) pour vous montrer toute la plomberie manuelle nécessaire sans framework — et mieux apprécier ce que **Spring Boot** automatisera dès le module suivant.
+:::
+
+## Création d'une application web classique avec Maven
+
+<Steps>
+
+1. **Créer le projet Maven**
+
+   Choisissez l'option *skip archetype* et le packaging `war`, ou utilisez la commande :
+
+   ```bash
+   mvn archetype:generate -DgroupId=fr.insee -DartifactId=toto -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false
+   ```
+
+2. **Ajouter le descripteur de déploiement**
+
+   Créez `src/main/webapp/WEB-INF/web.xml` (pour un déploiement sur **Tomcat 9**) :
+
+   ```xml title="src/main/webapp/WEB-INF/web.xml"
+   <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+            http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+       version="3.1">
+   </web-app>
+   ```
+
+3. **Configurer Java 17 et l'API Servlet dans `pom.xml`**
+
+   ```xml title="pom.xml"
+   <dependencies>
+       <dependency>
+           <groupId>javax.servlet</groupId>
+           <artifactId>javax.servlet-api</artifactId>
+           <version>4.0.1</version>
+           <scope>provided</scope>
+       </dependency>
+   </dependencies>
+   <build>
+       <plugins>
+           <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-compiler-plugin</artifactId>
+               <version>3.9.0</version>
+               <configuration>
+                   <release>17</release>
+               </configuration>
+           </plugin>
+           <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-war-plugin</artifactId>
+               <version>3.3.2</version>
+           </plugin>
+       </plugins>
+   </build>
+   ```
+
+</Steps>
+
+## Évolution progressive : de la JSP à l'API JSON
+
+Parcourez les 5 étapes ci-dessous pour voir comment on passe d'une page web classique (HTML/JSP) à une véritable API JSON avec Jackson :
+
+<Tabs>
+  <TabItem label="1. Servlet + JSP">
+
+Créez la servlet dans `src/main/java/servlet/` et la JSP dans `/WEB-INF/jsp/` :
+
+```java title="CalculAvecJspServlet.java"
+package servlet;
+
+@WebServlet("/calcul-avec-jsp")
+public class CalculAvecJspServlet extends HttpServlet {
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int nombre1 = Integer.parseInt(request.getParameter("nombre1"));
+        int nombre2 = Integer.parseInt(request.getParameter("nombre2"));
+        int somme = nombre1 + nombre2;
+        int produit = nombre1 * nombre2;
+        request.setAttribute("somme", somme);
+        request.setAttribute("produit", produit);
+
+        response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
+        this.getServletContext().getRequestDispatcher("/WEB-INF/jsp/reponse-calcul.jsp")
+            .forward(request, response);
+    }
+}
+```
+
+```html title="WEB-INF/jsp/reponse-calcul.jsp"
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Calcul avec JSP</title>
+    </head>
+    <body>
+        <p>Calcul avec affichage de la réponse dans la JSP :</p>
+        <p>La somme de ${param.nombre1} et ${param.nombre2} est égale à ${requestScope.somme}.</p>
+        <p>Le produit de ${param.nombre1} et ${param.nombre2} est égal à ${requestScope.produit}.</p>
+    </body>
+</html>
+```
+
+Test (après déploiement à la racine de Tomcat) : [http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4](http://localhost:8080/calcul-avec-jsp?nombre1=3&nombre2=4)
+
+  </TabItem>
+  <TabItem label="2. Servlet HTML">
+
+Sans JSP, on écrit directement le HTML dans le flux de réponse (`PrintWriter`) :
+
+```java title="CalculServlet.java"
+package servlet;
+
+@WebServlet("/calcul")
+public class CalculServlet extends HttpServlet {
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int nombre1 = Integer.parseInt(request.getParameter("nombre1"));
+        int nombre2 = Integer.parseInt(request.getParameter("nombre2"));
+        int somme = nombre1 + nombre2;
+        int produit = nombre1 * nombre2;
+
+        response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        out.println("<!DOCTYPE html>");
+        out.println("<html>");
+        out.println("<head>");
+        out.println("<meta charset=\"utf-8\" />");
+        out.println("<title>Calcul</title>");
+        out.println("</head>");
+        out.println("<body>");
+        out.println("<p>Calcul avec affichage de la réponse dans la servlet :</p>");
+        out.println("<p>La somme de " + nombre1 + " et " + nombre2 + " est égale à " + somme + ".</p>");
+        out.println("<p>Le produit de " + nombre1 + " et " + nombre2 + " est égal à " + produit + ".</p>");
+        out.println("</body>");
+        out.println("</html>");
+    }
+}
+```
+
+Test : [http://localhost:8080/calcul?nombre1=3&nombre2=4](http://localhost:8080/calcul?nombre1=3&nombre2=4)
+
+  </TabItem>
+  <TabItem label="3. API text/plain">
+
+Première tentative d'API en renvoyant du texte brut (`text/plain`) :
+
+```java title="CalculTextPlainServlet.java"
+package servlet;
+
+@WebServlet("/calcul-text-plain")
+public class CalculTextPlainServlet extends HttpServlet {
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int nombre1 = Integer.parseInt(request.getParameter("nombre1"));
+        int nombre2 = Integer.parseInt(request.getParameter("nombre2"));
+        int somme = nombre1 + nombre2;
+        int produit = nombre1 * nombre2;
+
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        out.println("somme:" + somme + ", produit:" + produit);
+    }
+}
+```
+
+Test : [http://localhost:8080/calcul-text-plain?nombre1=3&nombre2=4](http://localhost:8080/calcul-text-plain?nombre1=3&nombre2=4)
+
+Compliqué à lire de manière automatique : on va plutôt utiliser un format structuré comme **XML** ou **JSON**.
+
+  </TabItem>
+  <TabItem label="4. API JSON manuel">
+
+En renvoyant du JSON construit à la main (`application/json`) :
+
+```java title="CalculJsonServlet.java"
+@WebServlet("/calcul-json")
+public class CalculJsonServlet extends HttpServlet {
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int nombre1 = Integer.parseInt(request.getParameter("nombre1"));
+        int nombre2 = Integer.parseInt(request.getParameter("nombre2"));
+        int somme = nombre1 + nombre2;
+        int produit = nombre1 * nombre2;
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        out.println("{\"somme\":" + somme + ", \"produit\":" + produit + "}");
+    }
+}
+```
+
+Test : [http://localhost:8080/calcul-json?nombre1=3&nombre2=4](http://localhost:8080/calcul-json?nombre1=3&nombre2=4)
+
+  </TabItem>
+  <TabItem label="5. API JSON + Jackson">
+
+Construire du JSON par concaténation est fastidieux et source d'erreurs. On ajoute **Jackson** dans le `pom.xml` :
+
+```xml title="pom.xml"
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.14.2</version>
+</dependency>
+```
+
+Jackson transforme un objet JavaBean (ici `Calcul.java` avec `somme`, `produit` et leurs getters/setters) ou une collection en JSON :
+
+```json
+{"somme":15,"produit":56}
+[{"somme":15,"produit":56},{"somme":15,"produit":56}]
+```
+
+```java title="CalculJacksonServlet.java"
+package servlet;
+
+@WebServlet("/calcul-jackson")
+public class CalculJacksonServlet extends HttpServlet {
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int nombre1 = Integer.parseInt(request.getParameter("nombre1"));
+        int nombre2 = Integer.parseInt(request.getParameter("nombre2"));
+        Calcul calcul = new Calcul();
+        calcul.setSomme(nombre1 + nombre2);
+        calcul.setProduit(nombre1 * nombre2);
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.writeValue(out, calcul);
+    }
+}
+```
+
+Test : [http://localhost:8080/calcul-jackson?nombre1=3&nombre2=4](http://localhost:8080/calcul-jackson?nombre1=3&nombre2=4)
+
+  </TabItem>
+</Tabs>
+
+## Présentation de la spécification JAX-RS
+
+- **JAX-RS** (*Java API for RESTful Web Services*) est une spécification de Java EE.
+- Il faut utiliser une implémentation : **Jersey** est l'**implémentation de référence** fournie par Oracle :
+  - la bibliothèque Jersey ;
+  - Jackson pour Jersey (conversion automatique des objets en JSON) ;
+  - le framework d'injection (`jersey-hk2`).
+
+```xml title="pom.xml"
+<dependency>
+    <groupId>org.glassfish.jersey.containers</groupId>
+    <artifactId>jersey-container-servlet</artifactId>
+    <version>2.35</version>
+</dependency>
+<dependency>
+    <groupId>org.glassfish.jersey.media</groupId>
+    <artifactId>jersey-media-json-jackson</artifactId>
+    <version>2.35</version>
+</dependency>
+<dependency>
+    <groupId>org.glassfish.jersey.inject</groupId>
+    <artifactId>jersey-hk2</artifactId>
+    <version>2.35</version>
+</dependency>
+```
+
+- On déclare dans `web.xml` la servlet qui joue le rôle de contrôleur frontal :
+
+```xml title="src/main/webapp/WEB-INF/web.xml"
+<servlet>
+    <servlet-name>javax.ws.rs.core.Application</servlet-name>
+</servlet>
+<servlet-mapping>
+    <servlet-name>javax.ws.rs.core.Application</servlet-name>
+    <url-pattern>/rest/*</url-pattern>
+</servlet-mapping>
+```
+
+- Plus besoin d'écrire la réponse avec `PrintWriter`, le contrôleur s'en charge :
+  - récupération des paramètres de requête avec `@QueryParam` ;
+  - `@Produces(MediaType.APPLICATION_JSON)` transforme l'objet Java en JSON et définit le `Content-Type` ;
+  - `@GET` expose la ressource en `GET`.
+
+```java title="src/main/java/resources/CalculResource.java"
+package resources;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import model.Calcul;
+
+@Path("/calcul-jersey")
+public class CalculResource {
+
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    @GET
+    public Calcul calcul(@QueryParam("nombre1") Integer nombre1, @QueryParam("nombre2") Integer nombre2) {
+        Calcul calcul = new Calcul();
+        calcul.setSomme(nombre1 + nombre2);
+        calcul.setProduit(nombre1 * nombre2);
+        return calcul;
+    }
+}
+```
+
+Test : [http://localhost:8080/rest/calcul-jersey?nombre1=3&nombre2=4](http://localhost:8080/rest/calcul-jersey?nombre1=3&nombre2=4)

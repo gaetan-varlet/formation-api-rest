@@ -2,10 +2,87 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
+/**
+ * Plugin rehype minimaliste : ouvre les liens externes (http/https) dans un nouvel onglet
+ * tout en restant accessible (icône visuelle masquée aux lecteurs d'écran + mention sr-only).
+ */
+function rehypeExternalLinks() {
+	/** @param {any} node */
+	function visit(node) {
+		if (!node || typeof node !== 'object') return;
+		if (
+			node.type === 'element' &&
+			node.tagName === 'a' &&
+			typeof node.properties?.href === 'string' &&
+			/^https?:\/\//.test(node.properties.href) &&
+			!node.properties.target
+		) {
+			node.properties.target = '_blank';
+			node.properties.rel = 'noopener noreferrer';
+			node.children ??= [];
+			node.children.push(
+				{
+					type: 'element',
+					tagName: 'span',
+					properties: { 'aria-hidden': 'true', className: ['external-link-icon'] },
+					children: [
+						{
+							type: 'element',
+							tagName: 'svg',
+							properties: {
+								viewBox: '0 0 24 24',
+								fill: 'none',
+								stroke: 'currentColor',
+								strokeWidth: '2',
+								strokeLinecap: 'round',
+								strokeLinejoin: 'round',
+							},
+							children: [
+								{
+									type: 'element',
+									tagName: 'path',
+									properties: { d: 'M15 3h6v6' },
+									children: [],
+								},
+								{
+									type: 'element',
+									tagName: 'path',
+									properties: { d: 'M10 14 21 3' },
+									children: [],
+								},
+								{
+									type: 'element',
+									tagName: 'path',
+									properties: { d: 'M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6' },
+									children: [],
+								},
+							],
+						},
+					],
+				},
+				{
+					type: 'element',
+					tagName: 'span',
+					properties: { className: ['sr-only'] },
+					children: [{ type: 'text', value: ' (nouvel onglet)' }],
+				}
+			);
+			return;
+		}
+		if (Array.isArray(node.children)) {
+			for (const child of node.children) visit(child);
+		}
+	}
+	return visit;
+}
+
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://gaetan-varlet.github.io',
 	base: '/formation-api-rest',
+	markdown: {
+		rehypePlugins: [rehypeExternalLinks],
+	},
 	integrations: [
 		starlight({
 			title: 'Formation API REST',

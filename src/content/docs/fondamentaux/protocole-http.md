@@ -12,17 +12,19 @@ Il s'agit d'un protocole **sans état**, ce qui signifie que le serveur ne conse
 
 ## Les méthodes de requêtes (ou verbes) HTTP
 
-HTTP définit un [ensemble de méthodes](https://developer.mozilla.org/fr/docs/Web/HTTP/M%C3%A9thode) de requête qui indiquent l'action que l'on souhaite réaliser sur la ressource indiquée.
+HTTP définit un [ensemble de méthodes](https://developer.mozilla.org/fr/docs/Web/HTTP/M%C3%A9thode) de requête qui indiquent l'action que l'on souhaite réaliser sur la ressource indiquée :
 
-- **GET** : demande une représentation de la ressource spécifiée. Les requêtes GET doivent uniquement être utilisées afin de récupérer des données
-- **HEAD** : demande une réponse identique à une requête GET pour laquelle on aura omis le corps de la réponse
-- **POST** : est utilisée pour envoyer une entité vers la ressource indiquée. Cela  entraîne généralement un changement d'état ou des effets de bord sur le serveur
-- **PUT** : remplace toutes les représentations actuelles de la ressource visée par le contenu de la requête
-- **DELETE** : supprime la ressource indiquée
-- **CONNECT** : établit un tunnel vers le serveur identifié par la ressource cible
-- **OPTIONS** : est utilisée pour décrire les options de communications avec la ressource visée
-- **TRACE** : réalise un message de test aller/retour en suivant le chemin de la ressource visée
-- **PATCH** : est utilisée pour appliquer des modifications partielles à une ressource
+| Méthode | Rôle | Corps de requête |
+| --- | --- | --- |
+| **GET** | Récupère une représentation de la ressource (lecture seule) | Non |
+| **HEAD** | Identique à `GET`, mais sans le corps de la réponse (en-têtes uniquement) | Non |
+| **POST** | Envoie une entité vers la ressource (création ou effet de bord sur le serveur) | Oui |
+| **PUT** | Remplace toutes les représentations actuelles de la ressource visée | Oui |
+| **PATCH** | Applique des modifications partielles à une ressource | Oui |
+| **DELETE** | Supprime la ressource indiquée | Non |
+| **OPTIONS** | Décrit les options de communication avec la ressource visée (utilisé pour CORS) | Non |
+| **CONNECT** | Établit un tunnel vers le serveur identifié par la ressource cible | Non |
+| **TRACE** | Réalise un message de test aller/retour en suivant le chemin de la ressource | Non |
 
 ## La requête HTTP
 
@@ -117,21 +119,27 @@ Content-Type: text/html
 
 ### Les codes de statut de réponse HTTP
 
-[documentation Mozilla](https://developer.mozilla.org/fr/docs/Web/HTTP/Status)
+Voir la [documentation Mozilla des statuts HTTP](https://developer.mozilla.org/fr/docs/Web/HTTP/Status) :
 
-- 1xx : information
-- 2xx : succès
-- 3xx : redirection
-- 4xx : erreur du client
-- 5xx : erreur du serveur
+| Famille | Signification | Exemples courants |
+| --- | --- | --- |
+| **1xx** | Information | `100 Continue`, `101 Switching Protocols` |
+| **2xx** | Succès | `200 OK`, `201 Created`, `204 No Content` |
+| **3xx** | Redirection | `301 Moved Permanently`, `304 Not Modified` |
+| **4xx** | Erreur du client | `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found` |
+| **5xx** | Erreur du serveur | `500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable` |
 
 ## L'en-tête Content-Type
 
-- l'en-tête HTTP **content-type** :
-- permet au client d'avoir plus d'informations sur ce qu'il reçoit, par exemple `text/html` pour du HTML, `text/plain` pour du texte brut, `application/pdf` pour du PDF, `application/json` pour des données au format JSON, `application/xml` pour des données au format XML. On parle de **type MIME** [liste des types MIME](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types)
-- permet aussi de préciser le jeu de caractères (**charset**) que le navigateur doit utiliser pour afficher le contenu. Par défaut, il s'agit du jeu de caractères *ISO-8859-1* nommé aussi *Latin-1*.
+- L'en-tête HTTP **`Content-Type`** :
+  - indique au client le format de ce qu'il reçoit : `text/html` (HTML), `text/plain` (texte brut), `application/pdf` (PDF), `application/json` (JSON), `application/xml` (XML). On parle de **type MIME** ([liste des types MIME](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types)) ;
+  - précise aussi le jeu de caractères (**charset**) que le navigateur doit utiliser (par défaut *ISO-8859-1* / *Latin-1*).
 
-La bonne pratique est d'utiliser l'UTF-8 comme encodage des fichiers contenant le code source et comme jeu de caractères en-tête de la réponse HTTP. Exemple pour ajouter des en-têtes en Java :
+:::tip[Bonne pratique : UTF-8 partout]
+Utilisez systématiquement **UTF-8** pour l'encodage de vos fichiers sources et pour l'en-tête `Content-Type` des réponses HTTP.
+:::
+
+Exemple pour ajouter ces en-têtes en Java :
 
 ```java
 response.setContentType("text/html");
