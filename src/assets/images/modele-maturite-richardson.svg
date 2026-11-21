@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 336" role="img" aria-label="Modèle de maturité de Richardson : niveaux 0 à 3 des API REST">
+  <defs>
+    <marker id="arr-up" viewBox="0 0 10 10" refX="5" refY="2" markerWidth="7" markerHeight="7" orient="0">
+      <path d="M 1 9 L 5 1 L 9 9 z" fill="#059669"/>
+    </marker>
+    <linearGradient id="axis-grad" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="65%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <style>
+      .title { font: 700 17px system-ui, -apple-system, sans-serif; fill: #0f172a; }
+      .sub { font: 500 12.5px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .lvl-title { font: 700 13.5px system-ui, -apple-system, sans-serif; fill: #0f172a; }
+      .lvl-sub { font: 500 11.5px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .badge-txt { font: 700 12px system-ui, -apple-system, sans-serif; fill: #ffffff; }
+      .pill-txt { font: 700 11px system-ui, -apple-system, sans-serif; }
+      .axis-txt { font: 700 11px system-ui, -apple-system, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Fond clair encadré pour compatibilité thèmes clair et sombre -->
+  <rect x="8" y="8" width="804" height="320" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+
+  <text x="410" y="38" text-anchor="middle" class="title">Modèle de maturité de Richardson</text>
+  <text x="410" y="57" text-anchor="middle" class="sub">Progression d'un simple tunnel HTTP jusqu'à une API hypermédia</text>
+
+  <!-- Axe vertical de maturité -->
+  <text x="46" y="79" text-anchor="middle" class="axis-txt" fill="#4f46e5">+ REST</text>
+  <line x1="46" y1="296" x2="46" y2="96" stroke="url(#axis-grad)" stroke-width="3" stroke-linecap="round" marker-end="url(#arr-up)"/>
+  <text x="46" y="314" text-anchor="middle" class="axis-txt" fill="#64748b">RPC</text>
+
+  <!-- Niveau 3 : Hypermédia -->
+  <rect x="208" y="76" width="580" height="50" rx="10" fill="#eef2ff" stroke="#a5b4fc" stroke-width="1.5"/>
+  <rect x="220" y="87" width="82" height="28" rx="7" fill="#4f46e5"/>
+  <text x="261" y="105" text-anchor="middle" class="badge-txt">Niveau 3</text>
+  <text x="316" y="97" class="lvl-title">Hypermédia (HATEOAS)</text>
+  <text x="316" y="115" class="lvl-sub">Réponse enrichie de liens vers les actions possibles</text>
+  <rect x="652" y="88" width="124" height="26" rx="13" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+  <text x="714" y="105" text-anchor="middle" class="pill-txt" fill="#3730a3">RESTful complet</text>
+
+  <!-- Niveau 2 : Verbes et statuts HTTP (Standard actuel) -->
+  <rect x="168" y="136" width="620" height="50" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+  <rect x="180" y="147" width="82" height="28" rx="7" fill="#059669"/>
+  <text x="221" y="165" text-anchor="middle" class="badge-txt">Niveau 2</text>
+  <text x="276" y="157" class="lvl-title">Verbes et statuts HTTP</text>
+  <text x="276" y="175" class="lvl-sub">GET, POST, PUT, DELETE · 200 OK, 201, 404…</text>
+  <rect x="644" y="148" width="132" height="26" rx="13" fill="#059669"/>
+  <text x="710" y="165" text-anchor="middle" class="pill-txt" fill="#ffffff">Standard actuel</text>
+
+  <!-- Niveau 1 : Ressources -->
+  <rect x="128" y="196" width="660" height="50" rx="10" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+  <rect x="140" y="207" width="82" height="28" rx="7" fill="#d97706"/>
+  <text x="181" y="225" text-anchor="middle" class="badge-txt">Niveau 1</text>
+  <text x="236" y="217" class="lvl-title">Ressources (URI distinctes)</text>
+  <text x="236" y="235" class="lvl-sub">Ex. /clients/42, /commandes/15 (verbes non normalisés)</text>
+
+  <!-- Niveau 0 : Tunnel HTTP -->
+  <rect x="88" y="256" width="700" height="50" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+  <rect x="100" y="267" width="82" height="28" rx="7" fill="#64748b"/>
+  <text x="141" y="285" text-anchor="middle" class="badge-txt">Niveau 0</text>
+  <text x="196" y="277" class="lvl-title">Le tunnel HTTP (RPC / POX)</text>
+  <text x="196" y="295" class="lvl-sub">Endpoint unique (ex. POST /api) utilisé comme simple transport</text>
+</svg>

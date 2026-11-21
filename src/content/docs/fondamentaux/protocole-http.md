@@ -156,3 +156,20 @@ response.setContentType("text/html;charset=UTF-8");
 response.setContentType("text/html");
 response.setCharacterEncoding("UTF-8");
 ```
+
+## Tester des requêtes HTTP en pratique
+
+Pour appeler une URL ou tester une API sans écrire de code applicatif :
+
+- 🌐 **Navigateur web :** pratique directement depuis la barre d'adresse, mais limité aux requêtes `GET`.
+- 🧪 **Client REST dédié (`Insomnia`, `Postman`) :** indispensable pour envoyer des requêtes `POST`, `PUT`, `PATCH` ou `DELETE`, configurer des en-têtes (`Content-Type`, `Authorization`…) et inspecter le statut et le corps de réponse.
+- 📘 **Documentation interactive Swagger :** lorsque l'API en expose une, elle permet d'exécuter des requêtes directement dans l'interface (par exemple [FakeRestAPI](http://fakerestapi.azurewebsites.net/)).
+- 💻 **Ligne de commande (`curl`) :** idéal pour reproduire ou scripter un appel depuis un terminal :
+
+  ```bash
+  curl -i https://jsonplaceholder.typicode.com/posts/1
+  ```
+
+- 📊 **Autres outils :** `LibreOffice`, `R`, `Python`, etc. — tout logiciel capable d'émettre une requête HTTP peut interroger une API.
+
+*(Les appels programmatiques depuis une application Java avec `RestClient` ou `HttpClient` et en JavaScript sont détaillés dans la page [Consommation d'une API REST](/formation-api-rest/api-rest/consommation-api-rest/).)*

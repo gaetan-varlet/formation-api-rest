@@ -109,7 +109,6 @@ export default defineConfig({
 						{ slug: 'fondamentaux/protocole-http' },
 						{ slug: 'fondamentaux/architecture' },
 						{ slug: 'fondamentaux/exemple-java-ee' },
-						{ slug: 'fondamentaux/consommation-api-rest' },
 					],
 				},
 				{
@@ -131,6 +130,7 @@ export default defineConfig({
 						{ slug: 'api-rest/gestion-erreurs' },
 						{ slug: 'api-rest/contrats-api' },
 						{ slug: 'api-rest/swagger' },
+						{ slug: 'api-rest/consommation-api-rest' },
 					],
 				},
 				{

@@ -4,20 +4,7 @@ title: "Consommation d'une API REST"
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-## Faire une requête HTTP
-
-- 🌐 **Avec un navigateur** : directement via la barre d'adresse (uniquement pour les requêtes `GET`).
-- 🧪 **Avec un client REST dédié** : **Insomnia**, **Postman**.
-- 📘 **Avec la documentation interactive Swagger** d'une API. Par exemple : [http://fakerestapi.azurewebsites.net/](http://fakerestapi.azurewebsites.net/).
-- ☕ **En Java** : par exemple pour consommer une API depuis un back-end ou une application web.
-- ⚡ **En JavaScript** : pour consommer une API depuis une IHM web.
-- 💻 **En ligne de commande (`bash`)** :
-
-  ```bash
-  curl https://jsonplaceholder.typicode.com/posts/1
-  ```
-
-- 📊 **Depuis d'autres outils ou langages** : **LibreOffice**, **R**, **Python**, etc.
+Au-delà des tests manuels via navigateur, Insomnia, Swagger ou `curl` (vus dans [Le protocole HTTP](/formation-api-rest/fondamentaux/protocole-http/#tester-des-requêtes-http-en-pratique)), une application consomme généralement une API REST directement par code — côté front-end (**JavaScript**) ou côté back-end (**Java**).
 
 ## En JavaScript
 
@@ -161,7 +148,7 @@ User userBasic = restClient.get()
 
 #### Injection et configuration du proxy
 
-Dans un projet Spring Boot, `RestClient.Builder` est fourni automatiquement par Spring (vous verrez l'injection de dépendances dans le module suivant). Pour partager une configuration (URL de base, proxy, en-têtes) dans toute l'application, on déclare un `@Bean` dans une classe `@Configuration` :
+Dans un projet Spring Boot, `RestClient.Builder` est fourni automatiquement par Spring (via l'[injection de dépendances](/formation-api-rest/spring-boot/injection-dependances/)). Pour partager une configuration (URL de base, proxy, en-têtes) dans toute l'application, on déclare un `@Bean` dans une classe `@Configuration` :
 
 ```java
 @Configuration
