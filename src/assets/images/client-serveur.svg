@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 240" role="img" aria-label="Schéma des échanges HTTP(S) entre un client et un serveur">
+  <defs>
+    <marker id="arr-req" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7"/>
+    </marker>
+    <marker id="arr-res" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981"/>
+    </marker>
+    <style>
+      .card-title { font: 700 16px system-ui, -apple-system, sans-serif; fill: #ffffff; }
+      .card-sub { font: 500 12px system-ui, -apple-system, sans-serif; fill: #e2e8f0; }
+      .req-lbl { font: 700 14px system-ui, -apple-system, sans-serif; fill: #0369a1; }
+      .res-lbl { font: 700 14px system-ui, -apple-system, sans-serif; fill: #047857; }
+      .badge-lbl { font: 700 12.5px system-ui, -apple-system, sans-serif; fill: #334155; }
+    </style>
+  </defs>
+
+  <!-- Fond léger pour lisibilité claire et sombre -->
+  <rect x="8" y="8" width="764" height="224" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+
+  <!-- Carte Client -->
+  <rect x="28" y="34" width="196" height="172" rx="12" fill="#0284c7"/>
+  <rect x="90" y="54" width="72" height="48" rx="6" fill="none" stroke="#ffffff" stroke-width="2.5"/>
+  <line x1="90" y1="67" x2="162" y2="67" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="99" cy="60.5" r="2" fill="#ffffff"/>
+  <circle cx="107" cy="60.5" r="2" fill="#ffffff"/>
+  <circle cx="115" cy="60.5" r="2" fill="#ffffff"/>
+  <line x1="80" y1="108" x2="172" y2="108" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  <text x="126" y="140" text-anchor="middle" class="card-title">Client</text>
+  <text x="126" y="162" text-anchor="middle" class="card-sub">Navigateur, application</text>
+  <text x="126" y="180" text-anchor="middle" class="card-sub">ou autre logiciel</text>
+
+  <!-- Flèche Requête (Client -> Serveur) -->
+  <text x="390" y="64" text-anchor="middle" class="req-lbl">Requête</text>
+  <line x1="242" y1="78" x2="532" y2="78" stroke="#0284c7" stroke-width="2.8" marker-end="url(#arr-req)"/>
+
+  <!-- Badge central : HTTP(S) -->
+  <rect x="304" y="106" width="172" height="28" rx="14" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="390" y="124" text-anchor="middle" class="badge-lbl">HTTP(S) · sans état</text>
+
+  <!-- Flèche Réponse (Serveur -> Client) -->
+  <line x1="538" y1="166" x2="248" y2="166" stroke="#10b981" stroke-width="2.8" marker-end="url(#arr-res)"/>
+  <text x="390" y="190" text-anchor="middle" class="res-lbl">Réponse</text>
+
+  <!-- Carte Serveur -->
+  <rect x="556" y="34" width="196" height="172" rx="12" fill="#0f766e"/>
+  <rect x="620" y="52" width="68" height="22" rx="4" fill="none" stroke="#ffffff" stroke-width="2.4"/>
+  <circle cx="631" cy="63" r="2.2" fill="#34d399"/>
+  <line x1="643" y1="63" x2="677" y2="63" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <rect x="620" y="80" width="68" height="22" rx="4" fill="none" stroke="#ffffff" stroke-width="2.4"/>
+  <circle cx="631" cy="91" r="2.2" fill="#34d399"/>
+  <line x1="643" y1="91" x2="677" y2="91" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <text x="654" y="140" text-anchor="middle" class="card-title">Serveur</text>
+  <text x="654" y="162" text-anchor="middle" class="card-sub">Traite la demande</text>
+  <text x="654" y="180" text-anchor="middle" class="card-sub">et renvoie les données</text>
+</svg>
