@@ -1,0 +1,91 @@
+---
+title: "Mise en place d'un Hello World de notre API REST avec Spring Boot"
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+## Initialisation du projet avec Spring Initializr
+
+- Historiquement, déployer une application web Java nécessitait un livrable `.war` et un serveur applicatif externe (ex. Tomcat).
+- **Spring Boot** produit un `.jar` autonome incluant directement le serveur embarqué (Tomcat par défaut).
+- [Spring Initializr](https://start.spring.io/) permet de générer le squelette du projet :
+  - **Outil de build :** Maven — **Langage :** Java 25 — **Packaging :** `Jar`
+  - **Dépendances :** *Spring Web*, *Spring Data JPA*, *H2 Database*, *Lombok* et *Spring Boot DevTools*
+
+## Démarrer l'application
+
+Exécutez la méthode `main` de la classe principale annotée avec **`@SpringBootApplication`** : le serveur Tomcat embarqué démarre automatiquement (sur le port `8080` par défaut).
+
+:::note[Que fait `@SpringBootApplication` ?]
+Elle regroupe trois annotations :
+- **`@Configuration`** : permet à la classe de déclarer des configurations et des `@Bean` en Java (à la place des anciens fichiers XML).
+- **`@EnableAutoConfiguration`** : génère automatiquement la configuration Spring adaptée aux dépendances présentes dans le *classpath*.
+- **`@ComponentScan`** : demande à Spring de scanner le package courant (et ses sous-packages) pour détecter vos classes annotées (`@RestController`, `@Service`, `@Repository`, `@Component`, `@Configuration`…).
+:::
+
+## Création d'un Hello World
+
+<Steps>
+
+1. **Créer le package `controller`**
+
+   Créez un package `controller` sous votre package racine (par exemple `fr.insee.formationapirest.controller` si le `main` est dans `fr.insee.formationapirest`).
+
+2. **Créer la classe `TestController.java`**
+
+   ```java title="TestController.java"
+   package fr.insee.formationapirest.controller;
+
+   import org.springframework.web.bind.annotation.GetMapping;
+   import org.springframework.web.bind.annotation.RestController;
+
+   @RestController
+   public class TestController {
+
+       @GetMapping("/hello")
+       public String helloWorld() {
+           return "Hello World !";
+       }
+   }
+   ```
+
+3. **Tester l'endpoint**
+
+   Démarrez l'application et accédez à l'URL [http://localhost:8080/hello](http://localhost:8080/hello).
+
+</Steps>
+
+:::note[Que fait `@RestController` ?]
+Elle combine deux annotations Spring MVC :
+- **`@Controller`** : désigne la classe comme contrôleur web capable de traiter des requêtes HTTP (`GET`, `POST`…). Par défaut, ses méthodes renvoient le nom d'une vue HTML (JSP, Thymeleaf).
+- **`@ResponseBody`** : indique que la valeur retournée par chaque méthode est écrite directement dans le corps de la réponse (JSON, texte…), sans passer par une vue.
+:::
+
+*(Rappel sur les autres stéréotypes vus au chapitre précédent : `@Component`, `@Service` pour la logique métier, et `@Repository` pour l'accès aux données avec traduction des exceptions — inutile et implicite sur les interfaces héritant de `JpaRepository`.)*
+
+## Mise en place de Swagger (OpenAPI)
+
+Swagger génère automatiquement une documentation interactive et standardisée (**OpenAPI**) de votre API à partir du code.
+
+Ajoutez la dépendance **springdoc-openapi** dans votre `pom.xml` :
+
+```xml title="pom.xml"
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    <version>3.2.0</version>
+</dependency>
+```
+
+Une fois l'application démarrée, deux URLs sont disponibles :
+- **Spécification OpenAPI (JSON) :** [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+- **Interface interactive Swagger UI :** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+
+:::tip[Rediriger la page d'accueil vers Swagger UI]
+Vous pouvez rediriger directement `/` vers Swagger UI en ajoutant cette propriété (la personnalisation complète est détaillée dans la section *Swagger*) :
+
+```properties title="application.properties"
+# Redirection de l'URL racine vers Swagger UI
+springdoc.swagger-ui.use-root-path=true
+```
+:::
