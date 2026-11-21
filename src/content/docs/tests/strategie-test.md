@@ -13,7 +13,9 @@ Vérifie le comportement d'une unité de logique métier (une méthode ou une cl
 - **Test unitaire isolé :** Toutes les dépendances internes de la classe testée sont remplacées par des doublures (*mocks* ou *stubs*).
 - **Test unitaire élargi :** La classe testée collabore avec de vrais objets métier en mémoire (objets-valeurs, validateurs purs), toujours sans I/O ni contexte Spring.
 
-> **Exemple :** Tester une règle de calcul sur des cas limites via un test paramétré (exécution en quelques millisecondes).
+:::tip[Exemple]
+Tester une règle de calcul sur des cas limites via un test paramétré (exécution en quelques millisecondes).
+:::
 
 ### Test d'intégration
 
@@ -22,19 +24,25 @@ Vérifie le fonctionnement de l'application avec son infrastructure technique r�
 - **Test d'intégration de tranche (*Slice Test*) :** Charge uniquement une couche technique Spring (`@WebMvcTest` pour la couche web, `@DataJpaTest` pour la persistance JPA).
 - **Test d'intégration complet (ou *Test de composant*) :** Démarre l'application complète et l'interroge par son point d'entrée externe (requête HTTP), connectée à une base de données de test. C'est la forme de référence dans les architectures orientées API/microservices.
 
-> **Exemple :** Envoyer une requête `POST /api/exclusions` avec un corps JSON et un rôle utilisateur, puis vérifier le statut HTTP `201`, la structure du JSON retourné et l'enregistrement en base de données.
+:::tip[Exemple]
+Envoyer une requête `POST /api/exclusions` avec un corps JSON et un rôle utilisateur, puis vérifier le statut HTTP `201`, la structure du JSON retourné et l'enregistrement en base de données.
+:::
 
 ### Test de contrat
 
 Vérifie uniquement la compatibilité du **format d'échange** (schéma JSON, noms et types des champs, codes HTTP) entre un **Consommateur** (client) et un **Fournisseur** (API), sans déployer les deux applications simultanément (outils : *Pact*, *Spring Cloud Contract*).
 
-> **Exemple :** Le front-end (consommateur) génère un fichier contrat stipulant qu'il lit les champs `hostname` (string) et `critique` (boolean) sur `GET /api/serveurs`. Ce contrat est rejoué automatiquement dans la CI du back-end (fournisseur) pour garantir qu'aucun renommage de champ ne cassera le front-end.
+:::tip[Exemple]
+Le front-end (consommateur) génère un fichier contrat stipulant qu'il lit les champs `hostname` (string) et `critique` (boolean) sur `GET /api/serveurs`. Ce contrat est rejoué automatiquement dans la CI du back-end (fournisseur) pour garantir qu'aucun renommage de champ ne cassera le front-end.
+:::
 
 ### Test de bout en bout (*End-to-End* / *E2E*)
 
 Vérifie un parcours utilisateur complet sur un environnement déployé réunissant tous les composants réels (navigateur, front-end, API back-end, base de données, fournisseur d'identité, services partenaires).
 
-> **Exemple :** Piloter un navigateur via Playwright pour s'authentifier sur un serveur OIDC, saisir un formulaire dans l'interface web et vérifier la mise à jour des données affichées.
+:::tip[Exemple]
+Piloter un navigateur via Playwright pour s'authentifier sur un serveur OIDC, saisir un formulaire dans l'interface web et vérifier la mise à jour des données affichées.
+:::
 
 ---
 
@@ -59,6 +67,8 @@ Grâce au démarrage rapide des conteneurs modernes et à la mise en cache du co
 
 ### Tableau comparatif
 
+![Comparaison entre la pyramide des tests historique et les stratégies modernes Testing Honeycomb et Trophy](../../../assets/images/pyramide-vs-honeycomb.svg "Pyramide des tests vs Testing Honeycomb / Trophy")
+
 | Critère | Stratégie historique (Pyramide) | Stratégies modernes (*Honeycomb* / *Trophy*) |
 |---|---|---|
 | **Volume principal** | Tests unitaires isolés (~80 %) | Tests d'intégration complet par HTTP |
@@ -77,9 +87,13 @@ Grâce au démarrage rapide des conteneurs modernes et à la mise en cache du co
 - **Arbitrage « tout en intégration » vs « unitaire + intégration » sur les règles de calcul :**
   - **Tout regrouper en intégration (via un test paramétré ou un `Scenario Outline`) :** Lorsque le harnais d'intégration est rapide (contexte Spring partagé), que la préparation des données est légère (quelques lignes en base) et que le nombre de cas reste raisonnable (moins de 15–20 cas). Cela évite de maintenir deux fichiers de tests pour la même fonctionnalité.
   - **Séparer en 1 test d'intégration nominal (pour le câblage) + N tests unitaires purs (pour l'algorithme) :** Uniquement lorsque la combinatoire est élevée (parseurs complexes, regex, matrices de dates) ou que la préparation du contexte d'intégration (multiples tables liées, bouchons HTTP) noie l'intention métier et ralentit l'exécution unitaire dans l'IDE.
-- **À éviter :** Appeler directement les méthodes Java des `@RestController` dans les tests d'intégration. Cela contourne les filtres de sécurité, la validation `@Valid`, le binding `@RequestParam` et la sérialisation Jackson.
+:::caution[À éviter]
+Appeler directement les méthodes Java des `@RestController` dans les tests d'intégration. Cela contourne les filtres de sécurité, la validation `@Valid`, le binding `@RequestParam` et la sérialisation Jackson.
+:::
 
 ### Choix des outils et simulation des frontières
+
+![Architecture d'un test d'intégration boîte noire par HTTP sur Spring Boot](../../../assets/images/test-integration-boite-noire.svg "Périmètre du test d'intégration boîte noire")
 
 - **Privilégier un outil unique (ou quasi unique) :** Plusieurs choix sont valides (tout-JUnit, tout-Cucumber, etc.). Utiliser le même outil pour les tests unitaires et les tests d'intégration homogénéise l'écriture des tests et évite de multiplier les styles d'assertions, en veillant simplement à ne pas démarrer le contexte Spring sur les tests unitaires.
 - **Client de test HTTP sur Spring Boot 4.0+ (`MockMvc` vs `RestTestClient`) :**
@@ -95,7 +109,9 @@ Grâce au démarrage rapide des conteneurs modernes et à la mise en cache du co
 
 ## 4. Spécificités en développement assisté par agents (IA)
 
-En développement agentique, cette stratégie de **tests d'intégration en boîte noire par HTTP est encore plus indispensable** qu'en développement manuel :
+:::note[Pourquoi cette stratégie est encore plus clé avec l'IA]
+En développement agentique, cette stratégie de **tests d'intégration en boîte noire par HTTP est encore plus indispensable** qu'en développement manuel.
+:::
 
 - **Un filet de sécurité objectif contre les angles morts de l'IA :** Un agent de code génère rapidement une implémentation crédible en apparence, mais peut introduire une régression sur un mapping JPA, une requête SQL, une sérialisation JSON ou une règle de sécurité. S'il écrit des tests unitaires isolés avec des mocks, il risque de mocker ses propres hypothèses fausses et de produire des tests complaisants qui passent au vert. Le test d'intégration HTTP vérifie le comportement réel de bout en bout (de la requête jusqu'à la base de données), ce qui réduit fortement le risque de valider une implémentation défaillante.
 - **Garder la maîtrise du contrat sans ralentir le flux :** Laisser l'agent générer le code et les tests à partir d'une liste claire des cas attendus dans le prompt (cas nominaux, erreurs `400`/`403`/`404`), puis concentrer la revue de code sur les assertions générées et sur toute modification apportée aux tests existants.

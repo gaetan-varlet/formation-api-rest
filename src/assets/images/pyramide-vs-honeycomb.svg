@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 385" role="img" aria-label="Comparaison entre la pyramide des tests historique et les stratégies modernes Testing Honeycomb et Trophy">
+  <defs>
+    <style>
+      .title { font: 700 16px system-ui, -apple-system, sans-serif; fill: #0f172a; }
+      .sub { font: 500 12px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .lbl { font: 700 13px system-ui, -apple-system, sans-serif; fill: #ffffff; }
+      .lbl-sm { font: 500 11.5px system-ui, -apple-system, sans-serif; fill: #f8fafc; }
+    </style>
+  </defs>
+
+  <!-- Carte gauche : Pyramide historique -->
+  <rect x="12" y="12" width="446" height="361" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="235" y="42" text-anchor="middle" class="title">Stratégie historique : Pyramide (2009)</text>
+  <text x="235" y="62" text-anchor="middle" class="sub">Isolation maximale par mocks</text>
+
+  <!-- E2E 5 % (tout à l'intérieur du sommet) -->
+  <polygon points="235,78 300,152 170,152" fill="#ef4444" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+  <text x="235" y="124" text-anchor="middle" class="lbl">E2E</text>
+  <text x="235" y="141" text-anchor="middle" class="lbl-sm">5 %</text>
+
+  <!-- Intégration 15 % -->
+  <polygon points="170,154 300,154 344,224 126,224" fill="#f59e0b" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+  <text x="235" y="186" text-anchor="middle" class="lbl">Intégration (15 %)</text>
+  <text x="235" y="205" text-anchor="middle" class="lbl-sm">peu couverte</text>
+
+  <!-- Unitaires 80 % -->
+  <polygon points="126,226 344,226 416,344 54,344" fill="#64748b" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+  <text x="235" y="272" text-anchor="middle" class="lbl">Unitaires isolés (~80 %)</text>
+  <text x="235" y="294" text-anchor="middle" class="lbl-sm">Mocks massifs sur @Service / @Repository</text>
+  <text x="235" y="313" text-anchor="middle" class="lbl-sm">Ne détecte pas SQL, JPA, JSON, Sécurité</text>
+
+  <!-- Carte droite : Stratégies modernes -->
+  <rect x="482" y="12" width="446" height="361" rx="14" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+  <text x="705" y="42" text-anchor="middle" class="title">Stratégies modernes (Honeycomb / Trophy)</text>
+  <text x="705" y="62" text-anchor="middle" class="sub">Boîte noire HTTP sur contexte Spring partagé</text>
+
+  <!-- Sommet : E2E / Contrat (~5 %) (triangle élargi pour contenir le texte sans coupure) -->
+  <polygon points="705,76 792,146 618,146" fill="#0ea5e9" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+  <text x="705" y="121" text-anchor="middle" class="lbl">E2E / Contrat</text>
+  <text x="705" y="138" text-anchor="middle" class="lbl-sm">~5 % (minimal)</text>
+
+  <!-- Cœur : Intégration HTTP (~70–80 %) -->
+  <polygon points="575,150 835,150 894,210 835,270 575,270 516,210" fill="#10b981" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>
+  <text x="705" y="188" text-anchor="middle" class="lbl">Intégration complète par HTTP (~70–80 %)</text>
+  <text x="705" y="209" text-anchor="middle" class="lbl-sm">Sécurité, @Valid, MVC, Métier, SQL/JPA, JSON</text>
+  <text x="705" y="229" text-anchor="middle" class="lbl-sm">Mocks uniquement aux frontières externes</text>
+
+  <!-- Base ciblée : Unitaires purs (~15–25 %) -->
+  <rect x="550" y="280" width="310" height="64" rx="10" fill="#4f46e5" stroke="#ffffff" stroke-width="2"/>
+  <text x="705" y="307" text-anchor="middle" class="lbl">Unitaires purs (~15–25 %)</text>
+  <text x="705" y="327" text-anchor="middle" class="lbl-sm">Algorithmes complexes sans Spring ni I/O</text>
+</svg>
