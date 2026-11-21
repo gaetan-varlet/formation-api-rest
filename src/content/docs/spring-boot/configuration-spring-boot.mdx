@@ -1,0 +1,227 @@
+---
+title: "Configuration de Spring Boot"
+---
+
+import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Les commandes Maven courantes
+
+```bash
+# Démarrage en local (rechargement à chaud si Spring Boot DevTools est présent)
+mvn spring-boot:run
+
+# Surcharger des propriétés au démarrage via Maven
+mvn spring-boot:run -Dspring-boot.run.arguments="--formationapirest.environnement=Toto --monNom=Varlet"
+
+# Générer le livrable dans target/ (ajouter -DskipTests pour ignorer les tests)
+mvn clean package
+
+# Exécuter le JAR produit avec son serveur Tomcat embarqué
+java -jar target/mon-application.jar
+
+# Surcharger des propriétés au lancement du JAR (-D avant -jar, ou -- en arguments après)
+java -DmonNom=Varlet -Dformationapirest.environnement=Toto -jar target/mon-application.jar
+```
+
+## Construction des livrables (JAR exécutable vs bibliothèque)
+
+<Tabs>
+<TabItem label="JAR exécutable (par défaut)">
+
+Par défaut, **Spring Boot Maven Plugin** produit un *fat JAR* contenant vos classes compilées **et** toutes les dépendances nécessaires à l'exécution :
+
+```xml title="pom.xml"
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+    </plugins>
+</build>
+```
+
+:::caution[Non réutilisable comme bibliothèque Maven]
+Dans un *fat JAR* Spring Boot, vos classes sont placées dans `/BOOT-INF/classes` au lieu de la racine du JAR. Si un autre projet importe ce JAR en dépendance Maven, **la compilation échouera**.
+:::
+
+</TabItem>
+<TabItem label="JAR bibliothèque + exécutable">
+
+Si un autre projet doit importer les classes de ce projet comme dépendance, ajoutez `<classifier>exec</classifier>` : Maven générera **à la fois** un JAR classique léger (pour les autres projets) et un JAR suffixé `-exec.jar` (exécutable avec `java -jar`) :
+
+```xml title="pom.xml"
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>repackage</id>
+                    <configuration>
+                        <classifier>exec</classifier>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+```
+
+</TabItem>
+</Tabs>
+
+## Injection de propriétés
+
+Vous pouvez injecter une valeur issue de `application.properties` (ou d'une variable d'environnement / ligne de commande) dans un composant Spring avec `@Value` :
+
+```properties title="src/main/resources/application.properties"
+monNom=Gaetan
+```
+
+```java title="TestController.java"
+import org.springframework.beans.factory.annotation.Value;
+
+@Value("${monNom:Inconnu}") // ":Inconnu" définit une valeur par défaut si la clé est absente
+private String nom;
+
+@GetMapping("/mon-nom")
+public String getNom() {
+    return nom;
+}
+```
+
+Démarrez l'application et accédez à [http://localhost:8080/mon-nom](http://localhost:8080/mon-nom).
+
+:::note[Alternative pour plusieurs propriétés : `@ConfigurationProperties`]
+Si vous avez plusieurs propriétés liées (ex. `app.api.url`, `app.api.timeout`), il existe une alternative à `@Value` : regrouper ces champs dans une classe (ou un `record`) annotée avec `@ConfigurationProperties(prefix = "app.api")`.
+:::
+
+## Activer la compression des réponses HTTP
+
+Disponible uniquement lorsque l'application tourne avec un serveur embarqué (Tomcat, Jetty, Undertow) :
+
+```properties title="src/main/resources/application.properties"
+server.compression.enabled=true
+```
+
+Par défaut, la compression s'applique dès **2 Ko** (`server.compression.min-response-size=2048`) sur les formats texte courants (JSON, HTML, XML, CSS, JS — personnalisables via `server.compression.mime-types`).
+
+*(Alternative si vous déployez en `.war` sur un serveur externe : il est aussi possible d'écrire un filtre de compression HTTP — voir [la section sur les filtres](/formation-api-rest/securite/filtres/) plus loin dans la formation.)*
+
+## Activer une classe selon une propriété
+
+Vous pouvez conditionner l'enregistrement d'un bean Spring (`@Service`, `@Configuration`, `@Bean`…) à la valeur d'une propriété :
+
+- **`@ConditionalOnProperty`** : active la classe uniquement si la propriété correspond à `havingValue` (`matchIfMissing = false` par défaut : si la propriété est absente, le bean n'est pas créé).
+
+```java
+@Service
+@ConditionalOnProperty(name = "environnement", havingValue = "local")
+public class MonServiceLocal {
+    // Bean actif uniquement quand environnement=local
+}
+```
+
+- **`@ConditionalOnExpression`** : utile lorsque vous avez besoin d'une condition composée (`&&`, `||`) ou d'une valeur booléenne avec valeur par défaut directement dans l'expression (ici `false` si `ma-property` est absente).
+
+```java
+@Service
+@ConditionalOnExpression("${ma-property:false}")
+public class MonServiceOptionnel {
+    // Bean actif uniquement quand ma-property=true
+}
+```
+
+## Afficher les propriétés au démarrage (`PropertiesLogger`)
+
+Pour vérifier au démarrage quelles valeurs de propriétés ont été résolues (tout en masquant les secrets), vous pouvez enregistrer un `ApplicationListener` :
+
+<Steps>
+
+1. **Créer la classe `PropertiesLogger.java`**
+
+   ```java title="PropertiesLogger.java"
+   @Slf4j
+   public class PropertiesLogger implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
+
+       private static final Set<String> MOTS_CACHES =
+               Set.of("password", "pwd", "jeton", "token", "secret");
+
+       @Override
+       public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
+           Environment environment = event.getEnvironment();
+           log.info("============================================================================");
+           log.info("                            Valeurs des properties                          ");
+           log.info("============================================================================");
+           ((AbstractEnvironment) environment).getPropertySources().stream()
+                   .map(propertySource -> {
+                       if (propertySource instanceof EnumerablePropertySource<?> enumerable) {
+                           return enumerable.getPropertyNames();
+                       }
+                       log.warn("{} n'est pas EnumerablePropertySource : impossible à lister", propertySource);
+                       return new String[] {};
+                   })
+                   .flatMap(Arrays::stream)
+                   .distinct()
+                   .filter(Objects::nonNull)
+                   .forEach(key -> log.info("{} = {}", key, resoutValeurAvecMasquePwd(key, environment)));
+           log.info("============================================================================");
+       }
+
+       private static String resoutValeurAvecMasquePwd(String key, Environment environment) {
+           String value = environment.getProperty(key);
+           if (value != null && !value.isBlank()
+                   && MOTS_CACHES.stream().anyMatch(key.toLowerCase()::contains)) {
+               return "******";
+           }
+           return Objects.toString(value, "");
+       }
+   }
+   ```
+
+2. **Enregistrer le listener dans la méthode `main`**
+
+   ```java title="FormationApiRestApplication.java"
+   public static void main(String[] args) {
+       SpringApplication sa = new SpringApplication(FormationApiRestApplication.class);
+       sa.addListeners(new PropertiesLogger());
+       sa.run(args);
+   }
+   ```
+
+</Steps>
+
+:::note[Alternative native : Spring Boot Actuator]
+Si vous activez **Spring Boot Actuator** (vu en fin de formation), l'endpoint `/actuator/env` permet également d'inspecter les propriétés actives et leur source, avec masquage automatique des valeurs sensibles.
+:::
+
+## Configuration par environnement (livrable unique)
+
+La bonne pratique consiste à produire **un unique livrable** (un seul `.jar` ou une seule image conteneur) identique sur tous les environnements (`dev`, `recette`, `prod`), puis à surcharger les propriétés au démarrage via des **variables d'environnement** ou un fichier `application.properties` externe.
+
+## À savoir : les profils Spring Boot
+
+:::caution[À utiliser avec parcimonie]
+Avec l'approche « livrable unique + variables d'environnement », **vous n'avez généralement pas besoin de profils** pour gérer vos environnements (`dev`, `recette`, `prod`). Évitez en particulier de stocker des fichiers `application-prod.properties` versionnés dans Git.
+
+De même, pour activer ou désactiver une classe selon le contexte, préférez `@ConditionalOnProperty` ou `@ConditionalOnExpression` (vus plus haut, pilotés par de simples propriétés) plutôt que `@Profile(...)`.
+
+Les profils restent toutefois pratiques ponctuellement, par exemple pour activer une configuration dédiée au développement local (`application-local.properties`) :
+:::
+
+```bash
+# Activation d'un profil via argument au lancement du JAR
+java -jar target/mon-application.jar --spring.profiles.active=local
+
+# Ou via variable d'environnement
+SPRING_PROFILES_ACTIVE=local java -jar target/mon-application.jar
+```
+
+## Bonus : personnaliser la bannière ASCII
+
+Pour personnaliser la bannière affichée dans la console au démarrage de Spring Boot :
+
+- Créez un fichier **`banner.txt`** dans `src/main/resources/`.
+- Vous pouvez générer le texte ASCII sur [Text to ASCII Art Generator (TAAG)](http://patorjk.com/software/taag/#p=display&f=Graceful&t=Youpi).
