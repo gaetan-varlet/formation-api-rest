@@ -4,24 +4,46 @@ title: "Configuration de Spring Boot"
 
 import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
-## Les commandes Maven courantes
+## Lancer et packager l'application
+
+<Tabs>
+<TabItem label="En local (Maven)">
+
+Démarre l'application directement en local (avec rechargement à chaud si *Spring Boot DevTools* est présent) :
 
 ```bash
-# Démarrage en local (rechargement à chaud si Spring Boot DevTools est présent)
 mvn spring-boot:run
+```
 
-# Surcharger des propriétés au démarrage via Maven
+Pour surcharger des propriétés au démarrage via Maven :
+
+```bash
 mvn spring-boot:run -Dspring-boot.run.arguments="--formationapirest.environnement=Toto --monNom=Varlet"
+```
 
-# Générer le livrable dans target/ (ajouter -DskipTests pour ignorer les tests)
+</TabItem>
+<TabItem label="Packager et exécuter le JAR">
+
+Génère le livrable dans le dossier `target/` (ajoutez `-DskipTests` pour ignorer les tests) :
+
+```bash
 mvn clean package
+```
 
-# Exécuter le JAR produit avec son serveur Tomcat embarqué
+Exécute le JAR produit avec son serveur Tomcat embarqué :
+
+```bash
 java -jar target/mon-application.jar
+```
 
-# Surcharger des propriétés au lancement du JAR (-D avant -jar, ou -- en arguments après)
+Pour surcharger des propriétés au lancement du JAR (options `-D` **avant** `-jar`, ou arguments `--` après) :
+
+```bash
 java -DmonNom=Varlet -Dformationapirest.environnement=Toto -jar target/mon-application.jar
 ```
+
+</TabItem>
+</Tabs>
 
 ## Construction des livrables (JAR exécutable vs bibliothèque)
 
