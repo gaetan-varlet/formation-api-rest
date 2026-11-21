@@ -8,12 +8,16 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 - avec le navigateur, via la barre d'adresse (uniquement requêtes GET)
 - en utilisant des applications spécifiques telles que **Postman** ou **Advanced REST client**, qui sont liées au navigateur Chrome, ou **RESTClient** lié au navigateur Firefox
-- avec la documentation interactive **Swagger** d'une API. Par exemple : `http://fakerestapi.azurewebsites.net/`
+- avec la documentation interactive **Swagger** d'une API. Par exemple : [http://fakerestapi.azurewebsites.net/](http://fakerestapi.azurewebsites.net/)
 - en Java : par exemple, consommer une API dans son API ou dans son application web
 - en JavaScript : consommer son API pour faire une IHM en JavaScript
-- en bash : `curl https://jsonplaceholder.typicode.com/posts/1`
+- en bash :
+
+  ```bash
+  curl https://jsonplaceholder.typicode.com/posts/1
+  ```
 - en Libre Office
-- en SAS, en R
+- en R
 - en Python
 - etc...
 
@@ -28,9 +32,14 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 Plusieurs approches existent selon le contexte du projet :
 
-- **Avec des bibliothèques (recommandé dans un projet Spring / applicatif)** : `RestClient` de Spring, OkHTTP, Jersey Client
-- **En Java standard (depuis Java 11)** : `java.net.http.HttpClient` (synchrone et asynchrone, support HTTP/2)
-- **Approche historique (legacy, à éviter en neuf)** : `HttpURLConnection` avec `InputStream`, **Jackson** (JSON) et **JAXB** (XML)
+1. **Avec Spring Boot (recommandé)** : **`RestClient`** (ou `WebClient` pour du réactif non-bloquant) — gère automatiquement la sérialisation/désérialisation JSON, les en-têtes et la gestion d'erreurs.
+2. **En Java standard sans framework (depuis Java 11)** : `java.net.http.HttpClient` (synchrone et asynchrone, support HTTP/2).
+3. **Autres bibliothèques tierces** : OkHTTP, Jersey Client.
+4. **Approche historique (legacy, à éviter en neuf)** : `HttpURLConnection` avec `InputStream`, **Jackson** (JSON) et **JAXB** (XML).
+
+:::tip[Pourquoi privilégier RestClient dans ce cours ?]
+Dans une application Spring Boot, `RestClient` remplace avantageusement `HttpClient` et les appels manuels à `ObjectMapper` : le code est beaucoup plus concis, lisible et s'intègre directement avec l'injection de dépendances Spring.
+:::
 
 :::caution
 `RestTemplate` est déprécié depuis Spring Boot 4 / Spring 7.0 : privilégiez `RestClient`.
@@ -102,7 +111,97 @@ import javax.xml.bind.annotation.XmlSchema;
 
 </details>
 
-### Avec Java 11+ : `HttpClient`
+### Avec Spring Boot : RestClient (recommandé)
+
+`RestClient` propose une API fluide et convertit automatiquement les objets Java en JSON (et inversement) via Jackson, sans avoir à manipuler `ObjectMapper` ou `InputStream` à la main.
+
+<Tabs>
+  <TabItem label="GET">
+```java
+RestClient restClient = RestClient.create("http://fakerestapi.azurewebsites.net/api/v1");
+
+User user = restClient.get()
+    .uri("/Users/{id}", 1)
+    .accept(MediaType.APPLICATION_JSON)
+    .retrieve()
+    .body(User.class);
+```
+  </TabItem>
+  <TabItem label="POST">
+```java
+RestClient restClient = RestClient.create("http://fakerestapi.azurewebsites.net/api/v1");
+
+User user = new User();
+user.setUserName("toto");
+user.setPassword("azerty");
+
+User created = restClient.post()
+    .uri("/Users")
+    .contentType(MediaType.APPLICATION_JSON)
+    .body(user)
+    .retrieve()
+    .body(User.class);
+```
+  </TabItem>
+  <TabItem label="Authentification">
+```java
+// Mode Bearer
+User userBearer = restClient.get()
+    .uri("/Users/1")
+    .header("Authorization", "Bearer " + token)
+    .retrieve()
+    .body(User.class);
+
+// Mode Basic
+User userBasic = restClient.get()
+    .uri("/Users/1")
+    .headers(headers -> headers.setBasicAuth("ID", "MDP"))
+    .retrieve()
+    .body(User.class);
+```
+  </TabItem>
+</Tabs>
+
+#### Injection et configuration du proxy
+
+Dans un projet Spring Boot, `RestClient.Builder` est fourni automatiquement par Spring (vous verrez l'injection de dépendances dans le module suivant). Pour partager une configuration (URL de base, proxy, en-têtes) dans toute l'application, on déclare un `@Bean` dans une classe `@Configuration` :
+
+```java
+@Configuration
+public class RestClientConfig {
+
+    @Bean
+    public RestClient userRestClient(RestClient.Builder builder) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy-rie.http.insee.fr", 8080)));
+
+        return builder
+            .baseUrl("http://fakerestapi.azurewebsites.net/api/v1")
+            .requestFactory(factory) // facultatif si pas de proxy
+            .build();
+    }
+}
+
+@Service
+public class UserApiClient {
+
+    private final RestClient restClient;
+
+    // Spring injecte automatiquement le @Bean RestClient configuré ci-dessus
+    public UserApiClient(RestClient userRestClient) {
+        this.restClient = userRestClient;
+    }
+
+    public User getUser(int id) {
+        return restClient.get()
+            .uri("/Users/{id}", id)
+            .retrieve()
+            .body(User.class);
+    }
+}
+```
+
+### En Java standard (sans framework) : HttpClient
 
 #### Requêtes synchrones (GET et POST)
 
@@ -249,7 +348,7 @@ HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofStri
   </TabItem>
 </Tabs>
 
-### Approche historique : `HttpURLConnection`
+### Approche historique : HttpURLConnection
 
 :::note[Code legacy]
 `HttpURLConnection` est l'API historique de Java (antérieure à Java 11). **Elle n'est plus recommandée pour de nouveaux développements** : préférez `HttpClient` en Java standard ou `RestClient` dans un projet Spring. Ces exemples sont conservés à titre informatif pour faciliter la lecture d'applications existantes.
