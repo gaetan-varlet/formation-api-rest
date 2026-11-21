@@ -1,47 +1,11 @@
 {
-    "configurations": [
-        {
-            "type": "java",
-            "name": "Launch DemoApplication",
-            "request": "launch",
-            "mainClass": "com.example.demo.DemoApplication",
-            "projectName": "demo"
-        },
-        {
-            "type": "java",
-            "name": "CodeLens (Launch) - HttpRequestHttpClient",
-            "request": "launch",
-            "mainClass": "request.HttpRequestHttpClient",
-            "projectName": "application-client"
-        },
-        {
-            "type": "java",
-            "name": "CodeLens (Launch) - HttpRequestJava",
-            "request": "launch",
-            "mainClass": "request.HttpRequestJava",
-            "projectName": "application-client"
-        },
-        {
-            "type": "java",
-            "name": "CodeLens (Launch) - HttpRequestJerseyClient",
-            "request": "launch",
-            "mainClass": "request.HttpRequestJerseyClient",
-            "projectName": "application-client"
-        },
-        {
-            "type": "java",
-            "name": "CodeLens (Launch) - FormationApiRestApplication sans préciser de profil",
-            "request": "launch",
-            "mainClass": "fr.insee.formationapirest.FormationApiRestApplication",
-            "projectName": "application-serveur-2-springboot"
-        },
-        {
-            "type": "java",
-            "name": "CodeLens (Launch) - FormationApiRestApplication avec le profil local",
-            "request": "launch",
-            "mainClass": "fr.insee.formationapirest.FormationApiRestApplication",
-            "projectName": "application-serveur-2-springboot",
-            "args": "--spring.profiles.active=local"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "command": "./node_modules/.bin/astro dev",
+      "name": "Development server",
+      "request": "launch",
+      "type": "node-terminal"
+    }
+  ]
 }

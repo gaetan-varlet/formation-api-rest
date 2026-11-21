@@ -1,0 +1,55 @@
+---
+title: Formation API REST avec Spring Boot
+description: Support de formation complet pour concevoir, tester, sécuriser et déployer des API REST avec Spring Boot.
+template: splash
+hero:
+  tagline: "Support de formation par Gaëtan Varlet — Octobre 2026"
+  image:
+    file: ../../assets/images/hero-api-spring.jpg
+  actions:
+    - text: Commencer la formation
+      link: /formation-api-rest/fondamentaux/introduction/
+      icon: right-arrow
+    - text: Dépôt GitHub de la formation
+      link: https://github.com/gaetan-varlet/formation-api-rest
+      icon: external
+      variant: minimal
+      attrs:
+        target: _blank
+        rel: noopener noreferrer
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Parcours de la formation
+
+<CardGrid stagger>
+	<Card title="1. Fondamentaux" icon="open-book">
+		Services web, protocole HTTP, architecture REST, exemple Java EE et consommation d'API.
+		[Accéder au module](/formation-api-rest/fondamentaux/introduction/)
+	</Card>
+	<Card title="2. Démarrer avec Spring Boot" icon="rocket">
+		Présentation de Spring, injection de dépendances, premier Hello World, base de données et logs.
+		[Accéder au module](/formation-api-rest/spring-boot/presentation-spring/)
+	</Card>
+	<Card title="3. Développement d'API REST" icon="laptop">
+		Création de CRUD, gestion des erreurs, annotations, contrats d'API, requêtes SQL et Swagger.
+		[Accéder au module](/formation-api-rest/api-rest/creation-crud/)
+	</Card>
+	<Card title="4. Fichiers, Streaming & Performance" icon="setting">
+		Réception de fichiers, export CSV, streaming, benchmark SQL, cache et tâches planifiées.
+		[Accéder au module](/formation-api-rest/fichiers-performance/reception-fichier/)
+	</Card>
+	<Card title="5. Sécurité & Filtres" icon="approve-check">
+		Spring Security et Keycloak, chaîne de filtres, CORS et neutralisation des entrées utilisateur.
+		[Accéder au module](/formation-api-rest/securite/spring-security-keycloak/)
+	</Card>
+	<Card title="6. Tests" icon="list-format">
+		Stratégie de test, tests unitaires, tests Spring, Cucumber, WireMock et intégration CI/CD.
+		[Accéder au module](/formation-api-rest/tests/strategie-test/)
+	</Card>
+	<Card title="7. Production & Déploiement" icon="up-caret">
+		Supervision avec Spring Boot Actuator et déploiement JAR/WAR sur VM ou Kubernetes.
+		[Accéder au module](/formation-api-rest/deploiement/actuator/)
+	</Card>
+</CardGrid>

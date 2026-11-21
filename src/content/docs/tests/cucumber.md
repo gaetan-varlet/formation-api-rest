@@ -1,0 +1,206 @@
+---
+title: "Les tests avec Cucumber"
+---
+
+## Principes
+
+- framework de tests, pour l’implémentation de scénarios de type BDD (Behavior-Driven-Development)
+- utilisation du langage **Gherkin**, proche du langage humain et compréhensible par les non informaticiens, pour spécifier les comportements logiciels attendus
+- écriture d'un code de **glue** pour faire le lien entre les spécifications en *Gherkin* et le code Java
+- possibilité de faire des tests unitaires ou des tests d'intégration
+- permet d'avoir une documentation vivante et à jour (**living documentation**) grâce à nos tests
+
+## Living Documentation
+
+![Rapport Cucumber](../../../assets/images/cucumber-report.png)
+
+## Bibliothèques
+
+```xml
+<cucumber.version>8.1.0</cucumber.version>
+```
+
+```xml
+<dependency>
+    <groupId>org.junit.platform</groupId>
+    <artifactId>junit-platform-suite</artifactId>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>io.cucumber</groupId>
+    <artifactId>cucumber-java8</artifactId>
+    <version>${cucumber.version}</version>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>io.cucumber</groupId>
+    <artifactId>cucumber-junit-platform-engine</artifactId>
+    <version>${cucumber.version}</version>
+    <scope>test</scope>
+</dependency>
+```
+
+## Configuration pour les tests unitaires
+
+```java
+import static io.cucumber.junit.platform.engine.Constants.*;
+
+// utilisation la plateforme Junit pour exécuter nos scénarios
+@Suite
+@IncludeEngines("cucumber")
+// les fichiers .feature sont dans le dossier features des ressources de tests
+@SelectPackages("features")
+// les Steps et la config Spring seront à chercher dans le package cucumber
+@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "fr.insee.formationapirest.unittests")
+@ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty, html:target/rapport-cucumber-unit-tests.html")
+public class CucumberRunnerTest {
+}
+```
+
+## Ecriture d'une première feature
+
+```gherkin
+Feature: Obtenir les vins
+
+    Scenario: obtenir tous les vins quand il y en a 3 en base
+        Given des vins avec les attributs suivants
+            | chateau   | appellation  | prix |
+            | Château 1 | Saint-Julien | 10.5 |
+            | Château 2 | Pomerol      | 25   |
+            | Château 3 | Pomerol      | 30   |
+        When je récupère tous les vins
+        Then le nombre de vins est 3
+```
+
+## Création d'un code glue
+
+```java
+public class VinGlue implements En {
+    private VinRepoMock vinRepository;
+    private VinService vinService;
+    private List<Vin> vins;
+
+    public VinGlue() {
+        Before(() -> {
+            vinRepository = new VinRepoMock();
+            vinService = new VinService(vinRepository);
+        });
+        Given("des vins avec les attributs suivants", (DataTable dataTable) -> {
+            List<Vin> toSave = dataTable.asMaps().stream().map(this::transformMapToVin).toList();
+            toSave.forEach(v -> vinRepository.save(v));
+        });
+        When("je récupère tous les vins", () -> {
+            vins = vinService.findAll(null);
+        });
+        Then("le nombre de vins est {int}", (Integer nbExcepted) -> {
+            assertThat(vins).hasSize(nbExcepted);
+        });
+    }
+    private Vin transformMapToVin(Map<String, String> line) {
+        return Vin.builder().chateau(line.get("chateau")).appellation(line.get("appellation")).prix(Double.valueOf(line.get("prix"))).build();
+    }
+}
+```
+
+## Création du VinRepoMock
+
+```java
+public class VinRepoMock implements VinRepository {
+
+    List<Vin> vins = new ArrayList<>();
+
+    @Override
+    public List<Vin> findAll() {
+        return this.vins;
+    }
+    @Override
+    public List<Vin> findByAppellation(String app) {
+        return this.vins.stream().filter(v -> v.getAppellation().equals(app)).toList();
+    }
+    @Override
+    public Vin save(Vin vin) {
+        vins.add(vin);
+        return vin;
+    }
+}
+```
+
+## Ajout d'un test pour obtenir les vins d'une appellation
+
+```gherkin
+Scenario: obtenir tous les vins d'une appellation
+    Given des vins avec les attributs suivants
+        | chateau   | appellation  | prix |
+        | Château 1 | Saint-Julien | 10.5 |
+        | Château 2 | Pomerol      | 25   |
+        | Château 3 | Pomerol      | 30   |
+    When je récupère tous les vins de l'appellation "Pomerol"
+    Then le nombre de vins est 2
+```
+
+```java
+When("je récupère tous les vins de l'appellation {string}", (String appellation) -> {
+    vins = vinService.findAll(appellation);
+});
+```
+
+## Alternative : injection de classe avec Spring (1)
+
+- exemple de Michael Azerhad : `https://github.com/mica16/BDD-TDD-Demo/tree/part3`
+- possibilité d'injecter des classes avec Spring, que l'on va utiliser dans le code de glue, par exemple des repository inMemory
+- il faut ajouter la dépendance `cucumber-spring`
+
+```xml
+
+<dependency>
+    <groupId>io.cucumber</groupId>
+    <artifactId>cucumber-spring</artifactId>
+    <version>${cucumber.version}</version>
+    <scope>test</scope>
+</dependency>
+```
+
+## Alternative : injection de classes avec Spring (2)
+
+- création d'une classe de configuration pour injecter les repo dans le contexte Spring
+- le scope `cucumber-glue` permet de réinitialiser les objets entre chaque test
+- création d'une classe de contexte faire le lien avec les tests Cucumber
+
+```java
+@Configuration
+public class RepositoriesConfiguration {
+    @Bean
+    @Scope("cucumber-glue")
+    public VinRepoMock vinRepository() {
+        return new VinRepoMock();
+    }
+}
+```
+
+```java
+import org.springframework.test.context.ContextConfiguration;
+
+@ContextConfiguration(classes = {
+        RepositoriesConfiguration.class
+})
+@CucumberContextConfiguration
+class ContextConfigurationTest implements En {}
+```
+
+## Mise à jour du code Glue
+
+- le `VinRepoMock` est injecté au lieu d'être instancié dans la classe
+
+```java
+public class VinGlue implements En {
+    private VinService vinService;
+    private List<Vin> vins;
+
+    public VinGlue(VinRepoMock vinRepository) {
+        Before(() -> {
+            vinService = new VinService(vinRepository);
+        });
+        ...
+    }
+}
+```

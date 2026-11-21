@@ -1,0 +1,411 @@
+---
+title: "Accès aux données : de Spring Data JPA au SQL historique"
+---
+
+## Panorama des approches
+
+| Approche | Abstraction | Cas d'usage type |
+| :--- | :--- | :--- |
+| **Query Methods** | Maximale | Filtres simples dérivés du nom |
+| **`@Query` (JPQL / SQL)** | Déclarative | Requêtes complexes ou spécifiques |
+| **Repo Custom (`EntityManager`)** | Impérative | Requêtes dynamiques (critères) |
+| **Specifications (`Criteria API`)** | Composée | Filtres dynamiques modulaires et pagination |
+| **`JdbcClient` / `JdbcTemplate`** | Basse | SQL direct hors ORM |
+| **JDBC natif** | Nulle | Code legacy |
+
+## Spring Data Query Methods
+
+Spring Data parse le **nom de la méthode** dans l'interface et génère automatiquement la requête au démarrage :
+
+```java
+@Repository
+public interface VinRepository extends JpaRepository<Vin, Integer> {
+
+    // WHERE appellation = ?
+    List<Vin> findByAppellation(String appellation);
+
+    // WHERE prix <= ? ORDER BY annee DESC
+    List<Vin> findByPrixLessThanEqualOrderByAnneeDesc(BigDecimal prixMax);
+
+    // Contrôle d'existence sans ramener l'entité
+    boolean existsByChateau(String chateau);
+}
+```
+
+- **Validation stricte au boot :** Si une propriété est mal orthographiée, Spring Boot refuse de démarrer.
+- **Documentation officielle des mots-clés :**  
+  [https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)
+
+## Optimisation des relations : le problème du N+1 SELECT
+
+Par défaut, les relations (`@ManyToOne`, `@OneToMany`) chargées à la demande (*LAZY*) déclenchent une cascade de requêtes SQL lors du parcours des données :
+
+```sql
+1. SELECT * FROM vin;                         --> 1 requête (ramène N lignes)
+2. SELECT * FROM region WHERE id = ?;         --> N requêtes exécutées
+3. SELECT * FROM producteur WHERE id = ?;     --> N requêtes exécutées
+                                              ─────────────────────────
+                                              Total : 1 + 2N requêtes !
+```
+
+- **Conséquence :** Effondrement des performances et saturation de la base de données.
+- **Mauvaise réponse :** Passer les relations en `FetchType.EAGER` (dégrade les performances sur toutes les autres requêtes).
+
+## Résoudre le N+1 avec @EntityGraph
+
+L'annotation **`@EntityGraph`** surcharge dynamiquement la stratégie de chargement pour la méthode ciblée en forçant une jointure SQL :
+
+```java
+@Repository
+public interface VinRepository extends JpaRepository<Vin, Integer> {
+
+    // Charge Vin, sa Region et son Producteur en une SEULE requête SQL
+    @EntityGraph(attributePaths = {"region", "producteur"})
+    List<Vin> findAll();
+
+    // Fonctionne également combiné avec une Query Method
+    @EntityGraph(attributePaths = {"region", "producteur"})
+    List<Vin> findByAppellation(String appellation);
+}
+```
+
+- **Résultat :** Les données liées sont récupérées en un seul aller-retour réseau vers la base de données.
+
+## Requêtes déclaratives avec @Query
+
+Nécessaire dès que la requête comporte des agrégations, des sous-requêtes ou devient trop verbeuse pour une Query Method :
+
+```java
+@Repository
+public interface VinRepository extends JpaRepository<Vin, Integer> {
+
+    // 1. JPQL : opère sur l'entité Java (vérifié au boot, portable)
+    @Query("SELECT DISTINCT v.appellation FROM Vin v WHERE v.prix <= :prixMax ORDER BY v.appellation")
+    List<String> findAppellationsAbordables(BigDecimal prixMax);
+
+    // 2. SQL natif : syntaxe directe du moteur SGBD (PostgreSQL)
+    @Query(value = "SELECT DISTINCT appellation FROM formation.vin WHERE date_mise_en_bouteille IS NOT NULL", nativeQuery = true)
+    List<String> findAppellationsEnBouteille();
+}
+```
+
+## Projections légères : requêter sans charger l'Entité
+
+Évite de charger l'entité complète (`Vin`) en projetant directement le SQL vers un **Record** :
+
+```java
+public record VinResponse(Integer id, String chateau, String appellation, Integer annee, BigDecimal prix) {}
+
+@Repository
+public interface VinRepository extends JpaRepository<Vin, Integer> {
+    // 1. Dérivé du nom : colonnes déduites automatiquement du Record
+    List<VinResponse> findByAppellation(String appellation);
+
+    // 2. Via @Query : instanciation explicite en JPQL
+    @Query("""
+        SELECT new fr.insee.formationapirest.dto.VinResponse(
+            v.id, v.chateau, v.appellation, v.annee, v.prix
+        )
+        FROM Vin v WHERE v.annee = :annee
+    """)
+    List<VinResponse> findResumeByAnnee(Integer annee);
+}
+```
+
+- **Gains :** Seules les colonnes utiles sont lues (pas de `SELECT *`) et aucun objet n'est conservé dans le cache L1 Hibernate.
+
+## Requêtes d'écriture : @Modifying
+
+Par défaut, `@Query` n'accepte que des lectures (`SELECT`). Pour exécuter un `UPDATE` ou un `DELETE`, deux annotations sont requises :
+
+```java
+@Repository
+public interface VinRepository extends JpaRepository<Vin, Integer> {
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("UPDATE Vin v SET v.prix = :nouveauPrix WHERE v.id = :id")
+    int updatePrix(Integer id, BigDecimal nouveauPrix);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("DELETE FROM Vin v WHERE v.annee < :anneeLimite")
+    int deleteVinsAnciens(Integer anneeLimite);
+}
+```
+
+- **`@Modifying(clearAutomatically = true)` :** Exécute un `executeUpdate()` et purge le cache L1 Hibernate pour éviter de conserver des entités désynchronisées en mémoire.
+- **`@Transactional` :** Impose un contexte transactionnel obligatoire pour l'écriture (généralement porté par le Service).
+
+## Le Repository Personnalisé (Custom)
+
+Indispensable quand la requête doit être construite **dynamiquement** avec des filtres optionnels reçus à l'exécution.
+
+### 1. Définir l'interface du fragment
+
+```java
+package fr.insee.formationapirest.repository;
+
+import java.util.List;
+
+public interface VinRepositoryCustom {
+    List<String> findAppellationsDynamiques(String filtre, Integer anneeMin);
+}
+```
+
+## Implémentation du Custom Repository
+
+### 2. Implémenter avec l'EntityManager
+
+Convention stricte : nommer la classe `<NomDuRepoPrincipal>Impl`.
+
+```java
+package fr.insee.formationapirest.repository;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import java.util.List;
+
+public class VinRepositoryImpl implements VinRepositoryCustom {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+```
+
+```java
+    @Override
+    public List<String> findAppellationsDynamiques(String filtre, Integer anneeMin) {
+        StringBuilder jpql = new StringBuilder("SELECT DISTINCT v.appellation FROM Vin v WHERE 1=1");
+
+        if (filtre != null && !filtre.isBlank()) {
+            jpql.append(" AND LOWER(v.appellation) LIKE :filtre");
+        }
+        if (anneeMin != null) {
+            jpql.append(" AND v.annee >= :anneeMin");
+        }
+
+        TypedQuery<String> query = entityManager.createQuery(jpql.toString(), String.class);
+        if (filtre != null && !filtre.isBlank()) {
+            query.setParameter("filtre", "%" + filtre + "%");
+        }
+        if (anneeMin != null) {
+            query.setParameter("anneeMin", anneeMin);
+        }
+
+        return query.getResultList();
+    }
+}
+```
+
+## Agrégation et utilisation
+
+### 3. Étendre l'interface personnalisée
+
+```java
+@Repository
+public interface VinRepository extends JpaRepository<Vin, Integer>, VinRepositoryCustom {
+    // Combine JpaRepository, les Query Methods, @EntityGraph et le code Custom
+}
+```
+
+### 4. Utilisation transparente dans le Service
+
+```java
+@Service
+@RequiredArgsConstructor
+public class VinService {
+
+    private final VinRepository vinRepository;
+
+    public List<String> getAppellations(String filtre, Integer anneeMin) {
+        return vinRepository.findAppellationsDynamiques(filtre, anneeMin);
+    }
+}
+```
+
+## Au-delà du Repo Custom : Spring Data Specifications
+
+Pour les écrans de recherche complexes (nombreux filtres optionnels combinables) :
+
+- **Le principe :** Le Repository étend l'interface standard `JpaSpecificationExecutor<Vin>`.
+- **Le fonctionnement :** Découpe chaque filtre dans une fonction réutilisable (`Specification<T>`), puis les assemble dynamiquement à la volée avec `.and()` et `.or()`.
+- **Les atouts majeurs :**
+  - Standard officiel Spring Data basé sur la Criteria API standard de Jakarta.
+  - Gestion native et automatique de la pagination (`Pageable` + calcul du `COUNT`).
+- **Pourquoi pas Querydsl ?** Bibliothèque non maintenue sous Jakarta EE / Spring Boot 3+ ; `Specifications` est le standard intégré sans dépendance ni plugin externe.
+
+📖 *Pour aller plus loin :* [Documentation Spring Data Specifications](https://docs.spring.io/spring-data/jpa/reference/jpa/specifications.html)
+
+## L'approche historique : NamedParameterJdbcTemplate
+
+Avant fin 2023, l'alternative hors ORM imposait l'écriture d'un `RowMapper` :
+
+```java
+@Repository
+@RequiredArgsConstructor
+public class VinDaoClassic {
+
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+
+    public List<VinResponse> findVinsAbordables(String appellation, BigDecimal prixMax) {
+        String sql = """
+            SELECT id, chateau, appellation, annee, prix 
+            FROM formation.vin 
+            WHERE appellation = :appellation AND prix <= :prixMax
+        """;
+
+        Map<String, Object> params = Map.of(
+            "appellation", appellation,
+            "prixMax", prixMax
+        );
+```
+
+```java
+        // Mapping manuel ligne par ligne depuis le ResultSet JDBC
+        return jdbcTemplate.query(sql, params, (rs, rowNum) -> new VinResponse(
+            rs.getInt("id"),
+            rs.getString("chateau"),
+            rs.getString("appellation"),
+            rs.getInt("annee"),
+            rs.getBigDecimal("prix")
+        ));
+    }
+}
+```
+
+- **Avantage historique :** Paramètres nommés (`:appellation`) au lieu des index positionnels `?` du vieux `JdbcTemplate`.
+- **Inconvénient :** Code verbeux, extraction manuelle des colonnes et gestion des types JDBC.
+
+## L'alternative moderne : JdbcClient (Lecture)
+
+Sorti en **novembre 2023** avec **Spring 6.1**, `JdbcClient` unifie les templates historiques via une API fluide nativement compatible avec les **Records** :
+
+```java
+@Repository
+@RequiredArgsConstructor
+public class VinDaoModern {
+    private final JdbcClient jdbcClient;
+    public List<VinResponse> findVinsAbordables(String appellation, BigDecimal prixMax) {
+        return jdbcClient.sql("""
+                    SELECT id, chateau, appellation, annee, prix 
+                    FROM formation.vin 
+                    WHERE appellation = :appellation AND prix <= :prixMax
+                """)
+                .param("appellation", appellation)
+                .param("prixMax", prixMax)
+                .query(VinResponse.class) // Mapping automatique colonne -> Record
+                .list();
+    }
+}
+```
+
+- **Zéro `RowMapper` :** Instancie directement le Record par correspondance de noms.
+- ⚠️ **Limite sur le `fetchSize` :** L'API fluide n'a pas de méthode `.fetchSize()`. Sans impact pour `.list()`, mais critique pour le **streaming** où il faudra passer par les properties.
+
+## Écritures et opérations par lot avec JdbcClient
+
+`JdbcClient` gère les écritures unitaires (`UPDATE`, `INSERT`, `DELETE`) via **`.update()`** :
+
+```java
+// UPDATE unitaire : retourne le nombre de lignes modifiées
+public int updatePrix(Integer id, BigDecimal nouveauPrix) {
+    return jdbcClient.sql("UPDATE formation.vin SET prix = :prix WHERE id = :id")
+            .param("prix", nouveauPrix)
+            .param("id", id)
+            .update();
+}
+```
+
+### Écritures massives : la limite du batch
+
+- **Pas de batch dans `JdbcClient` :** L'API fluide ne propose pas d'équivalent à `batchUpdate`.
+- **Retour à `JdbcTemplate` :** Pour insérer ou mettre à jour des milliers de lignes en un seul aller-retour réseau, `JdbcTemplate.batchUpdate()` reste indispensable.
+- **SQL natif non portable :** La requête est directement soumise au moteur SGBD (PostgreSQL) sans couche d'abstraction dialectale.
+
+## Écritures massives : le batching avec NamedParameterJdbcTemplate
+
+Pour insérer ou mettre à jour des données en masse, `JdbcClient` est inadapté (pas de batch). On utilise **`NamedParameterJdbcTemplate.batchUpdate()`** :
+
+```java
+@Repository
+@RequiredArgsConstructor
+public class VinDaoModern {
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+
+    public void updatePrixEnMasse(List<VinResponse> vins) {
+        // Les noms des paramètres nommés (:prix, :id) DOIVENT correspondre aux champs du Record
+        String sql = "UPDATE formation.vin SET prix = :prix WHERE id = :id";
+        // Mapping automatique : vin.prix() -> :prix, vin.id() -> :id
+        SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(vins);
+        // Exécute l'ensemble de la liste en un seul lot JDBC (executeBatch)
+        jdbcTemplate.batchUpdate(sql, batch);
+    }
+}
+```
+
+- **Convention stricte :** Le mapping automatique repose sur l'égalité stricte entre le nom du champ Record (`prix`) et le paramètre SQL (`:prix`).
+- **Envoi groupé :** Toute la liste est transmise en un seul appel réseau (pas de découpage automatique par paquet ici, contrairement au batchSize de JdbcTemplate). S'il y a trop de lignes à insérer, il faut alors découper la liste manuellement en sous-lites (via List.subList) avant d'appeler batchUpdate.
+
+## L'overhead Hibernate : que gagne-t-on hors ORM ?
+
+| Dimension | Spring Data JPA / Hibernate | JdbcClient / JdbcTemplate |
+| :--- | :--- | :--- |
+| **Mémoire (RAM)** | Entités en session + snapshots de dirty-checking | Zéro rétention d'objet technique |
+| **CPU & GC** | Parsing JPQL, dirty-checking, forte pression GC | SQL brut direct, latence plancher |
+| **Écritures** | Batching complexe (bloqué par `IDENTITY`) | `batchUpdate` natif à plein débit |
+
+- 💡 **Le compromis :** Débit maximal et contrôle SQL vs automatisation de l'ORM (relations, dirty-checking, portabilité).
+
+## L'ancêtre Java : JDBC natif avec PreparedStatement
+
+La méthode historique manuelle (années 90/2000) avant Spring :
+
+```java
+@Repository
+@RequiredArgsConstructor
+public class VinDaoLegacyJdbc {
+    private final DataSource dataSource;
+
+    public List<String> findAllAppellationsJdbc() {
+        List<String> retour = new ArrayList<>();
+        String sql = "SELECT DISTINCT appellation FROM formation.vin";
+
+        // Try-with-resources pour fermer manuellement Connection, Statement et ResultSet
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                retour.add(rs.getString("appellation"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur d'accès JDBC", e);
+        }
+        return retour;
+    }
+}
+```
+
+## Arbre de décision : quelle approche choisir ?
+
+```txt
+Besoin d'accéder aux données ?
+ │
+ ├── 1. Filtres simples sur des attributs ?
+ │    └── ✅ Query Method (dérivée du nom)
+ │
+ ├── 2. Requête complexe, agrégation ou jointure spécifique ?
+ │    └── ✅ @Query (JPQL par défaut, SQL natif si spécifique SGBD)
+ │
+ ├── 3. Requête dynamique avec filtres conditionnels ?
+ │    ├── Filtres simples (2-3 critères) ──► ✅ Repo Custom + EntityManager
+ │    └── Formulaire riche + pagination  ──► ✅ Spring Data Specifications
+ │
+ └── 4. Volume massif, batch ou performance brute hors ORM ?
+      └── ✅ JdbcClient (ou JdbcTemplate)
+
+──────────────────────────────────────────────────────────────────
+💡 Les 2 réflexes d'optimisation JPA :
+ • Lecture seule / colonnes partielles : projeter vers un Record (VinResponse).
+ • Chargement de relations (@ManyToOne) : ajouter @EntityGraph (anti N+1).
+```

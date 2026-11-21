@@ -1,0 +1,201 @@
+---
+title: "Contrats d’API : DTO et validation"
+---
+
+## 1. Altérer la sérialisation directe : @JsonIgnore
+
+- L'annotation **@JsonIgnore** exclut un attribut de la sérialisation / désérialisation JSON (sur le champ ou le getter)
+- L'équivalent Jakarta XML / JAXB est **@XmlTransient** (à positionner sur le getter)
+
+```java
+// Alternative sur la classe : @JsonIgnoreProperties(value = {"id", "prix"})
+public class Vin {
+    private Integer id;
+    private String chateau;
+    private String appellation;
+    @JsonIgnore
+    private BigDecimal prix;
+
+    @XmlTransient
+    public BigDecimal getPrix() {
+        return prix;
+    }
+}
+```
+
+> **Limite :** Pollue le modèle de persistance et fige une seule vue possible pour tous les clients de l'API.
+
+## 2. Formaliser un contrat d'API : l'apport du pattern DTO
+
+*Objectif : découpler ce que l'API expose de ce que la base stocke.*
+
+Un **DTO** (*Data Transfer Object*) est un conteneur de données pur dédié au transport entre l'API REST et le client :
+
+- **Contrat entrant (*Request*)** : données acceptées en écriture (création / mise à jour)
+- **Contrat sortant (*Response*)** : données restituées en lecture
+
+### Pourquoi découpler le contrat d'API de l'entité JPA ?
+
+- **Sécurité (Mass Assignment)** : empêche un client d'écraser des champs internes (forcer un identifiant, modifier des droits ou des statuts internes).
+- **Stabilité de l'API** : le schéma de la base (colonnes, types) peut évoluer sans casser les clients existants.
+- **Fiabilité technique** : prévient les boucles de sérialisation Jackson sur les relations bidirectionnelles et élimine le risque de `LazyInitializationException`.
+
+## 3. Modéliser les contrats : les records Java
+
+En Java moderne, le **record** est le composant standard pour définir un DTO : immuable, concis, muni nativement d'un constructeur canonique, d'accesseurs et d'un support immédiat par Jackson.
+
+```java
+// Contrat entrant : aucun identifiant technique n'est accepté à la création
+public record CreateVinRequest(
+    String chateau,
+    String appellation,
+    BigDecimal prix
+) {}
+```
+
+```java
+// Contrat sortant : données garanties au client par l'API
+public record VinResponse(
+    Integer id,
+    String chateau,
+    String appellation,
+    BigDecimal prix
+) {}
+```
+
+## 4. Structurer les flux : conventions Request & Response
+
+Pour éviter le suffixe fourre-tout `...Dto`, la nomenclature explicite **le sens du flux et l'intention métier** :
+
+- **Flux entrants (Requêtes HTTP) :**
+  - Création : `CreateVinRequest`
+  - Mise à jour : `UpdateVinRequest`
+- **Flux sortants (Réponses HTTP) :**
+  - Vue détaillée / unitaire : `VinResponse` ou `VinDetailResponse`
+  - Vue de synthèse / liste : `VinSummaryResponse` ou `VinItemResponse`
+
+## 5. Valider le contrat entrant (1/3) : le contrôle manuel
+
+Que se passe-t-il si le client envoie un prix négatif, ou pas de prix du tout ?
+
+```java
+public VinResponse create(CreateVinRequest request) {
+    if (request.prix().compareTo(BigDecimal.ZERO) <= 0) {
+        throw new IllegalArgumentException("Le prix doit être positif");
+    }
+    // ... autres contrôles, un par un
+}
+```
+
+- Prix absent → `NullPointerException` → **erreur 500** au lieu d'un 400
+- On s'arrête à la **première** erreur : le client corrige, renvoie, découvre la suivante
+- Règle cachée dans le code, à recopier pour `Create` et `Update`
+- La requête a déjà traversé le contrôleur et ouvert la transaction avant d'être refusée
+
+## 5. Valider le contrat entrant (2/3) : Bean Validation
+
+Dépendance à ajouter : `spring-boot-starter-validation`
+
+**Les règles, sur le contrat :**
+
+```java
+public record CreateVinRequest(
+    @NotBlank @Size(max = 100) String chateau,
+    @NotBlank String appellation,
+    @NotNull @Positive BigDecimal prix
+) {}
+```
+
+**Le déclenchement, dans le contrôleur :**
+
+```java
+public ResponseEntity<VinResponse> create(@Valid @RequestBody CreateVinRequest request)
+```
+
+Requête invalide → **400 immédiat**, avant le service.
+
+> **Uniquement pour les req. HTTP** : un batch / listener qui appelle `VinService` ne passe pas par `@Valid`.
+
+## 5. Valider le contrat entrant (3/3) : bilan et pièges
+
+### Pourquoi c'est mieux que le contrôle dans le service
+
+- **Toutes** les erreurs remontées d'un coup (château vide *et* prix négatif)
+- **Rejet précoce** : ni transaction, ni appel au repository
+- Règle **lisible dans le contrat**, et reprise dans la doc OpenAPI par springdoc
+- Annotations standard (Jakarta Validation), messages personnalisables, contraintes sur mesure réutilisables
+
+### Pièges et limites
+
+- **`@Positive` accepte `null`** : toujours le coupler à `@NotNull`
+- **Sans le starter, `@Valid` est ignoré silencieusement** : aucune erreur, aucune validation
+- **Seulement en HTTP** : si le service est appelé ailleurs, il doit se protéger lui-même
+- **Hors HTTP** : `@Validated` sur la classe du service + `@Valid` sur le paramètre
+- **Vérifie la requête seule, pas la base** : `@Valid` détecte un prix négatif, pas un doublon. « Ce vin existe déjà » exige d'interroger la base : c'est le rôle du service (erreur métier → **409**)
+
+## 6. Passer du contrat au modèle interne : le Mapper
+
+Le Mapper gère la translation bidirectionnelle entre le contrat d'échange (record) et le modèle de persistance (entité).
+
+```java
+@Component
+public class VinMapper {
+    public Vin toEntity(CreateVinRequest request) {
+        Vin vin = new Vin();
+        vin.setChateau(request.chateau());
+        vin.setAppellation(request.appellation());
+        vin.setPrix(request.prix());
+        return vin;
+    }
+    public VinResponse toResponse(Vin v) {
+        return new VinResponse(v.getId(), v.getChateau(), v.getAppellation(), v.getPrix());
+    }
+}
+```
+
+> **Évolution :** **MapStruct** génère ces mappers à la compilation.
+
+## 6 bis. Évolution : MapStruct
+
+**MapStruct** génère le mapper **à la compilation** à partir d'une interface.
+
+- Attributs de **même nom** : associés automatiquement
+- Nom différent : on l'indique avec `@Mapping`
+- Attribut oublié : **warning** à la compilation (**erreur** avec `unmappedTargetPolicy = ERROR`)
+
+```java
+@Mapper(componentModel = "spring")
+public interface VinMapper {
+
+    @Mapping(target = "id", ignore = true)
+    Vin toEntity(CreateVinRequest request);
+
+    @Mapping(source = "chateau", target = "nomChateau")
+    VinResponse toResponse(Vin entity);
+}
+```
+
+> ⚠️ MapStruct demande un peu de configuration et peut entrer en **conflit avec Lombok** si les deux ne sont pas déclarés ensemble.
+
+## 7. Orchestrer les échanges dans la couche Service
+
+Le Service reçoit le contrat d'entrée, interagit avec la persistance, et renvoie le contrat de sortie. Le contrôleur ne manipule jamais d'entité JPA directe.
+
+```java
+@Service
+@RequiredArgsConstructor
+public class VinService {
+
+    private final VinRepository vinRepository;
+    private final VinMapper vinMapper;
+
+    public VinResponse create(CreateVinRequest request) {
+        // 1. Contrat entrant -> Entité
+        Vin entity = vinMapper.toEntity(request);
+        // 2. Persistance
+        Vin saved = vinRepository.save(entity);
+        // 3. Entité -> Contrat sortant
+        return vinMapper.toResponse(saved);
+    }
+}
+```

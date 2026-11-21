@@ -1,0 +1,35 @@
+---
+title: "Tests Cucumber : conf pour Gitlab"
+---
+
+## Réduire les logs dans le pipeline
+
+```bash
+variables:
+  MAVEN_TEST_OPTS: >-
+    -Dspring.datasource.driver-class-name=org.h2.Driver
+    -Dspring.datasource.url=jdbc:h2:mem:testdb
+    -Dlog.level=INFO
+
+job_tests_build:
+  script:
+    - mvn clean verify $MAVEN_TEST_OPTS
+```
+
+## Avoir le rapport sur Gtilab Pages
+
+```bash
+pages:
+  stage: deploy-reports
+  needs:
+    - job_tests_build
+  script:
+    - mkdir public
+    - mv ./target/rapport-cucumber.html public/rapport-cucumber.html
+  artifacts:
+    paths:
+      - public/
+  allow_failure: true
+  only:
+    - main
+```

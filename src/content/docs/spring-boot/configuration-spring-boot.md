@@ -1,0 +1,214 @@
+---
+title: "Configuration de Spring Boot"
+---
+
+## Les commandes Maven
+
+```bash
+# démarrage de l'application en local avec prise en compte des modifications sans redémarrer
+mvn spring-boot:run
+# possibilité de surcharger de properties
+mvn spring-boot:run -Dspring-boot.run.arguments="--formationapirest.environnement=Toto --monNom=Varlet"
+
+# génère le livrable le dossier /target
+mvn clean package # -DskipTests permet de ne pas exécuter les tests
+# exécution en local de l'application avec son Tomcat embarqué
+java -jar target/ROOT.jar
+# possibilité de surcharger des properties
+java -jar -DmonNom=Varlet -Dformationapirest.environnement=Toto target/ROOT.jar
+```
+
+## Construction et exécution des livrables (1)
+
+- par défaut, le plugin *Spring Boot Maven Plugin* utilisé pour construire le livrable permet de créer un JAR exécutable qui contient les classes compilées et toutes les bibliothèques nécessaires
+- ce JAR ne respecte pas l'organisation habituelle d'un JAR que l'on utilise en tant que bibliothèque dans un autre projet, l'utilisation de ces classes dans un autre projet ne fonctionnera pas, les classes ne seront pas trouvées par Maven à la compilation du projet utilisant cette bibliothèque
+- le problème est qu'au lieu que la hiérarchie des dossiers contenant le code source soit à la racine du JAR, elle est dans un dossier */BOOT-INF/classes*
+- ce JAR est généré en utilisant la configuration du plugin par défaut en lançant la commande `mvn clean install`. Il faut ensuite lancer la commande `java -jar NOM-JAR.jar` pour lancer l'exécutable
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+    </plugins>
+</build>
+```
+
+## Construction et exécution des livrables (2)
+
+- si on souhaite produire un JAR utilisable en tant que bibliothèque, il faut configurer le plugin pour qu'il produise le JAR en question (qui sera très léger car ne contenant que le code source sans les dépendances nécessaires à son exécution) à la place du JAR exécutable
+- il est en plus possible de produire le JAR exécutable qui sera suffixé **exec**
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <executions>
+                <execution>
+                <id>repackage</id>
+                <configuration>
+                    <classifier>exec</classifier>
+                </configuration>
+                </execution>
+            </executions>
+            </plugin>
+    </plugins>
+</build>
+```
+
+## Injection de properties
+
+possibilité d'injecter des properties dans des variables java
+
+```properties
+# dans les properties
+monNom=Gaetan
+```
+
+```java
+// dans le controller Test
+import org.springframework.beans.factory.annotation.Value;
+
+@Value("${monNom}")
+private String nom;
+
+@GetMapping("mon-nom")
+public String getNom() {
+    return nom;
+}
+```
+
+lancer l'application et accéder à l'URL `http://localhost:8080/mon-nom`
+
+## Activer la compression des réponses HTTP
+
+- méthode ne fonctionnant qu'avec un serveur embarqué
+
+```properties
+server.compression.enabled=true
+# autres properties sans besoin de les changer
+server.compression.mime-types=text/html, text/xml, text/plain, text/css, text/javascript, application/javascript, application/json
+server.compression.min-response-size=2048
+```
+
+## Activer une classe via property
+
+```java
+// activation d'une classe sur la bonne valeur d'une property
+@ConditionalOnProperty(name = "environnement", havingValue = "local", matchIfMissing = false)
+// matchIfMissing est optionnel
+
+// activation d'une classe si la property renseignée vaut true, avec une valeur par défaut à false si la property n'existe pas
+@ConditionalOnExpression("${ma-property:false}")
+```
+
+## Bonus : Bannière ASCII
+
+changer la bannière de démarrage de l'application :
+
+- créer un fichier **banner.txt** dans *src/main/resources*
+- [http://patorjk.com/software/taag/#p=display&f=Graceful&t=Youpi](http://patorjk.com/software/taag/#p=display&f=Graceful&t=Youpi) permet de générer un texte avec des polices fantaisistes
+
+## Configuration pour logguer les properties (1)
+
+**Etape 1 :** Création d'une classe de configuration
+
+```java
+@Slf4j
+public class PropertiesLogger implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
+    private static final Set<String> motsCaches =
+            Set.of("password", "pwd", "jeton", "token", "secret");
+    @Override
+    public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
+        Environment environment = event.getEnvironment();
+        log.info("============================================================================");
+        log.info("                            Valeurs des properties                          ");
+        log.info("============================================================================");
+        ((AbstractEnvironment) environment)
+                .getPropertySources().stream()
+                        .map(
+                                propertySource -> {
+                                    if (propertySource instanceof EnumerablePropertySource) {
+                                        return ((EnumerablePropertySource<?>) propertySource)
+                                                .getPropertyNames();
+                                    } else {
+                                        log.warn(
+                                                propertySource
+                                                        + " n'est pas EnumerablePropertySource :"
+                                                        + " impossible à lister");
+                                        return new String[] {};
+```
+
+## Configuration pour logguer les properties (2)
+
+```java
+                                    }
+                                })
+                        .flatMap(Arrays::stream)
+                        .distinct()
+                        .filter(Objects::nonNull)
+                        .forEach(
+                                key ->
+                                        log.info(
+                                                key
+                                                        + " = "
+                                                        + resoutValeurAvecMasquePwd(
+                                                                key, environment)));
+        log.info("==========================================================================");
+    }
+
+    private static Object resoutValeurAvecMasquePwd(String key, Environment environment) {
+        if (StringUtils.isNotBlank(environment.getProperty(key))
+                && motsCaches.stream()
+                        .map(String::toLowerCase)
+                        .anyMatch(key.toLowerCase()::contains)) {
+            return "******";
+        }
+        return Objects.requireNonNull(environment.getProperty(key));
+    }
+}
+```
+
+## Configuration pour logguer les properties (3)
+
+**Etape 2** : mise à jour de la méthode main pour utiliser cette classe
+
+```java
+public static void main(String[] args) {
+    SpringApplication sa = new SpringApplication(FormationApiRestApplication.class);
+    sa.addListeners(new PropertiesLogger());
+    sa.run(args);
+}
+```
+
+## Configuration de Spring Boot avec des profils (1)
+
+Spring Boot permet la gestion de différents environnements avec les profils :
+
+- création de profils dans le **pom.xml** (cf diapo suivante)
+- gestion des properties avec des fichiers **application.properties**, **application-local.properties**... (pas utilisé ici)
+- démarrer l'application avec un profil en ajoutant dans **Program arguments** la commande suivante
+
+```properties
+--spring.profiles.active=local # ou avec dev pour lancer l'application avec le profil dev
+```
+
+## Configuration de Spring Boot avec des profils (2)
+
+ajouter le profil local dans la balise `<project>` du pom.xml
+
+```xml
+<profiles>
+    <profile>
+        <id>local</id>
+        <properties>
+            <env>local</env>
+            <config.properties>local</config.properties>
+        </properties>
+    </profile>
+</profiles>
+```

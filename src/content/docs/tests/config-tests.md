@@ -1,0 +1,139 @@
+---
+title: "Configuration pour les tests"
+---
+
+## Les bibliothèques de test
+
+```xml
+<dependency>
+   <groupId>org.springframework.boot</groupId>
+   <artifactId>spring-boot-starter-webmvc-test</artifactId>
+   <scope>test</scope>
+</dependency>
+```
+
+- JUnit
+- Mockito
+- AssertJ
+- Hamcrest / Json-path
+- Spring Test
+
+## Maven Surefire
+
+- lacement des tests avec les classes finissant par `Test`
+- exécution dans la phase `test` de maven
+
+```xml
+<!-- permet de lancer les tests unitaires en UTF-8 -->
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+</plugin>
+```
+
+## Maven Failsafe
+
+- lacement des tests avec les classes finissant par `IT`
+- exécution dans la phase `verify` de maven
+
+```xml
+<!-- permet de lancer les tests d'intégration en UTF-8 -->
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-failsafe-plugin</artifactId>
+</plugin>
+```
+
+## JaCoCo (1)
+
+- **Java Code Coverage**, génère un rapport de couverture (`target/jacoco.exec`) interprétable par SonarQube
+- génère également un rapport lisible (`target/site/jacoco/index.html`)
+- possibilité de faire échouer le build de l'application en ajoutant un score minimum à atteindre
+- défaut : ne reflète pas nécessairement l'efficacité des tests mais uniquement le pourcentage de lignes de code traversées par nos tests
+
+## JaCoCo (2)
+
+Les métriques :
+
+- **Lines coverage** : pourcentage de lignes de code dans lesquels les tests sont passés
+- **Branches coverage** : pourcentage de branches (liés aux if/else, switch) dans lequel les tests sont passés
+- **Cyclomatic complexity** : complexité cyclomatique, nombre de chemins nécessaires pour couvrir tous les chemins possibles dans un code
+  - par exemple, s'il n'y a pas de if, la complexité sera de 1
+  - reflète en général le nombre de cas de test que nous devons mettre en oeuvre pour couvrir l'ensemble du code
+
+## Jacoco (3)
+
+```xml
+<!-- génère un rapport sur la couverture de tests -->
+<plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <version>0.8.14</version>
+    <executions>
+        <execution>
+            <id>default-prepare-agent</id>
+            <goals>
+                <goal>prepare-agent</goal>
+            </goals>
+        </execution>
+        <execution>
+            <id>default-report</id>
+            <phase>verify</phase>
+            <goals>
+                <goal>report</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+## PiTest - Mutation Testing (1)
+
+- 100% de couverture signifie que toutes les lignes ont été exécutées au moins une fois, mais ne dit rien sur la précision des tests, raison pour laquelle les tests de mutation sont importants
+
+> Si vous voulez savoir si vos tests sont bons, introduisez un bug et regardez si vos tests échouent
+
+Principes :
+
+- Des mutations (erreurs) sont introduites dans le code et les tests sont exécutés
+- Si les tests échouent, la mutation est tuée, si les tests réussissent, la mutation survit
+- la qualité des tests peut être évaluée à partir du pourentage de mutations tuées
+
+## PiTest (2)
+
+- génération d'un rapport (`target/pit-reports/index.html`) avec la commande `mvn clean test org.pitest:pitest-maven:mutationCoverage`
+
+```xml
+<!-- lancement des tests de mutation avec la commande
+	mvn clean test org.pitest:pitest-maven:mutationCoverage -->
+<plugin>
+    <groupId>org.pitest</groupId>
+    <artifactId>pitest-maven</artifactId>
+    <version>1.12.0</version>
+    <!-- need this to support JUnit 5 -->
+    <dependencies>
+        <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-junit5-plugin</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+    </dependencies>
+</plugin>
+```
+
+## PiTest (3)
+
+- plein de configurations possibles
+- possibilité d'attacher le lancement de `PiTest` à une phase maven pour ne plus lancer la commande
+
+```xml
+<executions>
+    <execution>
+        <id>pit-report</id>
+        <phase>test</phase>
+        <goals>
+            <goal>mutationCoverage</goal>
+        </goals>
+    </execution>
+</executions>
+```
