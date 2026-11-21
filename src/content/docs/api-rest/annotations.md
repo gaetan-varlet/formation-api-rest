@@ -2,53 +2,65 @@
 title: "Annotations Spring Web & formats"
 ---
 
-## @RequestMapping : les bases
+## `@RequestMapping` : les bases
 
-- **value** permet de spécifier le ou les chemin(s) de l'URL et **method** la ou les méthode(s) HTTP souhaitée pour cette méthode. Il n'y a pas de valeur par défaut
+- **`value`** (ou **`path`**) permet de spécifier le ou les chemin(s) de l'URL, et **`method`** la ou les méthode(s) HTTP autorisées. Si `method` n'est pas précisé, **toutes les méthodes HTTP** (`GET`, `POST`, `PUT`, `DELETE`…) sont acceptées.
 
 ```java
 @RequestMapping(value = "/vin", method = RequestMethod.GET)
 @RequestMapping(value = { "/vin", "/vins" }, method = { RequestMethod.PUT, RequestMethod.POST })
 ```
 
-- le mapping peut encore être réduit en spécifiant un ou plusieurs en-tête dans la requête avec **headers**
+- Le mapping peut encore être restreint en imposant un ou plusieurs en-têtes dans la requête avec **`headers`** :
 
 ```java
-@RequestMapping(value = "/vin", headers = "key=val", method = GET)
-@RequestMapping(value = "/vin", headers = { "key1=val1", "key2=val2" }, method = GET)
+@RequestMapping(value = "/vin", headers = "key=val", method = RequestMethod.GET)
+@RequestMapping(value = "/vin", headers = { "key1=val1", "key2=val2" }, method = RequestMethod.GET)
 ```
 
-- il existe des raccourcis pour chaque méthode HTTP
+- Il existe un raccourci dédié pour chaque méthode HTTP (à privilégier au quotidien) :
 
 ```java
-@RequestMapping (method = RequestMethod.GET) = @GetMapping
-@RequestMapping (method = RequestMethod.POST) = @PostMapping
-// etc
+@GetMapping("/vin")     // équivalent à @RequestMapping(value = "/vin", method = RequestMethod.GET)
+@PostMapping("/vin")    // équivalent à @RequestMapping(value = "/vin", method = RequestMethod.POST)
+@PutMapping("/vin")     // équivalent à @RequestMapping(value = "/vin", method = RequestMethod.PUT)
+@PatchMapping("/vin")   // équivalent à @RequestMapping(value = "/vin", method = RequestMethod.PATCH)
+@DeleteMapping("/vin")  // équivalent à @RequestMapping(value = "/vin", method = RequestMethod.DELETE)
 ```
 
-- il n'est pas possible de mapper la même URL avec la même méthode HTTP sur deux fonctions différentes, l'application **ne démarrera pas** : `Exception : to {GET /vin/csv}: There is already 'vinController' bean method`
+:::caution[Conflit de routes = échec au démarrage]
+Il est impossible de mapper la même URL avec la même méthode HTTP sur deux méthodes Java différentes. L'application **refusera de démarrer** avec une erreur de type :  
+`Ambiguous mapping. Cannot map 'vinController' method ... There is already 'vinController' bean method`
+:::
 
-## @RequestMapping : @Consumes et @Produces
+## Négociation de format : `consumes` et `produces`
 
-- une requête peut fournir des éléments dans son body à différents formats, à préciser dans l'en-tête **Content-Type**, par exemple XML ou JSON
-- la requête peut aussi spécifier quels formats elle accepte en retour via l'en tête **Accept**
-- l'annotation `@RequestMapping` contient des attributs **consumes** et **produces** permettant de spécifier ce que le service accepte et ce qu'il produit
-- si une restriction sur le *consumes* (en-tête **Content-Type**) n'est pas respectée, une erreur HTTP 415 est renvoyée (Unsupported Media Type)
-- si une restriction sur le *produces* (en-tête **Accept**) n'est pas respectée, une erreur HTTP 406 est renvoyée (Not Acceptable)
-- sans précision, il n'y a pas de restriction. Exemple de restriction :
+Une requête HTTP peut envoyer des données dans son corps (format précisé par l'en-tête **`Content-Type`**) et indiquer les formats qu'elle accepte en réponse (via l'en-tête **`Accept`**).
+
+Les annotations `@RequestMapping` / `@PostMapping` / `@GetMapping` disposent des attributs **`consumes`** et **`produces`** pour restreindre ces formats :
 
 ```java
-@RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = { "application/json", "application/xml" })
+@PostMapping(
+    consumes = "application/json",
+    produces = { "application/json", "application/xml" }
+)
 ```
+
+- Si le `Content-Type` envoyé ne respecte pas `consumes` → erreur HTTP **`415 Unsupported Media Type`**.
+- Si l'en-tête `Accept` demandé ne correspond pas à `produces` → erreur HTTP **`406 Not Acceptable`**.
+- Sans précision, aucune restriction de format n'est appliquée.
 
 ## Retourner un objet au format XML
 
-- il n'est pas possible de renvoyer une liste d'objets au format XML, il faut créer un objet contenant la liste d'objets à retourner
-- pour transformer l'objet Java en XML, il faut ajouter l'annotation `@XmlRootElement` sur la classe de l'objet à transformer, dans notre cas, la classe Vin
-- pour que le XML soit utilisable, il faut ajouter une dépendance depuis Java 9 :
+Par défaut, Spring Boot embarque Jackson uniquement pour le **JSON**. Pour exposer aussi du **XML** :
 
-```xml
-<!-- ajout de la dépendance pour JAXB suite au passage à Java 9+ qui ne l'inclut plus d'office -->
+- **Avec JAXB (approche standard Java/Jakarta) :**
+  - Annotez la classe de l'objet à sérialiser avec `@XmlRootElement` (par exemple sur `Vin`).
+  - Il n'est pas possible de renvoyer directement une `List<Vin>` en XML avec JAXB seul : il faut encapsuler la liste dans un objet conteneur annoté `@XmlRootElement`.
+  - Depuis Java 9+, JAXB n'est plus inclus dans le JDK ; il faut ajouter son implémentation dans `pom.xml` :
+
+```xml title="pom.xml"
+<!-- Dépendance JAXB (retirée du JDK depuis Java 9+) -->
 <dependency>
     <groupId>org.glassfish.jaxb</groupId>
     <artifactId>jaxb-runtime</artifactId>
@@ -56,51 +68,60 @@ title: "Annotations Spring Web & formats"
 </dependency>
 ```
 
-## Les options des paramètres de requêtes (1)
+:::tip[Alternative Spring Boot : `jackson-dataformat-xml`]
+En ajoutant la dépendance `com.fasterxml.jackson.dataformat:jackson-dataformat-xml`, Jackson sérialise automatiquement vos DTOs/Records **et vos listes** en XML sans avoir besoin d'ajouter `@XmlRootElement`.
+:::
 
-- par défaut le paramètre à le même nom que la variable Java. Si on veut préciser un nom différent pour le paramètre de requête, il faut le préciser dans l'attribut **value**
+## Paramètres de requête (`@RequestParam`)
+
+### Nom, caractère obligatoire et valeur par défaut
+
+- Par défaut, le paramètre HTTP porte le même nom que la variable Java. Pour utiliser un nom différent dans l'URL, précisez **`value`** (ou `name`) :
 
 ```java
 @RequestParam(value = "id") String vinId // l'attribut name fonctionne également
-@RequestParam("id") String vinId // lorsqu'il n'y a que le paramètre value, il n'est pas nécessaire de le préciser
+@RequestParam("id") String vinId         // raccourci quand seul value est précisé
 ```
 
-- par défaut, un paramètre de requête est requis, s'il est absent, une erreur 400 (Bad Request) est renvoyée. Pour le rendre optionnel, il faut utiliser l'attribut **required=false**. Quand le paramètre n'est pas spécifié il vaut alors `null`
+- Par défaut, un `@RequestParam` est **obligatoire** : s'il est absent, Spring renvoie une erreur **`400 Bad Request`**.
+- Pour le rendre optionnel, utilisez **`required = false`** (il vaudra `null` s'il n'est pas fourni) :
 
 ```java
 @RequestParam(required = false) String id
 ```
 
-- il est possible de renseigner une valeur par défaut au paramètre avec l'attribut **defaultValue**. Dans ce cas, le paramètre de requête n'est plus considéré comme obligatoire
+- Vous pouvez aussi définir une **`defaultValue`** (ce qui rend automatiquement le paramètre optionnel) :
 
 ```java
 @RequestParam(defaultValue = "test") String id
 ```
 
-## Les options des paramètres de requêtes (2)
+### Paramètres multiples et différence avec `@PathVariable`
 
-- il est possible de récupérer tous les paramètres dans une map
+- Récupérer tous les paramètres de requête dans une `Map` :
 
 ```java
-@RequestParam Map<String,String> allParams
+@RequestParam Map<String, String> allParams
 ```
 
-- si un paramètre à plusieurs valeurs, il est possible de les récupérer dans une liste
+- Récupérer un paramètre passé plusieurs fois dans une `List` :
 
 ```java
 @RequestParam List<String> id
 ```
 
-```bash
-http://localhost:8080/foo?id=1&id=2
-http://localhost:8080/foo?id=1,2,3 # autre possibilité en Spring MVC
+```http
+GET http://localhost:8080/foo?id=1&id=2
+GET http://localhost:8080/foo?id=1,2,3
 ```
 
-- les paramètres de requêtes sont décodés alors que pour les variables de chemin, la valeur est extraite de l'URL. Il peut y avoir des différences
+- Les paramètres de requête (`@RequestParam`) sont décodés selon les règles des formulaires URL (où `+` devient un espace), contrairement aux variables de chemin (`@PathVariable`) où `+` est conservé tel quel :
 
-```bash
-http://localhost:8080/foos/ab+c # id=ab+c
-http://localhost:8080/foos?id=ab+c # id=ab c
+```http
+GET http://localhost:8080/foos?id=ab+c  # @RequestParam -> "ab c"
+GET http://localhost:8080/foos/ab+c     # @PathVariable -> "ab+c"
 ```
 
-- les variables de chemin peuvent être rendus optionnels mais cela est déconseillé car cela peut entraîner des conflits de chemin
+:::note[Variables de chemin optionnelles]
+Il est techniquement possible de rendre une `@PathVariable` optionnelle (`required = false`), mais c'est déconseillé car cela provoque facilement des ambiguïtés et conflits entre routes.
+:::
