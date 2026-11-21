@@ -1,0 +1,179 @@
+---
+title: "Documenter son API avec Swagger"
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+## Rappel : activation avec `springdoc-openapi`
+
+La mise en place initiale (dépendance `springdoc-openapi-starter-webmvc-ui`, URLs de la spécification OpenAPI et de Swagger UI) est détaillée dans la page [Hello World — Mise en place de Swagger (OpenAPI)](/formation-api-rest/spring-boot/hello-world/#mise-en-place-de-swagger-openapi).
+
+## Personnaliser les métadonnées et injecter la version Maven
+
+Pour afficher automatiquement le numéro de version du `pom.xml` dans votre documentation Swagger, exposez la propriété Maven dans `application.properties` :
+
+```properties title="application.properties"
+info.versionApplication=@project.version@
+```
+
+:::note[Filtrage Maven avec `spring-boot-starter-parent`]
+Avec `spring-boot-starter-parent`, le filtrage des ressources Maven est **déjà activé par défaut** sur `application*.properties` et `application*.yml` avec le délimiteur `@...@` (pour ne pas entrer en conflit avec les placeholders Spring `${...}`).
+
+Il est donc **inutile** d'ajouter un bloc `<resources><filtering>true</filtering></resources>` dans votre `pom.xml` — cela ne sert que hors `spring-boot-starter-parent` et risque de corrompre d'éventuels fichiers binaires dans `src/main/resources`.
+:::
+
+Créez ensuite une classe `OpenApiConfiguration` dans le package `config` pour personnaliser le titre, la description et la version de l'API :
+
+```java title="OpenApiConfiguration.java"
+package fr.insee.formationapirest.config;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class OpenApiConfiguration {
+
+    @Value("${info.versionApplication}")
+    private String version;
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI().info(new Info()
+            .title("Swagger Formation API REST")
+            .description("API de gestion d'une cave à vins")
+            .version(version));
+    }
+}
+```
+
+## Documenter les contrôleurs et endpoints
+
+`springdoc-openapi` génère déjà la structure des routes, des paramètres et des DTOs par introspection. Pour rendre la documentation métier plus lisible, enrichissez vos contrôleurs avec les annotations `io.swagger.v3.oas.annotations` :
+
+- **`@Tag`** sur la classe du contrôleur : regroupe les endpoints sous un nom et une description communs.
+- **`@Operation`** sur une méthode :
+  - `summary` : texte court affiché directement sur la ligne de l'endpoint dans Swagger UI ;
+  - `description` : explication plus détaillée, visible uniquement en ouvrant (dépliant) l'endpoint.
+
+```java title="VinController.java"
+@RestController
+@RequestMapping("/vin")
+@Tag(name = "Vin", description = "Opérations de consultation et de gestion des vins")
+@RequiredArgsConstructor
+public class VinController {
+
+    private final VinService vinService;
+
+    @Operation(
+        summary = "Lister les vins",
+        description = "Retourne tous les vins, ou uniquement ceux de l'appellation demandée si le paramètre est renseigné."
+    )
+    @GetMapping
+    public List<VinResponse> getAll(@RequestParam(required = false) String appellation) {
+        return vinService.findAll(appellation);
+    }
+}
+```
+
+:::tip[Autres annotations utiles]
+D'autres annotations OpenAPI permettent d'affiner la documentation au besoin (`@ApiResponse` pour détailler les codes retour HTTP, `@Parameter` pour décrire un paramètre, `@Schema` pour enrichir un champ de DTO…).
+
+Notez également que `springdoc-openapi` exploite déjà automatiquement vos annotations Bean Validation (`@NotBlank`, `@Positive`, `@Size`…) sur les DTOs ainsi que `@ParameterObject` pour les objets `Pageable`.
+:::
+
+## Intégrer l'authentification Keycloak (OAuth2)
+
+Lorsque votre API sera protégée par Keycloak (voir le module [Sécuriser son API avec Spring Security et Keycloak](/formation-api-rest/securite/spring-security-keycloak/)), vous pourrez activer le bouton **Authorize** dans Swagger UI pour obtenir un jeton JWT directement depuis l'interface.
+
+<Steps>
+
+1. **Configurer les propriétés Swagger UI et reverse proxy**
+
+   ```properties title="application.properties"
+   # Client OAuth2 public utilisé par l'interface Swagger UI
+   springdoc.swagger-ui.oauth.clientId=localhost-frontend-minimal
+   # Scopes cochés par défaut lors de la connexion
+   springdoc.swagger-ui.oauth.scopes=role-as-group profile
+   # Recommandé pour le flux Authorization Code depuis un navigateur (PKCE)
+   springdoc.swagger-ui.oauth.use-pkce-with-authorization-code-grant=true
+
+   # Prise en compte des en-têtes X-Forwarded-* derrière un reverse proxy (permet d'exposer le serveur en HTTPS dans Swagger)
+   server.forward-headers-strategy=NATIVE
+   ```
+
+2. **Déclarer le schéma OAuth2 dans `OpenApiConfiguration`**
+
+   Remplacez le contenu de `OpenApiConfiguration.java` par la configuration complète ci-dessous afin de déclarer le schéma de sécurité Keycloak et de l'appliquer aux opérations exposées dans Swagger UI :
+
+   ```java title="OpenApiConfiguration.java"
+   package fr.insee.formationapirest.config;
+
+   import io.swagger.v3.oas.models.Components;
+   import io.swagger.v3.oas.models.OpenAPI;
+   import io.swagger.v3.oas.models.info.Info;
+   import io.swagger.v3.oas.models.security.OAuthFlow;
+   import io.swagger.v3.oas.models.security.OAuthFlows;
+   import io.swagger.v3.oas.models.security.Scopes;
+   import io.swagger.v3.oas.models.security.SecurityRequirement;
+   import io.swagger.v3.oas.models.security.SecurityScheme;
+   import org.springdoc.core.customizers.OperationCustomizer;
+   import org.springframework.beans.factory.annotation.Value;
+   import org.springframework.context.annotation.Bean;
+   import org.springframework.context.annotation.Configuration;
+
+   @Configuration
+   public class OpenApiConfiguration {
+
+       private static final String SCHEME_KEYCLOAK = "oAuthScheme";
+       private static final String REALMS = "/realms/";
+
+       @Value("${keycloak.auth-server-url:}")
+       private String keycloakUrl;
+
+       @Value("${keycloak.realm:}")
+       private String realmName;
+
+       @Value("${info.versionApplication}")
+       private String version;
+
+       @Bean
+       public OpenAPI customOpenAPIKeycloak() {
+           Scopes scopes = new Scopes();
+           scopes.put("role-as-group", "obtenir les rôles");
+           scopes.put("profile", "obtenir le nom, prénom, preferred username...");
+
+           String openIdConnectBaseUrl = keycloakUrl + REALMS + realmName + "/protocol/openid-connect";
+
+           return new OpenAPI()
+               .info(new Info()
+                   .title("Swagger Formation API REST")
+                   .description("API de gestion d'une cave à vins")
+                   .version(version))
+               .components(new Components().addSecuritySchemes(SCHEME_KEYCLOAK, new SecurityScheme()
+                   .type(SecurityScheme.Type.OAUTH2)
+                   .in(SecurityScheme.In.HEADER)
+                   .description("Authentification Keycloak")
+                   .flows(new OAuthFlows().authorizationCode(new OAuthFlow()
+                       .scopes(scopes)
+                       .authorizationUrl(openIdConnectBaseUrl + "/auth")
+                       .tokenUrl(openIdConnectBaseUrl + "/token")
+                       .refreshUrl(openIdConnectBaseUrl + "/token")))));
+       }
+
+       @Bean
+       public OperationCustomizer ajouterKeycloak() {
+           // Associe le schéma de sécurité à chaque endpoint pour envoyer le jeton dans Authorization: Bearer ...
+           return (operation, handlerMethod) -> operation
+               .addSecurityItem(new SecurityRequirement().addList(SCHEME_KEYCLOAK));
+       }
+   }
+   ```
+
+</Steps>
+
+:::caution[Ne bloquez pas Swagger UI avec Spring Security]
+Lorsque vous ajouterez Spring Security, pensez à laisser accessibles sans authentification les URLs `/swagger-ui.html`, `/swagger-ui/**` et `/v3/api-docs/**` (comme détaillé dans le module *Sécurité*), sans quoi il ne sera plus possible de charger la page Swagger pour s'authentifier.
+:::
