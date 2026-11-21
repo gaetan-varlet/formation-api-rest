@@ -6,7 +6,7 @@ title: "Le protocole HTTP"
 
 HTTP (Hypertext Transfer Protocol) est un protocole de communication client-serveur développé pour le World Wide Web. Il est utilisé pour échanger toute sorte de données entre client HTTP et serveur HTTP.
 
-Il s'agit d'un protocole **sans état**, ce qui signifie que le serveur ne conserve aucune donnée entre deux requêtes
+Il s'agit d'un protocole **sans état**, ce qui signifie que le serveur ne conserve aucune donnée entre deux requêtes.
 
 ![Schéma illustrant les échanges entre le client et le serveur](../../../assets/images/client-serveur.svg "Schéma illustrant les échanges entre le client et le serveur")
 
@@ -29,23 +29,22 @@ HTTP définit un [ensemble de méthodes](https://developer.mozilla.org/fr/docs/W
 ## La requête HTTP
 
 ```http
-Méthode, URL, Version du protocole
+Méthode URL Version-du-protocole
 En-têtes de requête
 
 Corps de requête
 ```
 
-- Méthode : précise le type de requête (HEAD, GET, POST...)
-- URL : adresse de la page sur le serveur
-- Version du protocole HTTP
-- il y a plusieurs en-tête sous la forme `clé: valeur`
-  - [liste des headers](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers)
-  - **Host** spéficie le nom de domaine du site
-  - **Cookie** permet d'envoyer au serveur les cookies qui ont été enregistrés sur l'ordinateur du client à la demande du serveur. Les cookies sont des fichiers textes contenant des informations sur la navigation effectuée sur les pages du site.
+- **Méthode** : précise le type de requête (`HEAD`, `GET`, `POST`…)
+- **URL** : adresse de la ressource sur le serveur
+- **Version du protocole HTTP** (ex. `HTTP/1.1`, `HTTP/2`)
+- **En-têtes** sous la forme `clé: valeur` ([liste des headers sur MDN](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers)) :
+  - **Host** spécifie le nom de domaine du site
+  - **Cookie** permet d'envoyer au serveur les cookies enregistrés sur le poste du client à la demande du serveur
   - **Content-Type** spécifie le type MIME du corps de la requête
   - **Content-Length** spécifie la longueur du corps de la requête
-  - **Accept** spécifie le type de contenu accepté par le client (par exemple text/html)
-- le corps de la requête peut contenir le contenu d'un formulaire HTML passé en POST sous la forme `variable1=valeur1&variable2=valeur2`
+  - **Accept** spécifie le type de contenu accepté par le client (par exemple `text/html` ou `application/json`)
+- **Corps de la requête** : optionnel, peut par exemple contenir les données d'un formulaire HTML passé en `POST` sous la forme `variable1=valeur1&variable2=valeur2` ou un document JSON
 
 ### Exemple de requête HTTP
 
@@ -53,54 +52,62 @@ Corps de requête
 GET / HTTP/1.1
 Host: developer.mozilla.org
 Accept-Language: fr
+```
 
+```http
 POST / HTTP/1.1
 Host: foo.com
-Content−Type: application/x−www−form−urlencoded
-Content−Length: 13
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 13
+
 say=Hi&to=Mom
 ```
 
-Dans une requête POST, il faut spécifier le type de données. Pour un formulaire HTML, il y a 2 valeurs possibles :
+Dans une requête `POST`, il faut spécifier le type de données. Pour un formulaire HTML, il y a 2 valeurs possibles :
 
-- application/x-www-form-urlencoded (valeur par défaut)
-- multipart/form-data (utilisé pour l'upload de fichiers)
+- `application/x-www-form-urlencoded` (valeur par défaut)
+- `multipart/form-data` (utilisé pour l'envoi de fichiers)
 
-Il faut également spécifier la longueur du corps.
+Il faut également spécifier la longueur du corps (`Content-Length`).
 
-### Structure d'une requête HTTP
+### Structure d'une URL d'API HTTP
 
 ```http
 https://mon-api/{variable-de-chemin}?parametre-de-requete-1=valeur&parametre-de-requete-2=valeur
 ```
 
-- **variables de chemin** : souvent utilisé pour les variables obligatoires
-- **paramètres de requête** :
-  - `?` à la fin de l'URL suivi de `clé=valeur`, puis `&` pour séparer les autres paramètres de requête
-  - souvent utilisé pour les variables non obligatoires notamment pour du filtrage
+- **Variables de chemin** : souvent utilisées pour les identifiants obligatoires.
+- **Paramètres de requête** :
+  - `?` à la fin de l'URL suivi de `clé=valeur`, puis `&` pour séparer les autres paramètres ;
+  - souvent utilisés pour les options non obligatoires, notamment le filtrage ou la pagination.
 
-Par exemple :
+:::tip[Exemple concret : API Sirene (Insee)]
+```http
+# Sans paramètre : retourne l'historique complet du SIREN
+GET https://api.insee.fr/entreprises/sirene/V3/siren/{siren}
 
-- **`https://api.insee.fr/entreprises/sirene/V3/siren/{siren}`** retourne les informations sur le siren avec recherche de la totalité des périodes historiques
-- **`https://api.insee.fr/entreprises/sirene/V3/siren/{siren}?date={date}`** même chose avec le paramètre date qui renvoie uniquement la période comprenant cette date
+# Avec paramètre de requête : filtre uniquement la période à cette date
+GET https://api.insee.fr/entreprises/sirene/V3/siren/{siren}?date={date}
+```
+:::
 
 ## La réponse HTTP
 
 ```http
-Version, Code-réponse, Texte-réponse
-En-tête de réponse
+Version Code-réponse Texte-réponse
+En-têtes de réponse
 
 Corps de réponse
 ```
 
-- Version HTTP du serveur
-- Code-réponse : le code retournée, par exemple 200, 404, 500
-- Texte-réponse : le texte associé par exemple “OK”, “NOT FOUND”, “INTERNAL ERROR”
-- les en-têtes :
+- **Version HTTP** du serveur
+- **Code-réponse** : le code retourné, par exemple `200`, `404`, `500`
+- **Texte-réponse** : le libellé associé, par exemple `OK`, `Not Found`, `Internal Server Error`
+- **En-têtes** :
   - **Date** : date de génération de la réponse
-  - **Server** : spécifie le modèle du serveur HTTP
+  - **Server** : spécifie le serveur HTTP utilisé
   - **Set-Cookie** : demande au navigateur d'enregistrer un cookie
-- le corps de la réponse contient le contenu du fichier, par exemple HTML
+- **Corps de la réponse** : contient les données renvoyées (HTML, JSON, fichier…)
 
 ### Exemple de réponse HTTP
 
@@ -114,7 +121,7 @@ Accept-Ranges: bytes
 Content-Length: 29769
 Content-Type: text/html
 
-<!DOCTYPE html... (suivi des 29769 octets de la page web demandée)
+<!DOCTYPE html>... (suivi des 29769 octets de la page web demandée)
 ```
 
 ### Les codes de statut de réponse HTTP
@@ -133,7 +140,7 @@ Voir la [documentation Mozilla des statuts HTTP](https://developer.mozilla.org/f
 
 - L'en-tête HTTP **`Content-Type`** :
   - indique au client le format de ce qu'il reçoit : `text/html` (HTML), `text/plain` (texte brut), `application/pdf` (PDF), `application/json` (JSON), `application/xml` (XML). On parle de **type MIME** ([liste des types MIME](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types)) ;
-  - précise aussi le jeu de caractères (**charset**) que le navigateur doit utiliser (par défaut *ISO-8859-1* / *Latin-1*).
+  - précise aussi le jeu de caractères (**charset**) que le navigateur doit utiliser pour afficher le contenu (historiquement *ISO-8859-1* / *Latin-1* en HTML ; en JSON, UTF-8 est toujours la norme).
 
 :::tip[Bonne pratique : UTF-8 partout]
 Utilisez systématiquement **UTF-8** pour l'encodage de vos fichiers sources et pour l'en-tête `Content-Type` des réponses HTTP.

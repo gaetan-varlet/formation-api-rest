@@ -301,8 +301,8 @@ List<CompletableFuture<HttpResponse<String>>> cfResponses = urls.stream()
     ).collect(Collectors.toList());
 System.out.println(LocalDateTime.now()); // 16:03:28.137822
 // on attend d'avoir toutes les réponses
-CompletableFuture<Void> conbinedCF = CompletableFuture.allOf(cfResponses.toArray(new CompletableFuture[cfResponses.size()]));
-conbinedCF.join();
+CompletableFuture<Void> combinedCF = CompletableFuture.allOf(cfResponses.toArray(new CompletableFuture[0]));
+combinedCF.join();
 System.out.println(LocalDateTime.now()); // 16:03:28.319822
 for (CompletableFuture<HttpResponse<String>> completableFuture : cfResponses) {
     System.out.println(completableFuture.join().body());
