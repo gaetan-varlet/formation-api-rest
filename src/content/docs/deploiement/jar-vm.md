@@ -1,5 +1,5 @@
 ---
-title: "Déploiement d'un JAR sur une VM du SNSSI (Deprecated)"
+title: "Déploiement JAR sur VM (Obsolète)"
 ---
 
 ## Mise à jour du POM pour le build

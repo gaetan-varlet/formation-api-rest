@@ -1,5 +1,5 @@
 ---
-title: "Déploiement d'un WAR sur une VM du SNSSI (Deprecated)"
+title: "Déploiement WAR sur VM (Obsolète)"
 ---
 
 ## Création d'un WAR pour les plateformes dev/qf au SNSSI

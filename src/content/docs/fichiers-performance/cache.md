@@ -1,5 +1,5 @@
 ---
-title: "Mettre en place du cache applicatif avec Spring Boot Cache"
+title: "Cache applicatif (Spring Cache)"
 ---
 
 ## Gestion du cache applicatif

@@ -1,5 +1,5 @@
 ---
-title: "Mise en place de filtres"
+title: "Filtres, CORS et intercepteurs"
 ---
 
 ## La notion de filtre

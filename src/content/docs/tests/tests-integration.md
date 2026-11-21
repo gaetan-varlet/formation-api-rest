@@ -1,5 +1,5 @@
 ---
-title: "Les tests fonctionnels / d'intégration avec Spring"
+title: "Tests d'intégration avec Spring"
 ---
 
 ## Principes

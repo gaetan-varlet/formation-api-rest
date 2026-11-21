@@ -1,5 +1,5 @@
 ---
-title: "Les tests avec Cucumber"
+title: "Introduction à Cucumber"
 ---
 
 ## Principes

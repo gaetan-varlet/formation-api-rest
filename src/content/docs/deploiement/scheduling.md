@@ -1,5 +1,5 @@
 ---
-title: "Mettre en place des tâches planifiées avec Spring Scheduling"
+title: "Tâches planifiées (Scheduling)"
 ---
 
 ## Gestion des tâches planifiées

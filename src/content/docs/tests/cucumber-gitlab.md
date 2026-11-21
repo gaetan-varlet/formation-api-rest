@@ -1,5 +1,5 @@
 ---
-title: "Tests Cucumber : conf pour Gitlab"
+title: "Intégration Cucumber dans GitLab CI"
 ---
 
 ## Réduire les logs dans le pipeline

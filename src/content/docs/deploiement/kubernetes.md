@@ -1,5 +1,5 @@
 ---
-title: "Déploiement d'un JAR sur Kubernetes"
+title: "Déploiement sur Kubernetes"
 ---
 
 ## Création d'un Dockerfile

@@ -1,5 +1,5 @@
 ---
-title: "Zoom sur les principales annotations"
+title: "Annotations Spring Web & formats"
 ---
 
 ## @RequestMapping : les bases
