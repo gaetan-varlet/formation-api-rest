@@ -2,80 +2,101 @@
 title: "Stratégies de tests sur un backend Spring Boot"
 ---
 
-Du test unitaire au test d'intégration boîte noire en développement moderne et assisté par IA
+## 1. Typologie des tests
 
-## 1. Typologie des tests — Unitaire & Intégration
+Avant de définir une stratégie de tests, il est indispensable de distinguer les quatre niveaux de tests selon leur périmètre d'isolation.
 
-**Test unitaire** *(en mémoire, sans Spring ni I/O, exécution en ms)*
-- **Isolé** : dépendances internes remplacées par des *mocks* ou *stubs*.
-- **Élargi** : collaboration avec de vrais objets métier en mémoire (objets-valeurs, validateurs).
+### Test unitaire
 
-**Test d'intégration** *(contexte Spring, sécurité, JSON et SQL réels)*
-- **De tranche (*Slice Test*)** : une couche technique isolée (`@WebMvcTest`, `@DataJpaTest`).
-- **Complet (*Composant*)** : application entière interrogée par HTTP + base de données de test (**la référence sur une API**).
+Vérifie le comportement d'une unité de logique métier (une méthode ou une classe) **en mémoire, sans framework ni entrées/sorties** (pas de base de données, pas de réseau, pas de système de fichiers).
 
-## 1. Typologie des tests — Contrat & Bout en bout
+- **Test unitaire isolé :** Toutes les dépendances internes de la classe testée sont remplacées par des doublures (*mocks* ou *stubs*).
+- **Test unitaire élargi :** La classe testée collabore avec de vrais objets métier en mémoire (objets-valeurs, validateurs purs), toujours sans I/O ni contexte Spring.
 
-**Test de contrat** *(Pact, Spring Cloud Contract)*
-- Vérifie la compatibilité du **format d'échange** (schéma JSON, types, codes HTTP) entre un **Consommateur** (front) et un **Fournisseur** (API), sans les déployer ensemble.
+> **Exemple :** Tester une règle de calcul sur des cas limites via un test paramétré (exécution en quelques millisecondes).
 
-**Test de bout en bout (*End-to-End* / *E2E*)** *(ex. Playwright)*
-- Vérifie un parcours utilisateur complet sur un **environnement déployé** réunissant tous les composants réels (navigateur, front, back, BDD, serveur OIDC).
+### Test d'intégration
 
-## 2. Stratégie historique : la Pyramide des tests (2009)
+Vérifie le fonctionnement de l'application avec son infrastructure technique réelle (contexte Spring, sécurité, sérialisation JSON, requêtes SQL/JPA). Seuls les systèmes externes hors du périmètre du service (APIs tierces, serveur mail, horloge système) sont simulés aux frontières. Ce niveau regroupe deux périmètres :
 
-Conçue quand le démarrage d'un serveur prenait plusieurs minutes : **~80 % Unitaires isolés / 15 % Intégration / 5 % E2E**.
+- **Test d'intégration de tranche (*Slice Test*) :** Charge uniquement une couche technique Spring (`@WebMvcTest` pour la couche web, `@DataJpaTest` pour la persistance JPA).
+- **Test d'intégration complet (ou *Test de composant*) :** Démarre l'application complète et l'interroge par son point d'entrée externe (requête HTTP), connectée à une base de données de test. C'est la forme de référence dans les architectures orientées API/microservices.
 
-**Limites sur une API Spring Boot orientée données :**
-- **Faux sentiment de sécurité** : les mocks masquent les requêtes SQL/JPQL invalides, erreurs de mapping JPA, oublis de `@Transactional`, bugs de sérialisation JSON ou failles `@RolesAllowed`.
-- **Couplage fort à l'implémentation** : renommer ou découper un `@Service` oblige à réécrire les mocks.
+> **Exemple :** Envoyer une requête `POST /api/exclusions` avec un corps JSON et un rôle utilisateur, puis vérifier le statut HTTP `201`, la structure du JSON retourné et l'enregistrement en base de données.
 
-## 2. Stratégies modernes : *Honeycomb* & *Trophy*
+### Test de contrat
 
-Grâce à la mise en cache du contexte Spring, l'effort se concentre sur le **test d'intégration complet en boîte noire** :
+Vérifie uniquement la compatibilité du **format d'échange** (schéma JSON, noms et types des champs, codes HTTP) entre un **Consommateur** (client) et un **Fournisseur** (API), sans déployer les deux applications simultanément (outils : *Pact*, *Spring Cloud Contract*).
 
-1. **Majorité de tests d'intégration par HTTP** : l'application démarre une seule fois. Chaque scénario valide sécurité, validation, métier, SQL et JSON en une passe. Mocks limités aux **frontières externes**.
-2. **Base ciblée de tests unitaires purs** : réservée aux algorithmes complexes sans Spring ni BDD.
-3. **Sommet minimal (E2E / Contrat)** : parcours critiques déployés et interfaces entre équipes.
+> **Exemple :** Le front-end (consommateur) génère un fichier contrat stipulant qu'il lit les champs `hostname` (string) et `critique` (boolean) sur `GET /api/serveurs`. Ce contrat est rejoué automatiquement dans la CI du back-end (fournisseur) pour garantir qu'aucun renommage de champ ne cassera le front-end.
 
-## 2. Pyramide vs *Honeycomb* / *Trophy*
+### Test de bout en bout (*End-to-End* / *E2E*)
 
-- **Volume principal** : Unitaires isolés (~80 %) ➔ **Intégration complète par HTTP**
-- **Usage des mocks** : Massif (`@Service`, `@Repository`) ➔ **Strictement aux frontières externes**
-- **Point d'entrée testé** : Méthodes Java internes ➔ **Contrat externe (requêtes HTTP / JSON)**
-- **Garanties** : Logique d'une classe isolée ➔ **Chaîne complète (sécurité, MVC, SQL, JSON)**
-- **Résistance au refactoring** : Faible ➔ **Élevée** (tant que le contrat HTTP reste stable)
+Vérifie un parcours utilisateur complet sur un environnement déployé réunissant tous les composants réels (navigateur, front-end, API back-end, base de données, fournisseur d'identité, services partenaires).
 
-## 3. Règles d'arbitrage : quand écrire quel test ?
+> **Exemple :** Piloter un navigateur via Playwright pour s'authentifier sur un serveur OIDC, saisir un formulaire dans l'interface web et vérifier la mise à jour des données affichées.
 
-- **Intégration HTTP par défaut** : cas d'usage métier, sécurité (`401`/`403`), validation (`400`), JSON, persistance BDD.
-- **Règles de calcul — Tout en intégration** *(test paramétré / `Scenario Outline`)* :
-  - Si contexte partagé rapide, données légères et **moins de 15–20 cas**.
-- **Règles de calcul — 1 Intégration + N Unitaires purs** :
-  - Si combinatoire élevée (parseurs, regex, matrices de dates) ou setup BDD lourd.
-- **Anti-pattern** : appeler directement les méthodes Java d'un `@RestController` (contourne sécurité, `@Valid` et Jackson).
+---
 
-## 3. Outillage et client HTTP (Spring Boot 4.0+)
+## 2. Stratégie historique vs Stratégies modernes
 
-- **Un outil principal unique** *(tout-JUnit ou tout-Cucumber)* pour homogénéiser le style, sans démarrer Spring sur les tests unitaires.
-- **`MockMvc` / `RestTestClient` lié à `MockMvc` (en mémoire)** :
-  - Teste sécurité, `@Valid`, `@RestControllerAdvice` et Jackson, avec `@WithMockUser`. Ne teste pas Tomcat.
-- **`RestTestClient` avec `RANDOM_PORT` (vrai serveur)** :
-  - Teste aussi Tomcat (taille des headers, compression, réseau), mais impose un vrai header `Authorization`.
+### La stratégie historique : la Pyramide des tests (Mike Cohn, 2009)
 
-## 3. Simuler les frontières externes et la base
+Conçue à une époque où le démarrage d'un serveur d'applications prenait plusieurs minutes, elle préconise une isolation maximale : **~80 % de tests unitaires isolés (mockés), 15 % de tests d'intégration, 5 % de tests E2E**.
 
-Éviter `@MockitoBean` sur les clients internes : simuler au niveau du protocole.
+**Limites sur une API Spring Boot orientée données / orchestration :**
 
-- **APIs HTTP externes** : serveur HTTP local (`HttpServer` du JDK, `MockWebServer`, ou `WireMock` pour pannes/latence).
-- **Horloge système** : injecter `java.time.Clock` ➔ `Clock.fixed` (unitaire) ou `MutableClock` `@Primary` (intégration).
-- **Messagerie & Infra** : `GreenMail` / `Mailpit` (SMTP), `Testcontainers` (Kafka, RabbitMQ, S3/MinIO).
-- **Base de données** : `H2` pour du JPA standard ; **`Testcontainers` (PostgreSQL)** dès l'usage de SQL natif ou types SGBD spécifiques.
+- **Faux sentiment de sécurité :** Une couverture de code élevée obtenue avec des mocks ne détecte ni les requêtes JPQL/SQL invalides, ni les erreurs de mapping JPA, ni les oublis de `@Transactional`, ni les régressions de sérialisation JSON ou de règles de sécurité (`@RolesAllowed`).
+- **Couplage fort à l'implémentation :** Les tests reproduisent le câblage interne des classes. Renommer ou découper un service oblige à réécrire les configurations de mocks.
 
-## 4. Développement assisté par agents (IA)
+### Les stratégies modernes : *Testing Honeycomb* (Spotify) et *Testing Trophy* (Kent C. Dodds)
 
-En développement agentique, le **test d'intégration HTTP en boîte noire** est indispensable :
+Grâce au démarrage rapide des conteneurs modernes et à la mise en cache du contexte Spring entre les tests, l'effort se concentre sur le **test d'intégration complet (composant)** traité comme une boîte noire :
 
-- **Filet de sécurité objectif** : évite que l'agent mocke ses propres hypothèses fausses (SQL, JPA, sécurité) avec des tests unitaires complaisants.
-- **Maîtrise du contrat** : lister les cas attendus dans le prompt (`200`, `400`, `403`, `404`), puis relire en priorité les assertions et modifications de tests.
-- **Boucle rapide** : contexte Spring unique partagé + exécution ciblée + algorithmes isolés en unitaire pur (retour **< 1 s**).
+1. **Majorité de tests d'intégration par HTTP :** L'application Spring complète démarre une seule fois pour toute la suite de tests. Les scénarios passent par la couche HTTP pour valider en une passe la sécurité, le binding Spring MVC, la logique métier, la persistance SQL et la sérialisation JSON. Les mocks sont strictement limités aux **frontières externes** (APIs tierces, horloge).
+2. **Base ciblée de tests unitaires purs :** Réservée aux algorithmes complexes sans dépendance Spring ni base de données (moteurs de règles, calculs), exécutés sans démarrer le contexte applicatif.
+3. **Sommet minimal de tests E2E / Contrat :** Limité aux parcours critiques déployés ou aux interfaces entre équipes indépendantes.
+
+### Tableau comparatif
+
+| Critère | Stratégie historique (Pyramide) | Stratégies modernes (*Honeycomb* / *Trophy*) |
+|---|---|---|
+| **Volume principal** | Tests unitaires isolés (~80 %) | Tests d'intégration complet par HTTP |
+| **Usage des mocks** | Massif sur les dépendances internes (`@Repository`, `@Service`) | Uniquement aux **frontières externes** (APIs tierces, horloge) |
+| **Point d'entrée testé** | Méthodes Java internes | Contrat externe (**requêtes HTTP / payloads JSON**) |
+| **Garanties apportées** | Logique isolée d'une classe | Chaîne complète : sécurité, validation, Spring MVC, SQL/JPA, JSON |
+| **Résistance au refactoring** | Faible (le découpage interne casse les mocks) | Élevée (transparent tant que le contrat HTTP est respecté) |
+
+---
+
+## 3. Règles d'arbitrage et outillage
+
+### Quand écrire quel test ? (Approche pragmatique)
+
+- **Test d'intégration HTTP par défaut :** Pour tout cas d'usage métier, contrôle d'accès (`401`/`403`), erreur de validation (`400`), sérialisation JSON et opération en base de données.
+- **Arbitrage « tout en intégration » vs « unitaire + intégration » sur les règles de calcul :**
+  - **Tout regrouper en intégration (via un test paramétré ou un `Scenario Outline`) :** Lorsque le harnais d'intégration est rapide (contexte Spring partagé), que la préparation des données est légère (quelques lignes en base) et que le nombre de cas reste raisonnable (moins de 15–20 cas). Cela évite de maintenir deux fichiers de tests pour la même fonctionnalité.
+  - **Séparer en 1 test d'intégration nominal (pour le câblage) + N tests unitaires purs (pour l'algorithme) :** Uniquement lorsque la combinatoire est élevée (parseurs complexes, regex, matrices de dates) ou que la préparation du contexte d'intégration (multiples tables liées, bouchons HTTP) noie l'intention métier et ralentit l'exécution unitaire dans l'IDE.
+- **À éviter :** Appeler directement les méthodes Java des `@RestController` dans les tests d'intégration. Cela contourne les filtres de sécurité, la validation `@Valid`, le binding `@RequestParam` et la sérialisation Jackson.
+
+### Choix des outils et simulation des frontières
+
+- **Privilégier un outil unique (ou quasi unique) :** Plusieurs choix sont valides (tout-JUnit, tout-Cucumber, etc.). Utiliser le même outil pour les tests unitaires et les tests d'intégration homogénéise l'écriture des tests et évite de multiplier les styles d'assertions, en veillant simplement à ne pas démarrer le contexte Spring sur les tests unitaires.
+- **Client de test HTTP sur Spring Boot 4.0+ (`MockMvc` vs `RestTestClient`) :**
+  - **En mémoire (`MockMvc` ou `RestTestClient` lié à `MockMvc`) :** Appelle le `DispatcherServlet` sans ouvrir de port réseau. Couvre les filtres Spring Security, `@Valid`, `@RequestParam`, `@RestControllerAdvice` et la sérialisation Jackson, tout en permettant de simuler facilement l'utilisateur (`@WithMockUser`). Ne teste pas le serveur Tomcat lui-même.
+  - **Sur vrai serveur (`RestTestClient` avec `RANDOM_PORT`) :** Démarre un vrai serveur Tomcat et envoie de vraies requêtes HTTP sur le réseau. Couvre en plus le comportement du conteneur web (taille maximale des en-têtes HTTP, compression, encodage réseau, streaming), mais impose d'envoyer un vrai en-tête `Authorization` à la place de `@WithMockUser`.
+- **Simulation des systèmes externes aux frontières :** Plutôt que de mocker les services clients internes avec `@MockitoBean` (ce qui court-circuite les clients HTTP et la désérialisation), simuler les dépendances au niveau du protocole :
+  - **APIs HTTP externes :** Démarrer un serveur HTTP local sur un port de test et rediriger les URLs configurées dans l'application — via un serveur embarqué léger (**`com.sun.net.httpserver.HttpServer`** natif au JDK, **`MockWebServer`** d'OkHttp) ou un serveur de bouchons dédié (**WireMock**, **MockServer**) si l'on doit simuler des latences ou pannes réseau.
+  - **Horloge système :** Injecter un bean standard `java.time.Clock` dans les services métier, et le remplacer en test par une horloge fixe (`Clock.fixed(...)` en unitaire) ou pilotable scénario par scénario (`MutableClock` `@Primary` en intégration, sans redémarrer le contexte Spring).
+  - **Messagerie et infrastructures tierces :** Utiliser **GreenMail** ou **Mailpit** pour vérifier les envois SMTP, et **Testcontainers** pour les brokers (Kafka, RabbitMQ) ou stockages (S3/MinIO).
+- **Base de données de test :** Une base en mémoire rapide (H2) convient tant que l'accès aux données repose sur du JPA standard. Basculer sur **Testcontainers (PostgreSQL)** dès l'introduction de requêtes SQL natives (`nativeQuery = true`) ou de types spécifiques au SGBD de production.
+
+---
+
+## 4. Spécificités en développement assisté par agents (IA)
+
+En développement agentique, cette stratégie de **tests d'intégration en boîte noire par HTTP est encore plus indispensable** qu'en développement manuel :
+
+- **Un filet de sécurité objectif contre les angles morts de l'IA :** Un agent de code génère rapidement une implémentation crédible en apparence, mais peut introduire une régression sur un mapping JPA, une requête SQL, une sérialisation JSON ou une règle de sécurité. S'il écrit des tests unitaires isolés avec des mocks, il risque de mocker ses propres hypothèses fausses et de produire des tests complaisants qui passent au vert. Le test d'intégration HTTP vérifie le comportement réel de bout en bout (de la requête jusqu'à la base de données), ce qui réduit fortement le risque de valider une implémentation défaillante.
+- **Garder la maîtrise du contrat sans ralentir le flux :** Laisser l'agent générer le code et les tests à partir d'une liste claire des cas attendus dans le prompt (cas nominaux, erreurs `400`/`403`/`404`), puis concentrer la revue de code sur les assertions générées et sur toute modification apportée aux tests existants.
+- **Préserver une boucle de vérification rapide et lisible :** Un agent valide son travail par itérations successives en relançant fréquemment les tests. Maintenir un contexte Spring unique partagé, exécuter de manière ciblée les tests modifiés et isoler les algorithmes complexes dans des tests unitaires sans framework (retour sous la seconde, traces d'erreur concises) garantit des cycles de correction courts et efficaces.
