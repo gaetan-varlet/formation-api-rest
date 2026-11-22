@@ -2,6 +2,8 @@
 title: "Spring Data JPA : requêtes et optimisation"
 ---
 
+import { Steps } from '@astrojs/starlight/components';
+
 ## Méthodes fournies nativement par `JpaRepository`
 
 :::note[Prérequis]
@@ -296,111 +298,107 @@ public class VinService {
 
 Indispensable quand la requête doit être construite **dynamiquement** avec des filtres optionnels reçus à l'exécution :
 
-### 1. Définir l'interface du fragment
+<Steps>
 
-```java title="VinRepositoryCustom.java"
-package fr.insee.formationapirest.repository;
+1. **Définir l'interface du fragment**
 
-import java.util.List;
+   ```java title="VinRepositoryCustom.java"
+   package fr.insee.formationapirest.repository;
 
-public interface VinRepositoryCustom {
-    List<String> findAppellationsDynamiques(String filtre, Integer anneeMin);
-}
-```
+   import java.util.List;
 
-### 2. Implémenter avec l'`EntityManager`
+   public interface VinRepositoryCustom {
+       List<String> findAppellationsDynamiques(String filtre, Integer anneeMin);
+   }
+   ```
 
-Convention stricte : nommer la classe `<NomDuRepoPrincipal>Impl`.
+2. **Implémenter avec l'`EntityManager`**
 
-```java title="VinRepositoryImpl.java"
-package fr.insee.formationapirest.repository;
+   Convention stricte : nommer la classe `<NomDuRepoPrincipal>Impl`.
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
-import java.util.List;
+   ```java title="VinRepositoryImpl.java"
+   package fr.insee.formationapirest.repository;
 
-public class VinRepositoryImpl implements VinRepositoryCustom {
+   import jakarta.persistence.EntityManager;
+   import jakarta.persistence.PersistenceContext;
+   import jakarta.persistence.TypedQuery;
+   import java.util.List;
 
-    @PersistenceContext
-    private EntityManager entityManager;
+   public class VinRepositoryImpl implements VinRepositoryCustom {
 
-    @Override
-    public List<String> findAppellationsDynamiques(String filtre, Integer anneeMin) {
-        StringBuilder jpql = new StringBuilder("SELECT DISTINCT v.appellation FROM Vin v WHERE 1=1");
+       @PersistenceContext
+       private EntityManager entityManager;
 
-        if (filtre != null && !filtre.isBlank()) {
-            jpql.append(" AND LOWER(v.appellation) LIKE :filtre");
-        }
-        if (anneeMin != null) {
-            jpql.append(" AND v.annee >= :anneeMin");
-        }
+       @Override
+       public List<String> findAppellationsDynamiques(String filtre, Integer anneeMin) {
+           StringBuilder jpql = new StringBuilder("SELECT DISTINCT v.appellation FROM Vin v WHERE 1=1");
 
-        TypedQuery<String> query = entityManager.createQuery(jpql.toString(), String.class);
-        if (filtre != null && !filtre.isBlank()) {
-            query.setParameter("filtre", "%" + filtre.toLowerCase() + "%");
-        }
-        if (anneeMin != null) {
-            query.setParameter("anneeMin", anneeMin);
-        }
+           if (filtre != null && !filtre.isBlank()) {
+               jpql.append(" AND LOWER(v.appellation) LIKE :filtre");
+           }
+           if (anneeMin != null) {
+               jpql.append(" AND v.annee >= :anneeMin");
+           }
 
-        return query.getResultList();
-    }
-}
-```
+           TypedQuery<String> query = entityManager.createQuery(jpql.toString(), String.class);
+           if (filtre != null && !filtre.isBlank()) {
+               query.setParameter("filtre", "%" + filtre.toLowerCase() + "%");
+           }
+           if (anneeMin != null) {
+               query.setParameter("anneeMin", anneeMin);
+           }
 
-### 3. Étendre l'interface et utiliser dans le Service
+           return query.getResultList();
+       }
+   }
+   ```
 
-```java title="VinRepository.java"
-public interface VinRepository extends JpaRepository<Vin, Integer>, VinRepositoryCustom {
-    // Combine JpaRepository, les Query Methods, @EntityGraph et le code Custom
-}
-```
+3. **Étendre l'interface et utiliser dans le Service**
 
-```java title="VinService.java"
-@Service
-@RequiredArgsConstructor
-public class VinService {
+   ```java title="VinRepository.java"
+   public interface VinRepository extends JpaRepository<Vin, Integer>, VinRepositoryCustom {
+       // Combine JpaRepository, les Query Methods, @EntityGraph et le code Custom
+   }
+   ```
 
-    private final VinRepository vinRepository;
+   ```java title="VinService.java"
+   @Service
+   @RequiredArgsConstructor
+   public class VinService {
 
-    public List<String> getAppellations(String filtre, Integer anneeMin) {
-        return vinRepository.findAppellationsDynamiques(filtre, anneeMin);
-    }
-}
-```
+       private final VinRepository vinRepository;
+
+       public List<String> getAppellations(String filtre, Integer anneeMin) {
+           return vinRepository.findAppellationsDynamiques(filtre, anneeMin);
+       }
+   }
+   ```
+
+</Steps>
 
 ## Au-delà du Repo Custom : Spring Data Specifications
 
 Pour les écrans de recherche complexes (nombreux filtres optionnels combinables) :
 
-- **Principe :** le Repository étend l'interface standard `JpaSpecificationExecutor<Vin>`.
-- **Fonctionnement :** découpe chaque filtre dans une fonction réutilisable (`Specification<T>`), puis les assemble dynamiquement à la volée avec `.and()` et `.or()`.
-- **Atouts majeurs :**
+- 🎯 **Principe :** le Repository étend l'interface standard `JpaSpecificationExecutor<Vin>`.
+- 🧩 **Fonctionnement :** découpe chaque filtre dans une fonction réutilisable (`Specification<T>`), puis les assemble dynamiquement à la volée avec `.and()` et `.or()`.
+- ✨ **Atouts majeurs :**
   - standard officiel Spring Data basé sur la Criteria API de Jakarta ;
   - gestion native et automatique de la pagination (`Pageable` + calcul du `COUNT`).
-- **Pourquoi pas Querydsl ?** Bibliothèque peu maintenue sous Jakarta EE / Spring Boot 3+ ; `Specifications` est le standard intégré sans dépendance ni plugin externe.
+- ⚠️ **Pourquoi pas Querydsl ?** Bibliothèque peu maintenue sous Jakarta EE / Spring Boot 3+ ; `Specifications` est le standard intégré sans dépendance ni plugin externe.
 
 Voir la [documentation Spring Data Specifications](https://docs.spring.io/spring-data/jpa/reference/jpa/specifications.html).
 
-## Arbre de décision : quelle approche choisir ?
+## Quelle approche choisir ?
 
-```txt
-Besoin d'accéder aux données ?
- │
- ├── 1. Filtres simples sur des attributs ?
- │    └── ✅ Query Method (dérivée du nom)
- │
- ├── 2. Requête complexe, agrégation ou jointure spécifique ?
- │    └── ✅ @Query (JPQL par défaut, SQL natif si spécifique SGBD)
- │
- ├── 3. Requête dynamique avec filtres conditionnels ?
- │    ├── Filtres simples (2-3 critères) ──► ✅ Repo Custom + EntityManager
- │    └── Formulaire riche + pagination  ──► ✅ Spring Data Specifications
- │
- └── 4. Volume massif, batch ou performance brute hors ORM ?
-      └── ✅ JdbcClient / NamedParameterJdbcTemplate (page suivante)
-```
+| Si votre besoin est… | Approche recommandée |
+| :--- | :--- |
+| **1. Faire du CRUD standard, paginer ou trier sans filtre métier** | **Méthodes natives de `JpaRepository`** *(`findById`, `findAll(Pageable)`, `save`, `deleteAllInBatch`…)* |
+| **2. Filtrer simplement sur des attributs** | **Query Method** *(dérivée du nom de la méthode)* |
+| **3. Écrire une requête complexe, une agrégation ou une jointure spécifique** | **`@Query`** *(JPQL par défaut, ou SQL natif si spécifique au SGBD)* |
+| **4. Construire une requête dynamique simple (2 à 3 critères optionnels)** | **Repository Custom (`EntityManager`)** |
+| **5. Gérer un formulaire de recherche riche avec pagination** | **Spring Data Specifications** |
+| **6. Traiter un volume massif, du batch ou viser la performance brute hors ORM** | **`JdbcClient` / `NamedParameterJdbcTemplate`** *([page suivante](/formation-api-rest/acces-donnees/jdbc-et-batching/))* |
 
 :::tip[Les 2 réflexes d'optimisation JPA]
 - **Lecture seule / colonnes partielles :** projeter vers un Record (`VinResponse`).
