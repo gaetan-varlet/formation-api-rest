@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 400" role="img" aria-label="Comparaison entre la pyramide des tests historique et les stratégies modernes Testing Honeycomb et Trophy">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 410" role="img" aria-label="Comparaison entre la pyramide des tests historique, le Testing Honeycomb de Spotify et le Testing Trophy de Kent C. Dodds">
   <defs>
     <linearGradient id="hex-grad" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#10b981"/>
@@ -10,70 +10,98 @@
     </linearGradient>
     <style>
       .badge { font: 700 10.5px system-ui, -apple-system, sans-serif; letter-spacing: 0.04em; }
-      .title { font: 700 16.5px system-ui, -apple-system, sans-serif; fill: #0f172a; }
-      .sub { font: 500 12px system-ui, -apple-system, sans-serif; fill: #475569; }
-      .lbl { font: 700 13px system-ui, -apple-system, sans-serif; fill: #ffffff; }
-      .lbl-sm { font: 500 11.5px system-ui, -apple-system, sans-serif; fill: #f8fafc; }
+      .title { font: 700 16px system-ui, -apple-system, sans-serif; fill: #0f172a; }
+      .sub { font: 500 11.5px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .lbl { font: 700 12.5px system-ui, -apple-system, sans-serif; fill: #ffffff; }
+      .lbl-sm { font: 500 11px system-ui, -apple-system, sans-serif; fill: #f8fafc; }
       .foot { font: 600 11.5px system-ui, -apple-system, sans-serif; }
-      .vs { font: 700 12px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .vs { font: 700 11.5px system-ui, -apple-system, sans-serif; fill: #475569; }
     </style>
   </defs>
 
   <!-- Carte gauche : Pyramide historique (2009) -->
-  <rect x="12" y="12" width="430" height="376" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
-  <rect x="137" y="26" width="180" height="22" rx="11" fill="#e2e8f0"/>
-  <text x="227" y="41" text-anchor="middle" class="badge" fill="#475569">HISTORIQUE · 2009</text>
-  <text x="227" y="68" text-anchor="middle" class="title">Pyramide des tests</text>
-  <text x="227" y="86" text-anchor="middle" class="sub">Isolation maximale par mocks</text>
+  <rect x="12" y="12" width="290" height="386" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <rect x="77" y="25" width="160" height="22" rx="11" fill="#e2e8f0"/>
+  <text x="157" y="40" text-anchor="middle" class="badge" fill="#475569">HISTORIQUE · 2009</text>
+  <text x="157" y="67" text-anchor="middle" class="title">Pyramide des tests</text>
+  <text x="157" y="85" text-anchor="middle" class="sub">Isolation maximale par mocks</text>
 
-  <!-- Sommet E2E 5 % -->
-  <polygon points="227,104 284,164 170,164" fill="#d97706" stroke="#f8fafc" stroke-width="2" stroke-linejoin="round"/>
-  <text x="227" y="142" text-anchor="middle" class="lbl">E2E</text>
-  <text x="227" y="157" text-anchor="middle" class="lbl-sm">~5 %</text>
+  <!-- Sommet E2E ~5 % -->
+  <polygon points="157,104 196,154 118,154" fill="#d97706" stroke="#f8fafc" stroke-width="2" stroke-linejoin="round"/>
+  <text x="157" y="143" text-anchor="middle" class="lbl">E2E</text>
 
-  <!-- Intégration 15 % -->
-  <polygon points="168,167 286,167 328,222 126,222" fill="#64748b" stroke="#f8fafc" stroke-width="2" stroke-linejoin="round"/>
-  <text x="227" y="191" text-anchor="middle" class="lbl">Intégration (~15 %)</text>
-  <text x="227" y="209" text-anchor="middle" class="lbl-sm">peu couverte</text>
+  <!-- Intégration ~15 % -->
+  <polygon points="115,158 199,158 232,216 82,216" fill="#64748b" stroke="#f8fafc" stroke-width="2" stroke-linejoin="round"/>
+  <text x="157" y="185" text-anchor="middle" class="lbl">Intégration</text>
+  <text x="157" y="203" text-anchor="middle" class="lbl-sm">~15 % (peu couverte)</text>
 
   <!-- Base Unitaires isolés ~80 % -->
-  <polygon points="124,225 330,225 394,316 60,316" fill="url(#pyr-base)" stroke="#f8fafc" stroke-width="2" stroke-linejoin="round"/>
-  <text x="227" y="256" text-anchor="middle" class="lbl">Unitaires isolés (~80 %)</text>
-  <text x="227" y="276" text-anchor="middle" class="lbl-sm">Mocks massifs sur @Service / @Repository</text>
-  <text x="227" y="294" text-anchor="middle" class="lbl-sm">Ne détecte pas SQL, JPA, JSON, Sécurité</text>
+  <polygon points="79,220 235,220 277,314 37,314" fill="url(#pyr-base)" stroke="#f8fafc" stroke-width="2" stroke-linejoin="round"/>
+  <text x="157" y="254" text-anchor="middle" class="lbl">Unitaires (~80 %)</text>
+  <text x="157" y="274" text-anchor="middle" class="lbl-sm">Mocks massifs sur l'interne</text>
+  <text x="157" y="292" text-anchor="middle" class="lbl-sm">SQL / JPA / JSON ignorés</text>
 
   <!-- Bilan gauche -->
-  <rect x="34" y="334" width="386" height="34" rx="9" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
-  <text x="227" y="355" text-anchor="middle" class="foot" fill="#64748b">Faux sentiment de sécurité · Fragile au refactoring</text>
+  <rect x="26" y="336" width="262" height="44" rx="9" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="157" y="355" text-anchor="middle" class="foot" fill="#64748b">Faux sentiment de sécurité</text>
+  <text x="157" y="371" text-anchor="middle" class="foot" fill="#64748b">Fragile au refactoring</text>
 
-  <!-- Carte droite : Stratégies modernes -->
-  <rect x="478" y="12" width="430" height="376" rx="16" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
-  <rect x="593" y="26" width="200" height="22" rx="11" fill="#d1fae5"/>
-  <text x="693" y="41" text-anchor="middle" class="badge" fill="#065f46">MODERNE · RECOMMANDÉE</text>
-  <text x="693" y="68" text-anchor="middle" class="title">Testing Honeycomb / Trophy</text>
-  <text x="693" y="86" text-anchor="middle" class="sub">Boîte noire HTTP sur contexte Spring partagé</text>
+  <!-- Panneau droit : Stratégies modernes -->
+  <rect x="332" y="12" width="616" height="386" rx="16" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+  <rect x="520" y="25" width="240" height="22" rx="11" fill="#d1fae5"/>
+  <text x="640" y="40" text-anchor="middle" class="badge" fill="#065f46">STRATÉGIES MODERNES · RECOMMANDÉES</text>
 
-  <!-- Sommet E2E / Contrat ~5 % -->
-  <polygon points="651,106 735,106 770,148 616,148" fill="#0284c7" stroke="#f0fdf4" stroke-width="2" stroke-linejoin="round"/>
-  <text x="693" y="125" text-anchor="middle" class="lbl">E2E / Contrat</text>
-  <text x="693" y="141" text-anchor="middle" class="lbl-sm">~5 % (minimal)</text>
+  <!-- Colonne 1 : Testing Honeycomb (Spotify) -->
+  <text x="486" y="67" text-anchor="middle" class="title">Testing Honeycomb</text>
+  <text x="486" y="85" text-anchor="middle" class="sub">Spotify · API &amp; Microservices</text>
 
-  <!-- Cœur Honeycomb : Intégration HTTP ~70–80 % -->
-  <polygon points="572,153 814,153 862,203 814,253 572,253 524,203" fill="url(#hex-grad)" stroke="#f0fdf4" stroke-width="2.5" stroke-linejoin="round"/>
-  <text x="693" y="185" text-anchor="middle" class="lbl">Intégration complète par HTTP (~70–80 %)</text>
-  <text x="693" y="206" text-anchor="middle" class="lbl-sm">Sécurité, @Valid, MVC, Métier, SQL/JPA, JSON</text>
-  <text x="693" y="226" text-anchor="middle" class="lbl-sm">Mocks limités aux frontières externes</text>
+  <!-- Sommet E2E / Contrat -->
+  <polygon points="442,106 530,106 550,144 422,144" fill="#0284c7" stroke="#f0fdf4" stroke-width="2" stroke-linejoin="round"/>
+  <text x="486" y="129" text-anchor="middle" class="lbl">E2E / Contrat</text>
 
-  <!-- Base ciblée : Unitaires purs ~15–25 % -->
-  <rect x="558" y="259" width="270" height="57" rx="10" fill="#4f46e5" stroke="#f0fdf4" stroke-width="2"/>
-  <text x="693" y="283" text-anchor="middle" class="lbl">Unitaires purs (~15–25 %)</text>
-  <text x="693" y="302" text-anchor="middle" class="lbl-sm">Algorithmes complexes sans Spring ni I/O</text>
+  <!-- Grand hexagone Intégration -->
+  <polygon points="414,148 558,148 602,206 558,264 414,264 370,206" fill="url(#hex-grad)" stroke="#f0fdf4" stroke-width="2.5" stroke-linejoin="round"/>
+  <text x="486" y="191" text-anchor="middle" class="lbl">Intégration HTTP</text>
+  <text x="486" y="210" text-anchor="middle" class="lbl-sm">Majoritaire (~70–80 %)</text>
+  <text x="486" y="229" text-anchor="middle" class="lbl-sm">Mocks aux frontières</text>
 
-  <!-- Bilan droite -->
-  <rect x="500" y="334" width="386" height="34" rx="9" fill="#ffffff" stroke="#86efac" stroke-width="1"/>
-  <text x="693" y="355" text-anchor="middle" class="foot" fill="#065f46">Forte confiance bout en bout · Résiste au refactoring</text>
+  <!-- Base réduite Unitaires -->
+  <polygon points="428,268 544,268 520,314 452,314" fill="#4f46e5" stroke="#f0fdf4" stroke-width="2" stroke-linejoin="round"/>
+  <text x="486" y="290" text-anchor="middle" class="lbl">Unitaires</text>
+  <text x="486" y="305" text-anchor="middle" class="lbl-sm">ciblés</text>
+
+  <!-- Séparateur vertical subtil -->
+  <line x1="640" y1="62" x2="640" y2="318" stroke="#bbf7d0" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+  <!-- Colonne 2 : Testing Trophy (Kent C. Dodds) -->
+  <text x="794" y="67" text-anchor="middle" class="title">Testing Trophy</text>
+  <text x="794" y="85" text-anchor="middle" class="sub">Kent C. Dodds · 4 couches</text>
+
+  <!-- Sommet du trophée : E2E -->
+  <polygon points="760,106 828,106 842,134 746,134" fill="#0284c7" stroke="#f0fdf4" stroke-width="2" stroke-linejoin="round"/>
+  <text x="794" y="125" text-anchor="middle" class="lbl">E2E</text>
+
+  <!-- Large coupe du trophée : Intégration -->
+  <polygon points="684,138 904,138 894,186 850,232 738,232 694,186" fill="url(#hex-grad)" stroke="#f0fdf4" stroke-width="2.5" stroke-linejoin="round"/>
+  <text x="794" y="169" text-anchor="middle" class="lbl">Intégration</text>
+  <text x="794" y="188" text-anchor="middle" class="lbl-sm">Couche principale (meilleur ROI)</text>
+  <text x="794" y="207" text-anchor="middle" class="lbl-sm">Modules + BDD + HTTP</text>
+
+  <!-- Pied rétréci du trophée : Unitaires -->
+  <rect x="754" y="236" width="80" height="38" rx="5" fill="#4f46e5" stroke="#f0fdf4" stroke-width="2"/>
+  <text x="794" y="259" text-anchor="middle" class="lbl">Unitaires</text>
+
+  <!-- Socle du trophée : Analyse statique -->
+  <polygon points="704,278 884,278 904,314 684,314" fill="#0f766e" stroke="#f0fdf4" stroke-width="2" stroke-linejoin="round"/>
+  <text x="794" y="295" text-anchor="middle" class="lbl">Analyse statique</text>
+  <text x="794" y="309" text-anchor="middle" class="lbl-sm">Compilateur Java, Sonar, linter</text>
+
+  <!-- Bilan droit commun -->
+  <rect x="354" y="336" width="572" height="44" rx="9" fill="#ffffff" stroke="#86efac" stroke-width="1"/>
+  <text x="640" y="355" text-anchor="middle" class="foot" fill="#065f46">Priorité aux tests d'intégration · Forte confiance bout en bout</text>
+  <text x="640" y="371" text-anchor="middle" class="foot" fill="#065f46">Résiste au refactoring tant que le contrat externe est respecté</text>
 
   <!-- Pastille VS centrale -->
-  <circle cx="460" cy="200" r="17" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-  <text x="460" y="204" text-anchor="middle" class="vs">VS</text>
+  <circle cx="317" cy="205" r="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="317" y="209" text-anchor="middle" class="vs">VS</text>
 </svg>

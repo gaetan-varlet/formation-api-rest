@@ -84,10 +84,11 @@ Grâce au démarrage rapide des conteneurs modernes et à la mise en cache du co
 1. **Majorité de tests d'intégration par HTTP :** L'application Spring complète démarre une seule fois pour toute la suite de tests. Les scénarios passent par la couche HTTP pour valider en une passe la sécurité, le binding Spring MVC, la logique métier, la persistance SQL et la sérialisation JSON. Les mocks sont strictement limités aux **frontières externes** (APIs tierces, horloge).
 2. **Base ciblée de tests unitaires purs :** Réservée aux algorithmes complexes sans dépendance Spring ni base de données (moteurs de règles, calculs), exécutés sans démarrer le contexte applicatif.
 3. **Sommet minimal de tests E2E / Contrat :** Limité aux parcours critiques déployés ou aux interfaces entre équipes indépendantes.
+4. **Socle d'analyse statique *(spécifique au Testing Trophy)* :** Compilateur Java (typage fort), linters et **SonarQube** détectent dès la compilation les erreurs de types, de syntaxe et les défauts évidents avant même d'exécuter un test.
 
 ### Tableau comparatif
 
-![Comparaison entre la pyramide des tests historique et les stratégies modernes Testing Honeycomb et Trophy](../../../assets/images/pyramide-vs-honeycomb.svg "Pyramide des tests vs Testing Honeycomb / Trophy")
+![Comparaison entre la pyramide des tests historique, le Testing Honeycomb et le Testing Trophy](../../../assets/images/pyramide-vs-honeycomb.svg "Pyramide des tests vs Testing Honeycomb et Testing Trophy")
 
 | Critère | Stratégie historique (Pyramide) | Stratégies modernes (*Honeycomb* / *Trophy*) |
 |---|---|---|
