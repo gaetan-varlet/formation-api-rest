@@ -166,7 +166,6 @@ export default defineConfig({
 						{ slug: 'tests/tests-unitaires' },
 						{ slug: 'tests/tests-integration' },
 						{ slug: 'tests/cucumber' },
-						{ slug: 'tests/cucumber-it' },
 						{ slug: 'tests/api-externes' },
 						{
 							slug: 'tests/cucumber-gitlab',
