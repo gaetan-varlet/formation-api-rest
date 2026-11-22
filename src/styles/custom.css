@@ -76,3 +76,32 @@
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }
+
+/*
+ * Aperçu visuel d'un e-mail HTML (utilisé dans neutralisation-entrees.md).
+ * Conserve un fond clair fixe pour simuler le rendu réel d'une messagerie, même en thème sombre.
+ */
+.sl-markdown-content .email-preview {
+	background-color: #ffffff;
+	color: #1e293b;
+	border: 1px solid #cbd5e1;
+	border-radius: 0.6rem;
+	overflow: hidden;
+	font-size: var(--sl-text-sm);
+}
+
+.sl-markdown-content .email-preview-header {
+	background-color: #f1f5f9;
+	border-bottom: 1px solid #cbd5e1;
+	padding: 0.45rem 0.9rem;
+	font-size: var(--sl-text-xs);
+	color: #475569;
+	margin-top: 0;
+}
+
+.sl-markdown-content .email-preview-body {
+	padding: 0.75rem 0.9rem;
+	line-height: 1.5;
+	margin-top: 0;
+	overflow-wrap: anywhere;
+}
