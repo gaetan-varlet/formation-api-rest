@@ -4,67 +4,67 @@ title: "Configuration pour les tests"
 
 ## Les bibliothèques de test
 
-```xml
+Ajoutez la dépendance de test Spring Boot (en portée `test`, pour ne pas l'embarquer dans le livrable final) — **elle est déjà fournie par défaut par Spring Initializr** lors de la création d'un projet Spring Web :
+
+```xml title="pom.xml"
 <dependency>
-   <groupId>org.springframework.boot</groupId>
-   <artifactId>spring-boot-starter-webmvc-test</artifactId>
-   <scope>test</scope>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-webmvc-test</artifactId>
+    <scope>test</scope>
 </dependency>
 ```
 
-- JUnit
-- Mockito
-- AssertJ
-- Hamcrest / Json-path
-- Spring Test
+Ce starter embarque automatiquement l'écosystème standard de test Java / Spring :
+- **JUnit 5** (moteur d'exécution et assertions de base) ;
+- **Mockito** (création de doublures / *mocks*) ;
+- **AssertJ** (assertions fluides `assertThat(...)`) ;
+- **Hamcrest / JsonPath** (assertions sur les structures JSON) ;
+- **Spring Test** (`@SpringBootTest`, `MockMvc`, `RestTestClient`…).
 
-## Maven Surefire
+## Exécution avec Maven : Surefire vs Failsafe
 
-- lacement des tests avec les classes finissant par `Test`
-- exécution dans la phase `test` de maven
+Maven distingue l'exécution des tests unitaires rapides de celle des tests d'intégration plus longs grâce à deux plugins :
 
-```xml
-<!-- permet de lancer les tests unitaires en UTF-8 -->
-<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-surefire-plugin</artifactId>
-</plugin>
+| Plugin | Convention de nommage | Phase Maven | Usage typique |
+| --- | --- | --- | --- |
+| **Maven Surefire** | `*Test.java` | `mvn test` | Tests unitaires rapides (sans contexte Spring) |
+| **Maven Failsafe** | `*IT.java` | `mvn verify` | Tests d'intégration / Cucumber |
+
+**Maven Surefire** est déjà actif par défaut avec `spring-boot-starter-parent`. Pour activer **Maven Failsafe** et lancer les tests d'intégration lors de `mvn verify`, ajoutez simplement le plugin dans `pom.xml` :
+
+```xml title="pom.xml"
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+        </plugin>
+    </plugins>
+</build>
 ```
 
-## Maven Failsafe
+## Couverture de code avec JaCoCo
 
-- lacement des tests avec les classes finissant par `IT`
-- exécution dans la phase `verify` de maven
+**JaCoCo** (*Java Code Coverage*) mesure les zones du code source exécutées pendant les tests :
 
-```xml
-<!-- permet de lancer les tests d'intégration en UTF-8 -->
-<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-failsafe-plugin</artifactId>
-</plugin>
-```
+- Génère un rapport HTML consultable localement dans `target/site/jacoco/index.html`.
+- Génère un rapport exploitable par **SonarQube** (`target/jacoco.exec` / XML).
+- Peut faire échouer le build si un seuil minimal de couverture n'est pas atteint (via le goal `check`).
 
-## JaCoCo (1)
+### Métriques principales
 
-- **Java Code Coverage**, génère un rapport de couverture (`target/jacoco.exec`) interprétable par SonarQube
-- génère également un rapport lisible (`target/site/jacoco/index.html`)
-- possibilité de faire échouer le build de l'application en ajoutant un score minimum à atteindre
-- défaut : ne reflète pas nécessairement l'efficacité des tests mais uniquement le pourcentage de lignes de code traversées par nos tests
+- **Lines coverage :** pourcentage de lignes de code dans lesquelles les tests sont passés.
+- **Branches coverage :** pourcentage de branches conditionnelles (liées aux `if`/`else`, `switch`…) effectivement traversées.
+- **Cyclomatic complexity :** complexité cyclomatique — nombre minimal de chemins indépendants pour parcourir tout un bloc de code (par exemple `1` sans `if`), donnant un indicateur du nombre de cas de test à mettre en œuvre.
 
-## JaCoCo (2)
+:::caution[Limite de la couverture de code]
+Un taux de couverture élevé (même 100 %) prouve uniquement que les lignes ont été **traversées**, pas que les résultats ont été correctement vérifiés par des assertions pertinentes.
+:::
 
-Les métriques :
+### Configuration Maven
 
-- **Lines coverage** : pourcentage de lignes de code dans lesquels les tests sont passés
-- **Branches coverage** : pourcentage de branches (liés aux if/else, switch) dans lequel les tests sont passés
-- **Cyclomatic complexity** : complexité cyclomatique, nombre de chemins nécessaires pour couvrir tous les chemins possibles dans un code
-  - par exemple, s'il n'y a pas de if, la complexité sera de 1
-  - reflète en général le nombre de cas de test que nous devons mettre en oeuvre pour couvrir l'ensemble du code
-
-## Jacoco (3)
-
-```xml
-<!-- génère un rapport sur la couverture de tests -->
+```xml title="pom.xml"
+<!-- Génère les rapports de couverture de tests JaCoCo -->
 <plugin>
     <groupId>org.jacoco</groupId>
     <artifactId>jacoco-maven-plugin</artifactId>
@@ -87,30 +87,26 @@ Les métriques :
 </plugin>
 ```
 
-## PiTest - Mutation Testing (1)
+## Tests de mutation avec PiTest
 
-- 100% de couverture signifie que toutes les lignes ont été exécutées au moins une fois, mais ne dit rien sur la précision des tests, raison pour laquelle les tests de mutation sont importants
+> *« Si vous voulez savoir si vos tests sont bons, introduisez un bug et regardez si vos tests échouent. »*
 
-> Si vous voulez savoir si vos tests sont bons, introduisez un bug et regardez si vos tests échouent
+Pour dépasser les limites d'un simple pourcentage de couverture, le **mutation testing** vérifie si vos assertions détectent réellement les régressions :
 
-Principes :
+1. **PiTest** injecte automatiquement de petits défauts (*mutations*) dans le code compilé (inverser un `>`, supprimer un appel de méthode, changer une constante…).
+2. La suite de tests est relancée sur chaque mutant :
+   - Si au moins un test échoue → la mutation est **tuée** (bon signe).
+   - Si tous les tests continuent de passer → la mutation **survit** (assertion manquante ou code mort).
+3. Le rapport (`target/pit-reports/index.html`) donne le pourcentage de mutations tuées.
 
-- Des mutations (erreurs) sont introduites dans le code et les tests sont exécutés
-- Si les tests échouent, la mutation est tuée, si les tests réussissent, la mutation survit
-- la qualité des tests peut être évaluée à partir du pourentage de mutations tuées
+### Configuration Maven et exécution
 
-## PiTest (2)
-
-- génération d'un rapport (`target/pit-reports/index.html`) avec la commande `mvn clean test org.pitest:pitest-maven:mutationCoverage`
-
-```xml
-<!-- lancement des tests de mutation avec la commande
-	mvn clean test org.pitest:pitest-maven:mutationCoverage -->
+```xml title="pom.xml"
 <plugin>
     <groupId>org.pitest</groupId>
     <artifactId>pitest-maven</artifactId>
     <version>1.12.0</version>
-    <!-- need this to support JUnit 5 -->
+    <!-- Plugin requis pour le support de JUnit 5 -->
     <dependencies>
         <dependency>
             <groupId>org.pitest</groupId>
@@ -121,16 +117,19 @@ Principes :
 </plugin>
 ```
 
-## PiTest (3)
+Lancement manuel à la demande (recommandé, car l'analyse de mutation peut être longue) :
 
-- plein de configurations possibles
-- possibilité d'attacher le lancement de `PiTest` à une phase maven pour ne plus lancer la commande
+```bash
+mvn clean test org.pitest:pitest-maven:mutationCoverage
+```
 
-```xml
+*(Si vous souhaitez l'exécuter automatiquement dans votre cycle Maven, par exemple en CI lors de `verify`, ajoutez un bloc `<executions>` dans la déclaration du plugin :)*
+
+```xml title="pom.xml (optionnel : exécution automatique)"
 <executions>
     <execution>
         <id>pit-report</id>
-        <phase>test</phase>
+        <phase>verify</phase>
         <goals>
             <goal>mutationCoverage</goal>
         </goals>
