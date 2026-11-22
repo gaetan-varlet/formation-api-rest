@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 300" role="img" aria-label="Arbre de décision pour les opérations d'écriture : save, saveAll ou deleteAllInBatch pour le CRUD unitaire et petits volumes, @Query avec @Modifying pour les mises à jour ou suppressions ciblées en masse, et NamedParameterJdbcTemplate.batchUpdate pour les imports et écritures massives.">
+  <defs>
+    <marker id="arr-write" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+    </marker>
+    <style>
+      .title { font: 700 16px system-ui, -apple-system, sans-serif; fill: #0f172a; }
+      .sub { font: 500 12px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .root-txt { font: 700 13px system-ui, -apple-system, sans-serif; fill: #ffffff; }
+      .cond-txt { font: 600 12px system-ui, -apple-system, sans-serif; fill: #1e293b; }
+      .sol-title { font: 700 13px system-ui, -apple-system, sans-serif; fill: #ffffff; }
+      .sol-sub { font: 500 11px system-ui, -apple-system, sans-serif; fill: #f1f5f9; }
+    </style>
+  </defs>
+
+  <rect x="8" y="8" width="864" height="284" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="440" y="35" text-anchor="middle" class="title">Sauvegarde, modification et suppression : quelle approche ?</text>
+  <text x="440" y="53" text-anchor="middle" class="sub">Du CRUD unitaire avec Hibernate aux écritures massives hors ORM</text>
+
+  <!-- Racine -->
+  <rect x="24" y="138" width="138" height="68" rx="10" fill="#0f172a"/>
+  <text x="93" y="167" text-anchor="middle" class="root-txt">Besoin d'écriture</text>
+  <text x="93" y="185" text-anchor="middle" class="root-txt">en base</text>
+
+  <!-- Tronc principal -->
+  <line x1="162" y1="172" x2="192" y2="172" stroke="#64748b" stroke-width="2"/>
+  <line x1="192" y1="106" x2="192" y2="238" stroke="#64748b" stroke-width="2"/>
+
+  <!-- Branche 1 : JpaRepository -->
+  <line x1="192" y1="106" x2="214" y2="106" stroke="#64748b" stroke-width="2" marker-end="url(#arr-write)"/>
+  <rect x="218" y="82" width="276" height="48" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="356" y="110" text-anchor="middle" class="cond-txt">1. CRUD unitaire / petit volume (&lt; 1 000)</text>
+  <line x1="494" y1="106" x2="532" y2="106" stroke="#475569" stroke-width="2" marker-end="url(#arr-write)"/>
+  <rect x="538" y="82" width="314" height="48" rx="8" fill="#0284c7"/>
+  <text x="695" y="103" text-anchor="middle" class="sol-title">JpaRepository : save(), saveAll(), delete()</text>
+  <text x="695" y="119" text-anchor="middle" class="sol-sub">Ou deleteAllInBatch() pour supprimer en 1 SQL</text>
+
+  <!-- Branche 2 : @Query + @Modifying -->
+  <line x1="192" y1="172" x2="214" y2="172" stroke="#64748b" stroke-width="2" marker-end="url(#arr-write)"/>
+  <rect x="218" y="148" width="276" height="48" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="356" y="176" text-anchor="middle" class="cond-txt">2. Mise à jour / suppression ciblée en masse</text>
+  <line x1="494" y1="172" x2="532" y2="172" stroke="#475569" stroke-width="2" marker-end="url(#arr-write)"/>
+  <rect x="538" y="148" width="314" height="48" rx="8" fill="#0f766e"/>
+  <text x="695" y="169" text-anchor="middle" class="sol-title">@Query + @Modifying</text>
+  <text x="695" y="185" text-anchor="middle" class="sol-sub">clearAutomatically = true, flushAutomatically = true</text>
+
+  <!-- Branche 3 : Batch JDBC -->
+  <line x1="192" y1="238" x2="214" y2="238" stroke="#64748b" stroke-width="2" marker-end="url(#arr-write)"/>
+  <rect x="218" y="214" width="276" height="48" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="356" y="242" text-anchor="middle" class="cond-txt">3. Imports &amp; écritures massives (&gt; 10 000)</text>
+  <line x1="494" y1="238" x2="532" y2="238" stroke="#475569" stroke-width="2" marker-end="url(#arr-write)"/>
+  <rect x="538" y="214" width="314" height="48" rx="8" fill="#b45309"/>
+  <text x="695" y="235" text-anchor="middle" class="sol-title">NamedParameterJdbcTemplate.batchUpdate()</text>
+  <text x="695" y="251" text-anchor="middle" class="sol-sub">Batch JDBC natif hors ORM (page suivante)</text>
+</svg>

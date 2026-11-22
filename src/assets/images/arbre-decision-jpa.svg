@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 456" role="img" aria-label="Arbre de décision pour choisir l'approche d'accès aux données : JpaRepository pour le CRUD standard, Query Method pour les filtres simples, @Query et @Modifying pour les requêtes complexes ou écritures directes, Repository Custom ou Specifications pour les requêtes dynamiques, et JdbcClient ou NamedParameterJdbcTemplate pour les volumes massifs.">
+  <defs>
+    <marker id="arr-jpa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+    </marker>
+    <style>
+      .title { font: 700 16px system-ui, -apple-system, sans-serif; fill: #0f172a; }
+      .sub { font: 500 12px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .root-txt { font: 700 13px system-ui, -apple-system, sans-serif; fill: #ffffff; }
+      .cond-txt { font: 600 12px system-ui, -apple-system, sans-serif; fill: #1e293b; }
+      .pill-txt { font: 700 11px system-ui, -apple-system, sans-serif; fill: #1e293b; }
+      .sol-title { font: 700 13px system-ui, -apple-system, sans-serif; fill: #ffffff; }
+      .sol-sub { font: 500 11px system-ui, -apple-system, sans-serif; fill: #f1f5f9; }
+    </style>
+  </defs>
+
+  <rect x="8" y="8" width="864" height="440" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="440" y="35" text-anchor="middle" class="title">Quelle approche d'accès aux données choisir ?</text>
+  <text x="440" y="53" text-anchor="middle" class="sub">Du plus simple (natif Spring Data) au plus bas niveau (SQL direct hors ORM)</text>
+
+  <!-- Racine -->
+  <rect x="24" y="218" width="138" height="68" rx="10" fill="#0f172a"/>
+  <text x="93" y="247" text-anchor="middle" class="root-txt">Besoin d'accès</text>
+  <text x="93" y="265" text-anchor="middle" class="root-txt">aux données</text>
+
+  <!-- Tronc principal -->
+  <line x1="162" y1="252" x2="192" y2="252" stroke="#64748b" stroke-width="2"/>
+  <line x1="192" y1="106" x2="192" y2="398" stroke="#64748b" stroke-width="2"/>
+
+  <!-- Branche 1 : JpaRepository -->
+  <line x1="192" y1="106" x2="214" y2="106" stroke="#64748b" stroke-width="2" marker-end="url(#arr-jpa)"/>
+  <rect x="218" y="84" width="276" height="44" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="356" y="110" text-anchor="middle" class="cond-txt">1. CRUD, tri ou pagination standard</text>
+  <line x1="494" y1="106" x2="532" y2="106" stroke="#475569" stroke-width="2" marker-end="url(#arr-jpa)"/>
+  <rect x="538" y="84" width="314" height="44" rx="8" fill="#0284c7"/>
+  <text x="695" y="103" text-anchor="middle" class="sol-title">JpaRepository (méthodes natives)</text>
+  <text x="695" y="119" text-anchor="middle" class="sol-sub">findById, findAll(Pageable), save, deleteAllInBatch…</text>
+
+  <!-- Branche 2 : Query Method -->
+  <line x1="192" y1="162" x2="214" y2="162" stroke="#64748b" stroke-width="2" marker-end="url(#arr-jpa)"/>
+  <rect x="218" y="140" width="276" height="44" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="356" y="166" text-anchor="middle" class="cond-txt">2. Filtres simples sur des attributs</text>
+  <line x1="494" y1="162" x2="532" y2="162" stroke="#475569" stroke-width="2" marker-end="url(#arr-jpa)"/>
+  <rect x="538" y="140" width="314" height="44" rx="8" fill="#0d9488"/>
+  <text x="695" y="159" text-anchor="middle" class="sol-title">Query Method</text>
+  <text x="695" y="175" text-anchor="middle" class="sol-sub">Requête dérivée du nom de la méthode</text>
+
+  <!-- Branche 3 : @Query -->
+  <line x1="192" y1="218" x2="214" y2="218" stroke="#64748b" stroke-width="2" marker-end="url(#arr-jpa)"/>
+  <rect x="218" y="196" width="276" height="44" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="356" y="222" text-anchor="middle" class="cond-txt">3. Requête complexe ou écriture directe</text>
+  <line x1="494" y1="218" x2="532" y2="218" stroke="#475569" stroke-width="2" marker-end="url(#arr-jpa)"/>
+  <rect x="538" y="196" width="314" height="44" rx="8" fill="#0f766e"/>
+  <text x="695" y="215" text-anchor="middle" class="sol-title">@Query (+ @Modifying si UPDATE/DELETE)</text>
+  <text x="695" y="231" text-anchor="middle" class="sol-sub">JPQL, SQL natif ou écriture sans charger l'entité</text>
+
+  <!-- Branche 4 : Requêtes dynamiques (2 sous-branches) -->
+  <line x1="192" y1="302" x2="214" y2="302" stroke="#64748b" stroke-width="2" marker-end="url(#arr-jpa)"/>
+  <rect x="218" y="274" width="212" height="56" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="324" y="298" text-anchor="middle" class="cond-txt">4. Requête dynamique</text>
+  <text x="324" y="315" text-anchor="middle" class="sub">(critères optionnels)</text>
+
+  <line x1="430" y1="302" x2="450" y2="302" stroke="#64748b" stroke-width="2"/>
+  <line x1="450" y1="274" x2="450" y2="330" stroke="#64748b" stroke-width="2"/>
+
+  <!-- Sous-branche 4a : Repo Custom -->
+  <line x1="450" y1="274" x2="466" y2="274" stroke="#64748b" stroke-width="2"/>
+  <rect x="466" y="257" width="96" height="34" rx="6" fill="#e0e7ff" stroke="#4f46e5" stroke-width="1.2"/>
+  <text x="514" y="278" text-anchor="middle" class="pill-txt">2–3 critères</text>
+  <line x1="562" y1="274" x2="580" y2="274" stroke="#475569" stroke-width="2" marker-end="url(#arr-jpa)"/>
+  <rect x="586" y="252" width="266" height="44" rx="8" fill="#4f46e5"/>
+  <text x="719" y="271" text-anchor="middle" class="sol-title">Repository Custom</text>
+  <text x="719" y="287" text-anchor="middle" class="sol-sub">EntityManager + JPQL construit en Java</text>
+
+  <!-- Sous-branche 4b : Specifications -->
+  <line x1="450" y1="330" x2="466" y2="330" stroke="#64748b" stroke-width="2"/>
+  <rect x="466" y="313" width="96" height="34" rx="6" fill="#f3e8ff" stroke="#7c3aed" stroke-width="1.2"/>
+  <text x="514" y="334" text-anchor="middle" class="pill-txt">Formulaire riche</text>
+  <line x1="562" y1="330" x2="580" y2="330" stroke="#475569" stroke-width="2" marker-end="url(#arr-jpa)"/>
+  <rect x="586" y="308" width="266" height="44" rx="8" fill="#7c3aed"/>
+  <text x="719" y="327" text-anchor="middle" class="sol-title">Spring Data Specifications</text>
+  <text x="719" y="343" text-anchor="middle" class="sol-sub">Filtres combinables + pagination native</text>
+
+  <!-- Branche 5 : JDBC -->
+  <line x1="192" y1="398" x2="214" y2="398" stroke="#64748b" stroke-width="2" marker-end="url(#arr-jpa)"/>
+  <rect x="218" y="376" width="276" height="44" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="356" y="402" text-anchor="middle" class="cond-txt">5. Volume massif, batch ou perf brute</text>
+  <line x1="494" y1="398" x2="532" y2="398" stroke="#475569" stroke-width="2" marker-end="url(#arr-jpa)"/>
+  <rect x="538" y="376" width="314" height="44" rx="8" fill="#b45309"/>
+  <text x="695" y="395" text-anchor="middle" class="sol-title">JdbcClient / NamedParameterJdbcTemplate</text>
+  <text x="695" y="411" text-anchor="middle" class="sol-sub">SELECT direct ou batchUpdate (page suivante)</text>
+</svg>

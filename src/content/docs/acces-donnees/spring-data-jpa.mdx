@@ -391,16 +391,35 @@ Voir la [documentation Spring Data Specifications](https://docs.spring.io/spring
 
 ## Quelle approche choisir ?
 
-| Si votre besoin est… | Approche recommandée |
-| :--- | :--- |
-| **1. Faire du CRUD standard, paginer ou trier sans filtre métier** | **Méthodes natives de `JpaRepository`** *(`findById`, `findAll(Pageable)`, `save`, `deleteAllInBatch`…)* |
-| **2. Filtrer simplement sur des attributs** | **Query Method** *(dérivée du nom de la méthode)* |
-| **3. Écrire une requête complexe, une agrégation ou une jointure spécifique** | **`@Query`** *(JPQL par défaut, ou SQL natif si spécifique au SGBD)* |
-| **4. Construire une requête dynamique simple (2 à 3 critères optionnels)** | **Repository Custom (`EntityManager`)** |
-| **5. Gérer un formulaire de recherche riche avec pagination** | **Spring Data Specifications** |
-| **6. Traiter un volume massif, du batch ou viser la performance brute hors ORM** | **`JdbcClient` / `NamedParameterJdbcTemplate`** *([page suivante](/formation-api-rest/acces-donnees/jdbc-et-batching/))* |
+![Arbre de décision : quelle approche d'accès aux données choisir](../../../assets/images/arbre-decision-jpa.svg "Quelle approche d'accès aux données choisir ?")
+
+<details>
+<summary>Transcription textuelle de l'arbre de décision</summary>
+
+1. **CRUD, tri ou pagination standard** → `JpaRepository` (`findById`, `findAll(Pageable)`, `save`, `deleteAllInBatch`…).
+2. **Filtres simples sur des attributs** → *Query Method* dérivée du nom de la méthode.
+3. **Requête complexe ou écriture directe** → `@Query` (JPQL portable par défaut, `nativeQuery = true` si spécifique SGBD, et `+ @Modifying` pour `UPDATE`/`DELETE` sans charger l'entité).
+4. **Requête dynamique (critères optionnels)** :
+   - **2–3 critères** → *Repository Custom* (`EntityManager` + JPQL construit en Java).
+   - **Formulaire riche** → *Spring Data Specifications* (filtres combinables + pagination native).
+5. **Volume massif, batch ou performance brute** → `JdbcClient` / `NamedParameterJdbcTemplate` (`SELECT` direct ou `batchUpdate`, [page suivante](/formation-api-rest/acces-donnees/jdbc-et-batching/)).
+
+</details>
 
 :::tip[Les 2 réflexes d'optimisation JPA]
 - **Lecture seule / colonnes partielles :** projeter vers un Record (`VinResponse`).
 - **Chargement de relations (`@ManyToOne`) :** ajouter `@EntityGraph` (anti N+1).
 :::
+
+## Et pour la sauvegarde, modification et suppression ?
+
+![Arbre de décision : quelle approche pour sauvegarder, modifier ou supprimer en base](../../../assets/images/arbre-decision-ecritures-jpa.svg "Sauvegarde, modification et suppression : quelle approche ?")
+
+<details>
+<summary>Transcription textuelle des choix d'écriture</summary>
+
+1. **CRUD unitaire / petit volume (< 1 000 lignes)** → `JpaRepository` : `save()`, `saveAll()`, `delete()` (ou `deleteAllInBatch()` pour supprimer en une seule requête SQL).
+2. **Modification ou suppression ciblée en masse** → `@Query` + `@Modifying(clearAutomatically = true, flushAutomatically = true)` (évite de charger les entités en RAM).
+3. **Imports et écritures massives (> 10 000 lignes)** → `NamedParameterJdbcTemplate.batchUpdate()` *(voir la [page suivante : SQL direct avec JDBC & Batching](/formation-api-rest/acces-donnees/jdbc-et-batching/#écritures-massives--saveall-vs-batch-jdbc))*.
+
+</details>
