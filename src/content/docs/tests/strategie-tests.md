@@ -2,6 +2,28 @@
 title: "Stratégies de tests sur un backend Spring Boot"
 ---
 
+## Pourquoi tester ?
+
+Au-delà de la conformité fonctionnelle, de l'ergonomie (UI/UX, accessibilité), de la performance, de la fiabilité et de la sécurité, une application réussie doit répondre dans la durée à deux exigences souvent sous-estimées :
+
+- **Fonctionner en rythme courant sans intervention de l'équipe informatique** (utilisateurs autonomes en production).
+- **Conserver un coût de MCO / MCS faible** (*Maintien en Condition Opérationnelle et de Sécurité*).
+
+Or deux constats reviennent sur de nombreux projets :
+
+1. **Un temps important est absorbé par le suivi de production et la correction de bugs**, au détriment des nouvelles fonctionnalités. Concevoir l'application pour rendre les utilisateurs autonomes et sécuriser les comportements libère ce temps de développement.
+2. **Les montées de version des bibliothèques sont repoussées voire abandonnées**, par crainte de casser l'existant.
+
+:::note[Idée reçue : « Écrire des tests est inutile, la MOA fait déjà une recette — et en plus ça prend du temps »]
+La recette manuelle valide un instant T, pas les modifications du lendemain. Investir dans des tests automatisés améliore directement la **productivité future du SI** :
+
+- **Automatiser les tâches répétitives :** un informaticien évite de refaire sans cesse les mêmes vérifications à la main à chaque livraison.
+- **Évoluer et refactorer sans crainte :** les tests détectent immédiatement les régressions dans la base de code.
+- **Faciliter les montées de version (MCS) :** si la suite de tests automatisés passe après une mise à jour de dépendance, la vérification manuelle devient réduite et ciblée — voire nulle si la couverture de tests est vraiment complète.
+:::
+
+![Évolution du coût de maintenance avec et sans tests automatisés](../../../assets/images/cout-maintenance-tests.svg "Coût de maintenance (MCO/MCS) avec et sans tests automatisés")
+
 ## Typologie des tests
 
 Avant de définir une stratégie de tests, il est indispensable de distinguer les quatre niveaux de tests selon leur périmètre d'isolation.

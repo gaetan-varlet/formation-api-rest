@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 340" role="img" aria-label="Comparaison du coût de maintenance avec et sans tests automatisés dans le temps">
+  <defs>
+    <style>
+      .title { font: 700 16px system-ui, -apple-system, sans-serif; fill: #0f172a; }
+      .sub { font: 500 12px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .axis-lbl { font: 600 11.5px system-ui, -apple-system, sans-serif; fill: #334155; }
+      .curve-red { font: 700 12.5px system-ui, -apple-system, sans-serif; fill: #be123c; }
+      .curve-red-sub { font: 500 11px system-ui, -apple-system, sans-serif; fill: #9f1239; }
+      .curve-green { font: 700 12.5px system-ui, -apple-system, sans-serif; fill: #047857; }
+      .curve-green-sub { font: 500 11px system-ui, -apple-system, sans-serif; fill: #065f46; }
+      .muted { font: 600 11px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .foot { font: 600 11.5px system-ui, -apple-system, sans-serif; fill: #065f46; }
+    </style>
+    <marker id="arr-axis" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- Fond global -->
+  <rect x="8" y="8" width="864" height="324" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="440" y="36" text-anchor="middle" class="title">Coût de maintenance (MCO / MCS) et vélocité dans le temps</text>
+  <text x="440" y="55" text-anchor="middle" class="sub">Un investissement initial modéré dans les tests évite l'explosion du coût des évolutions et montées de version</text>
+
+  <!-- Grille horizontale légère -->
+  <line x1="110" y1="215" x2="790" y2="215" stroke="#e2e8f0" stroke-width="1"/>
+  <line x1="110" y1="165" x2="790" y2="165" stroke="#e2e8f0" stroke-width="1"/>
+  <line x1="110" y1="115" x2="790" y2="115" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- Axes -->
+  <line x1="110" y1="260" x2="110" y2="80" stroke="#475569" stroke-width="1.8" marker-end="url(#arr-axis)"/>
+  <line x1="110" y1="260" x2="800" y2="260" stroke="#475569" stroke-width="1.8" marker-end="url(#arr-axis)"/>
+  <text x="118" y="86" class="axis-lbl">Coût / Temps par évolution</text>
+  <text x="800" y="278" text-anchor="end" class="axis-lbl">Temps · Évolutions · Montées de version</text>
+
+  <!-- Courbe 1 : Sans tests automatisés -->
+  <path d="M 115 246 C 200 245, 270 228, 330 204 C 420 168, 560 122, 775 86"
+        fill="none" stroke="#e11d48" stroke-width="3.2" stroke-linecap="round"/>
+  <text x="530" y="102" text-anchor="end" class="curve-red">Sans tests automatisés</text>
+  <text x="530" y="117" text-anchor="end" class="curve-red-sub">Régressions, recettes manuelles, dette technique</text>
+
+  <!-- Courbe 2 : Avec tests automatisés -->
+  <path d="M 115 214 C 200 211, 270 207, 330 204 C 440 199, 600 195, 775 192"
+        fill="none" stroke="#059669" stroke-width="3.2" stroke-linecap="round"/>
+  <text x="124" y="200" class="muted">Investissement initial</text>
+  <text x="775" y="213" text-anchor="end" class="curve-green">Avec tests automatisés</text>
+  <text x="775" y="228" text-anchor="end" class="curve-green-sub">Évolutions sereines, montées de version rapides</text>
+
+  <!-- Point seuil de rentabilité -->
+  <line x1="330" y1="204" x2="330" y2="260" stroke="#64748b" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <circle cx="330" cy="204" r="5" fill="#0f172a" stroke="#ffffff" stroke-width="2"/>
+  <text x="330" y="277" text-anchor="middle" class="muted">Seuil de rentabilité</text>
+
+  <!-- Pied de schéma -->
+  <rect x="28" y="294" width="824" height="26" rx="8" fill="#d1fae5"/>
+  <text x="440" y="311" text-anchor="middle" class="foot">Productivité future préservée : moins de suivi de production subi et un coût de MCO/MCS maîtrisé</text>
+</svg>
