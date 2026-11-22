@@ -89,7 +89,6 @@ Avec une sortie mineure tous les 6 mois et 12 mois de support gratuit par branch
   - tolérées tant que le SQL reste strictement standard ;
   - piège immédiat dès qu'on utilise des types ou fonctions propriétaires (JSONB, opérateurs PostgreSQL, etc.).
 
-:::tip[Comment limiter les écarts entre H2 et PostgreSQL ?]
-- **L'émulation (`MODE=PostgreSQL`)** ajuste l'URL JDBC de H2 pour tolérer une partie de la syntaxe PostgreSQL, mais reste une solution partielle.
-- **Testcontainers** (approche moderne) démarre un conteneur Docker PostgreSQL éphémère lors des tests, garantissant une parité stricte avec la production.
+:::tip[Pour aller plus loin côté tests]
+Pour arbitrer entre H2 en mémoire (standard ou `MODE=PostgreSQL`) et un vrai moteur PostgreSQL lors des tests d'intégration (**Testcontainers**, **Zonky**…), voir [Base de données dans les tests](/formation-api-rest/tests/bdd-tests/).
 :::

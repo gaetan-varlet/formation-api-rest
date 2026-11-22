@@ -1,0 +1,36 @@
+---
+title: "Base de données dans les tests"
+---
+
+:::caution[Page en construction]
+Cette page pose uniquement les principes d'arbitrage entre **H2** (standard ou en mode PostgreSQL) et un vrai moteur **PostgreSQL** en test (**Testcontainers**, **Zonky Embedded Postgres**, etc.). La partie pratique sera rédigée ultérieurement.
+:::
+
+## H2 en mémoire vs PostgreSQL en test
+
+Par défaut, les tests d'intégration peuvent s'appuyer sur une base en mémoire **H2** *(voir [Configuration de la BDD](/formation-api-rest/spring-boot/configuration-bdd/))*, qui démarre instantanément sans Docker ni serveur externe.
+
+Cette approche repose sur le rôle du **dialecte Hibernate** *(détaillé dans [Présentation de Spring Boot](/formation-api-rest/spring-boot/presentation-spring/#h2-vs-postgresql--le-rôle-et-les-limites-dhibernate))* : tant que le code passe par JPA / JPQL standard, Hibernate traduit les requêtes vers H2 en test et vers PostgreSQL en production.
+
+### Quand H2 ne suffit plus
+
+Les écarts entre H2 et PostgreSQL apparaissent dès que l'application sort du périmètre JPA standard :
+
+- **Requêtes SQL natives (`nativeQuery = true`)** utilisant une syntaxe propre à PostgreSQL ;
+- **Types ou opérateurs spécifiques au SGBD** *(ex. `JSONB`, expressions régulières ou fonctions PostgreSQL)* ;
+- **Différences subtiles de comportement SQL** *(gestion des clés, contraintes, schémas, verrouillage)*.
+
+### Pistes pour limiter les écarts
+
+- **Émulation `MODE=PostgreSQL` dans H2 :** ajuste l'URL JDBC de H2 (`jdbc:h2:mem:testdb;MODE=PostgreSQL`) pour tolérer une partie de la syntaxe PostgreSQL, mais reste une couverture partielle.
+- **Zonky Embedded Postgres :** exécute un véritable PostgreSQL embarqué sans nécessiter Docker *(piste à étudier ultérieurement)*.
+- **Testcontainers (PostgreSQL) :** démarre un conteneur Docker PostgreSQL éphémère pendant les tests, garantissant une parité stricte avec la base de production *(mise en œuvre à venir)*.
+
+## Règle d'arbitrage
+
+- **Conserver H2 en mémoire** tant que l'accès aux données repose sur du JPA / JPQL standard et que l'on privilégie la rapidité d'exécution.
+- **Basculer sur un vrai moteur PostgreSQL en test** (Testcontainers, Zonky Embedded Postgres ou équivalent) dès l'introduction de requêtes SQL natives ou de types spécifiques à PostgreSQL.
+
+## Mise en œuvre avec Spring Boot
+
+*Section à construire ultérieurement.*

@@ -119,7 +119,7 @@ Appeler directement les méthodes Java des `@RestController` dans les tests d'in
   - **[APIs HTTP externes](/formation-api-rest/tests/api-externes/) :** Démarrer un serveur HTTP local sur un port de test (ex. `HttpServer` du JDK ou **WireMock**) et y rediriger les URLs configurées.
   - **[Horloge système](/formation-api-rest/tests/horloge-temps/) :** Injecter `java.time.Clock` et le remplacer en test (horloge fixe ou mutable `@Primary`) pour garder des tests déterministes sans redémarrer le contexte Spring.
   - **Messagerie et autres infrastructures tierces :** Les envois d'e-mails, files de messages ou stockages externes doivent également être simulés ou isolés aux frontières pour préserver l'autonomie des tests *(non détaillé dans cette formation)*.
-- **Base de données de test :** Une base en mémoire rapide (H2) convient tant que l'accès aux données repose sur du JPA standard. Basculer sur **Testcontainers (PostgreSQL)** dès l'introduction de requêtes SQL natives (`nativeQuery = true`) ou de types spécifiques au SGBD de production.
+- **[Base de données de test](/formation-api-rest/tests/bdd-tests/) :** Une base en mémoire rapide (H2) convient tant que l'accès aux données repose sur du JPA standard. Basculer sur un vrai moteur PostgreSQL en test (ex. **Testcontainers** ou **Zonky**) dès l'introduction de requêtes SQL natives (`nativeQuery = true`) ou de types spécifiques au SGBD de production.
 
 ## Spécificités en développement assisté par agents (IA)
 

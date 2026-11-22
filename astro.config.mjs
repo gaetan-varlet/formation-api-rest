@@ -169,6 +169,10 @@ export default defineConfig({
 						{ slug: 'tests/api-externes' },
 						{ slug: 'tests/horloge-temps' },
 						{
+							slug: 'tests/bdd-tests',
+							badge: { text: 'À compléter', variant: 'caution' },
+						},
+						{
 							slug: 'tests/cucumber-gitlab',
 							badge: { text: 'À revoir', variant: 'caution' },
 						},
