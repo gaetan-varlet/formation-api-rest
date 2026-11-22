@@ -2,6 +2,10 @@
 title: "Intégration Cucumber dans GitLab CI"
 ---
 
+:::caution[Page à revoir]
+Cette page est en cours de révision : les exemples `.gitlab-ci.yml` ci-dessous doivent être mis à jour (réduction des logs Maven/Spring Boot, transmission des artefacts entre jobs, noms des rapports Cucumber et règles GitLab Pages).
+:::
+
 ## Réduire les logs dans le pipeline
 
 ```bash

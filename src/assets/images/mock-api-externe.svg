@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 264" role="img" aria-label="Principe du mock serveur HTTP local : le client HTTP appelle un serveur local au lieu de l'API externe réelle">
+  <defs>
+    <linearGradient id="service-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="mock-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <marker id="arr-sky" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7"/>
+    </marker>
+    <marker id="arr-indigo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#4f46e5"/>
+    </marker>
+    <style>
+      .title { font: 700 16px system-ui, -apple-system, sans-serif; fill: #0f172a; }
+      .sub { font: 500 12px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .pill { font: 700 10px system-ui, -apple-system, sans-serif; letter-spacing: 0.04em; }
+      .box-title { font: 700 13.5px system-ui, -apple-system, sans-serif; fill: #ffffff; }
+      .box-sub { font: 500 11px system-ui, -apple-system, sans-serif; fill: #eef2ff; }
+      .lbl-req { font: 600 11.5px system-ui, -apple-system, sans-serif; fill: #0369a1; }
+      .lbl-res { font: 600 11.5px system-ui, -apple-system, sans-serif; fill: #4338ca; }
+      .code { font: 600 11px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #334155; }
+      .ext-muted { font: 600 11px system-ui, -apple-system, sans-serif; fill: #64748b; }
+    </style>
+  </defs>
+
+  <!-- Fond global -->
+  <rect x="8" y="8" width="804" height="248" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="410" y="36" text-anchor="middle" class="title">Simulation d'une API externe par serveur HTTP local</text>
+  <text x="410" y="55" text-anchor="middle" class="sub">Le client HTTP reste identique : seule l'URL cible pointe vers localhost en test</text>
+
+  <!-- 1. Service applicatif testé -->
+  <rect x="28" y="86" width="218" height="106" rx="12" fill="url(#service-grad)"/>
+  <rect x="72" y="96" width="130" height="20" rx="10" fill="#d1fae5"/>
+  <text x="137" y="109.5" text-anchor="middle" class="pill" fill="#065f46">CODE TESTÉ (RÉEL)</text>
+  <text x="137" y="138" text-anchor="middle" class="box-title">Service / Client HTTP</text>
+  <text x="137" y="157" text-anchor="middle" class="box-sub">HttpClient / RestClient</text>
+  <text x="137" y="176" text-anchor="middle" class="box-sub">Appelle l'URL configurée</text>
+
+  <!-- Flèche requête HTTP -->
+  <text x="361" y="108" text-anchor="middle" class="lbl-req">Requête HTTP réelle</text>
+  <line x1="252" y1="120" x2="466" y2="120" stroke="#0284c7" stroke-width="2.4" marker-end="url(#arr-sky)"/>
+  <text x="361" y="135" text-anchor="middle" class="code">GET http://localhost:8082/...</text>
+
+  <!-- Flèche réponse scénarisée -->
+  <line x1="472" y1="164" x2="256" y2="164" stroke="#4f46e5" stroke-width="2.4" marker-end="url(#arr-indigo)"/>
+  <text x="361" y="182" text-anchor="middle" class="lbl-res">Réponse configurée (stub)</text>
+  <text x="361" y="198" text-anchor="middle" class="code">200 OK · 404 · 500 · délai / timeout</text>
+
+  <!-- 2. Serveur Mock Local -->
+  <rect x="476" y="86" width="234" height="106" rx="12" fill="url(#mock-grad)"/>
+  <rect x="524" y="96" width="138" height="20" rx="10" fill="#e0e7ff"/>
+  <text x="593" y="109.5" text-anchor="middle" class="pill" fill="#3730a3">FRONTIÈRE SIMULÉE</text>
+  <text x="593" y="138" text-anchor="middle" class="box-title">Serveur Mock Local</text>
+  <text x="593" y="157" text-anchor="middle" class="box-sub">localhost:8082 (WireMock / HttpServer)</text>
+  <text x="593" y="176" text-anchor="middle" class="box-sub">Intercepte, vérifie &amp; répond</text>
+
+  <!-- API externe réelle non appelée -->
+  <rect x="726" y="104" width="70" height="70" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="761" y="133" text-anchor="middle" class="ext-muted">API réelle</text>
+  <text x="761" y="149" text-anchor="middle" class="ext-muted">distante</text>
+  <text x="761" y="164" text-anchor="middle" class="ext-muted">(isolée)</text>
+
+  <!-- Note bas de schéma -->
+  <rect x="28" y="214" width="768" height="28" rx="8" fill="#e0f2fe" stroke="#bae6fd" stroke-width="1"/>
+  <text x="412" y="232" text-anchor="middle" class="sub" fill="#0c4a6e">Aucun appel réseau sortant : les tests restent rapides, déterministes et exécutables hors ligne en CI.</text>
+</svg>

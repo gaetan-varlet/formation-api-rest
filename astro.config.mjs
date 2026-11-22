@@ -167,8 +167,11 @@ export default defineConfig({
 						{ slug: 'tests/tests-integration' },
 						{ slug: 'tests/cucumber' },
 						{ slug: 'tests/cucumber-it' },
-						{ slug: 'tests/wiremock' },
-						{ slug: 'tests/cucumber-gitlab' },
+						{ slug: 'tests/api-externes' },
+						{
+							slug: 'tests/cucumber-gitlab',
+							badge: { text: 'À revoir', variant: 'caution' },
+						},
 					],
 				},
 				{
