@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 330" role="img" aria-label="Diagramme de séquence d'authentification HTTP Basic et Bearer">
+  <defs>
+    <marker id="arr-req" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7"/>
+    </marker>
+    <marker id="arr-warn" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706"/>
+    </marker>
+    <marker id="arr-ok" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+    </marker>
+    <style>
+      .title { font: 700 16px system-ui, -apple-system, sans-serif; fill: #0f172a; }
+      .actor { font: 700 14px system-ui, -apple-system, sans-serif; fill: #ffffff; }
+      .step { font: 700 12.5px system-ui, -apple-system, sans-serif; }
+      .mono { font: 500 12px ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .note { font: 600 12px system-ui, -apple-system, sans-serif; fill: #3730a3; }
+    </style>
+  </defs>
+
+  <!-- Fond clair encadré pour compatibilité thèmes clair et sombre -->
+  <rect x="8" y="8" width="804" height="314" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="410" y="36" text-anchor="middle" class="title">Cinématique d'authentification HTTP (exemple Basic)</text>
+
+  <!-- Acteurs et lignes de vie -->
+  <rect x="56" y="54" width="150" height="38" rx="9" fill="#0284c7"/>
+  <text x="131" y="78" text-anchor="middle" class="actor">Client</text>
+  <line x1="131" y1="92" x2="131" y2="274" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5"/>
+
+  <rect x="614" y="54" width="150" height="38" rx="9" fill="#0f766e"/>
+  <text x="689" y="78" text-anchor="middle" class="actor">Serveur / API</text>
+  <line x1="689" y1="92" x2="689" y2="274" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5"/>
+
+  <!-- 1. Requête initiale non authentifiée -->
+  <text x="410" y="114" text-anchor="middle" class="step" fill="#0369a1">1. GET /home  (sans en-tête Authorization)</text>
+  <line x1="138" y1="124" x2="678" y2="124" stroke="#0284c7" stroke-width="2.5" marker-end="url(#arr-req)"/>
+
+  <!-- 2. Défi 401 -->
+  <text x="410" y="150" text-anchor="middle" class="step" fill="#b45309">2. 401 Unauthorized</text>
+  <text x="410" y="165" text-anchor="middle" class="mono" fill="#92400e">WWW-Authenticate: Basic realm="localhost"</text>
+  <line x1="682" y1="174" x2="142" y2="174" stroke="#d97706" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#arr-warn)"/>
+
+  <!-- 3. Requête avec identifiants -->
+  <text x="410" y="200" text-anchor="middle" class="step" fill="#0369a1">3. GET /home</text>
+  <text x="410" y="215" text-anchor="middle" class="mono" fill="#0f172a">Authorization: Basic YWxpc2U6cGFzc3dvcmQ=</text>
+  <line x1="138" y1="224" x2="678" y2="224" stroke="#0284c7" stroke-width="2.5" marker-end="url(#arr-req)"/>
+
+  <!-- 4. Réponse 200 OK -->
+  <text x="410" y="254" text-anchor="middle" class="step" fill="#047857">4. 200 OK  (accès autorisé)</text>
+  <line x1="682" y1="264" x2="142" y2="264" stroke="#059669" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#arr-ok)"/>
+
+  <!-- Rappel mode Bearer / Keycloak -->
+  <rect x="56" y="284" width="708" height="28" rx="8" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1"/>
+  <text x="410" y="302" text-anchor="middle" class="note">En mode Keycloak (OIDC), le client obtient d'abord un JWT puis envoie : Authorization: Bearer &lt;token&gt;</text>
+</svg>
