@@ -207,10 +207,9 @@ public interface VinRepository extends JpaRepository<Vin, Integer> {
 public record VinResponse(Integer id, String chateau, String appellation, Integer annee, BigDecimal prix) {}
 
 public interface VinRepository extends JpaRepository<Vin, Integer> {
-    // 1. Dérivé du nom : colonnes déduites automatiquement du Record
+
     List<VinResponse> findByAppellation(String appellation);
 
-    // 2. Via @Query : instanciation explicite en JPQL
     @Query("""
         SELECT new fr.insee.formationapirest.dto.VinResponse(
             v.id, v.chateau, v.appellation, v.annee, v.prix
@@ -221,28 +220,77 @@ public interface VinRepository extends JpaRepository<Vin, Integer> {
 }
 ```
 
-- **Gains :** seules les colonnes utiles sont lues (pas de `SELECT *`) et aucun objet n'est conservé dans le cache L1 Hibernate.
+- **Approche 1 — *Query Method* (`findByAppellation`) :** Spring Data déduit automatiquement les colonnes à sélectionner à partir des champs du `Record`.
+- **Approche 2 — `@Query` JPQL (`findResumeByAnnee`) :** utile pour les requêtes plus complexes ; l'expression `SELECT new ...` instancie directement le `Record` (en précisant son nom complet avec le package).
+
+:::tip[⚡ Gains]
+Seules les colonnes utiles sont lues en base (pas de `SELECT *`) et aucun objet n'est conservé dans le cache L1 Hibernate (empreinte mémoire réduite et aucun suivi d'état).
+:::
 
 ## Requêtes d'écriture : `@Modifying`
 
-Par défaut, `@Query` n'accepte que des lectures (`SELECT`). Pour exécuter un `UPDATE` ou un `DELETE`, deux annotations sont requises :
+Par défaut, `@Query` n'accepte que des lectures (`SELECT`). Pour exécuter directement un `UPDATE` ou un `DELETE` en base (sans charger les entités en mémoire), il faut ajouter `@Modifying` sur la méthode du repository et s'assurer qu'elle s'exécute dans une transaction portée par le `@Service` :
 
 ```java title="VinRepository.java"
 public interface VinRepository extends JpaRepository<Vin, Integer> {
-    @Modifying(clearAutomatically = true)
-    @Transactional
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Vin v SET v.prix = :nouveauPrix WHERE v.id = :id")
     int updatePrix(Integer id, BigDecimal nouveauPrix);
 
-    @Modifying(clearAutomatically = true)
-    @Transactional
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Vin v WHERE v.annee < :anneeLimite")
     int deleteVinsAnciens(Integer anneeLimite);
 }
 ```
 
-- **`@Modifying(clearAutomatically = true)` :** exécute un `executeUpdate()` et purge le cache L1 Hibernate pour éviter de conserver des entités désynchronisées en mémoire.
-- **`@Transactional` :** impose un contexte transactionnel obligatoire pour l'écriture (généralement porté par le Service).
+```java title="VinService.java"
+@Service
+@RequiredArgsConstructor
+public class VinService {
+
+    private final VinRepository vinRepository;
+
+    @Transactional
+    public int appliquerRemise(Integer id, BigDecimal nouveauPrix) {
+        return vinRepository.updatePrix(id, nouveauPrix);
+    }
+}
+```
+
+- **Pourquoi `@Transactional` sur le `@Service` plutôt que sur le Repository ?**
+  - Les méthodes **héritées** de `JpaRepository` (`save`, `delete`, `deleteAllInBatch`…) embarquent déjà `@Transactional` dans Spring Data JPA. En revanche, **vos méthodes `@Query` personnalisées ne sont pas transactionnelles par défaut**.
+  - On place donc `@Transactional` sur le **`@Service`** afin que le cas d'usage métier complet (plusieurs lectures/écritures éventuelles) partage une **unique** transaction atomique avec *rollback* global en cas d'erreur.
+  - **Si aucune transaction n'est active** (ni sur le service, ni sur le repository), l'appel échoue à l'exécution avec une `TransactionRequiredException` (*« Executing an update/delete query »*).
+- **Que se passe-t-il si `@Modifying` est absent ?**
+  - Sur les méthodes natives de `JpaRepository` (`save`, `delete`, `*InBatch`) ou les *Query Methods* de suppression (`deleteBy...`), `@Modifying` n'est pas nécessaire : Spring Data sait déjà qu'il s'agit d'écritures.
+  - Sur une méthode `@Query`, Spring Data considère par défaut que la requête est un `SELECT` et tente de lire un jeu de résultats. Si vous écrivez un `UPDATE` ou un `DELETE` sans `@Modifying`, l'appel lève une exception à l'exécution (`Not supported for DML operations` / `InvalidDataAccessApiUsageException`).
+- **Que se passe-t-il si `clearAutomatically = true` est absent (`false` par défaut) ?**
+  - **En base de données :** la requête `UPDATE` ou `DELETE` s'exécute bien correctement en base. En revanche, elle **contourne le cache L1 Hibernate** (la mémoire de la transaction en cours).
+  - **Ce que vous risquez concrètement si la transaction continue après l'appel :**
+    1. **Donnée fausse côté Java / réponse API :** si vous aviez chargé `Vin #1` (`prix = 50 €`) avant d'appeler `updatePrix(1, 30 €)`, un nouveau `findById(1)` dans la même méthode renvoie toujours **`50 €`** (lu depuis le cache L1) alors que la base contient **`30 €`**.
+    2. **Écrasement silencieux en base :** si vous modifiez ensuite un autre champ sur ce `Vin` resté en mémoire (ex. `vin.setAppellation(...)`), Hibernate génère au `COMMIT` un `UPDATE` complet de l'entité… **et peut réécrire l'ancien prix `50 €` en base** *(ou lever une erreur de conflit si vous utilisez `@Version`)*.
+  - **Quand il n'y a aucun impact :** si la méthode `@Transactional` se termine juste après l'appel `@Modifying` (comme `appliquerRemise` ci-dessus), le `COMMIT` détruit immédiatement le cache L1 et la requête suivante lira bien `30 €`.
+- **Pourquoi ajouter `flushAutomatically = true` avec `clearAutomatically = true` ?**
+  - Par défaut, Hibernate garde les modifications faites sur vos entités en mémoire (cache L1) et attend le `COMMIT` pour exécuter les `UPDATE`/`INSERT` correspondants (et ne les envoie pas toujours avant une requête `@Query`, notamment en SQL natif).
+  - **Le piège si `clearAutomatically = true` est utilisé seul :**
+    ```java
+    @Transactional
+    public void corrigerVin(Integer id) {
+        Vin vin = vinRepository.findById(id).orElseThrow();
+        vin.setChateau("Château Margaux"); // Modifié en mémoire uniquement (pas encore en base)
+
+        vinRepository.updatePrix(id, new BigDecimal("45.00"));
+        // Sans flushAutomatically = true : clearAutomatically vide le cache L1
+        // -> "Château Margaux" est effacé de la mémoire avant même le COMMIT (modif perdue !)
+    }
+    ```
+  - Avec `flushAutomatically = true`, Spring Data force l'ordre exact : **1.** envoyer les modifs en attente vers la base (`flush`), **2.** exécuter le `@Modifying`, **3.** vider le cache L1 (`clear`). Rien n'est perdu.
+- **Peut-on utiliser `@Modifying(clearAutomatically = true, flushAutomatically = true)` tout le temps ?**
+  - **En pratique, oui** dans la grande majorité des cas : c'est la configuration la plus sûre dès que la requête `@Modifying` est la seule action ou la dernière action de votre service.
+  - **Les 2 cas où il faut faire attention :**
+    1. **Si vous réutilisez ensuite une variable Java chargée avant :** le `clear()` **détache** toutes les entités qui étaient en mémoire. Accéder ensuite à une relation `LAZY` sur cette variable lèvera une `LazyInitializationException`, et modifier un champ dessus ne sera plus sauvegardé au `COMMIT` (il faut la recharger via `findById` si vous en avez encore besoin).
+    2. **Dans une boucle :** à chaque itération, `flushAutomatically` force Hibernate à scanner tout le cache L1 (*dirty-checking*) et à envoyer les écritures en attente immédiatement (cassant le batching Hibernate s'il est activé), tandis que `clearAutomatically` vide le cache L1 — obligeant Hibernate à refaire des `SELECT` au tour suivant dès qu'il a besoin des mêmes entités de référence *(dans ce cas, préférez une unique requête `WHERE id IN (:ids)` ou du batch JDBC)*.
 
 ## Le Repository Personnalisé (*Custom*)
 
