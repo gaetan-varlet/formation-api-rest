@@ -60,6 +60,8 @@ public class CucumberRunnerTest {
 
 ### Écriture d'une première feature et de sa glue
 
+Un fichier `.feature` décrit le comportement attendu avec trois mots-clés : **`Given`** (état initial), **`When`** (action exécutée) et **`Then`** (résultat vérifié). Les barres `| ... |` forment un tableau (`DataTable`) lisible directement dans la spécification :
+
 ```gherkin title="vins.feature"
 Feature: Obtenir les vins
 
@@ -72,6 +74,12 @@ Feature: Obtenir les vins
         When je récupère tous les vins
         Then le nombre de vins est 3
 ```
+
+La classe de **glue** implémente `En` *(fournie par `cucumber-java8`)* pour relier chaque phrase Gherkin à du code Java dans son constructeur :
+
+- **`Before(...)` :** réinitialise le mock et le service avant chaque scénario pour éviter tout effet de bord.
+- **`DataTable` :** `dataTable.asMaps()` transforme les lignes du tableau Gherkin en `Map<String, String>` (nom de colonne → valeur).
+- **`{int}` :** capture un entier directement depuis la phrase Gherkin et le passe en argument de la lambda.
 
 ```java title="VinGlue.java"
 public class VinGlue implements En {
@@ -108,6 +116,8 @@ public class VinGlue implements En {
     }
 }
 ```
+
+Pour isoler `VinService` sans base de données ni framework de mock, `VinRepoMock` implémente simplement `VinRepository` en mémoire avec une `List<Vin>` :
 
 ```java title="VinRepoMock.java"
 public class VinRepoMock implements VinRepository {
@@ -151,11 +161,28 @@ When("je récupère tous les vins de l'appellation {string}", (String appellatio
 });
 ```
 
-### Alternative : injection de dépendances avec `cucumber-spring`
+:::note[Un seul contexte Spring, deux runners si vous faites aussi des TU en Cucumber]
+Écrire des tests unitaires en Cucumber fonctionne très bien tant qu'ils restent **sans contexte Spring** ni préparation lourde entre scénarios : ils s'exécutent en quelques millisecondes et permettent de garder un seul formalisme pour toute l'équipe.
 
-Il est possible d'injecter des beans de test (ex. un repository en mémoire) dans les classes de glue via Spring (voir l'[exemple de Michael Azerhad](https://github.com/mica16/BDD-TDD-Demo/tree/part3)).
+Si vous utilisez Cucumber **à la fois** pour les tests unitaires (`mvn test`) et pour les tests d'intégration (`mvn verify`), vous aurez **deux runners** distincts (`CucumberRunnerTest` sans Spring et `CucumberRunnerIT` avec Spring), mais **une seule** classe `@CucumberContextConfiguration` (`ContextConfigurationIT`). *(Si vos tests unitaires sont en JUnit classique sans Cucumber, un seul runner `CucumberRunnerIT` suffit.)*
 
-Ajoutez la dépendance `cucumber-spring` :
+Dans ce cas de cohabitation, dès que `cucumber-spring` est dans le `pom.xml`, Cucumber l'active par défaut pour tous les runners et échoue s'il ne trouve pas de `@CucumberContextConfiguration` côté unitaire. Pour garder `CucumberRunnerTest` en Java pur sans Spring, ajoutez dessus :
+
+```java
+@ConfigurationParameter(
+    key = OBJECT_FACTORY_PROPERTY_NAME,
+    value = "io.cucumber.core.backend.DefaultObjectFactory"
+)
+```
+
+Pensez aussi à séparer les dossiers de `.feature` (ex. `features.unittests` et `features.it`) pour que `CucumberRunnerTest` et `CucumberRunnerIT` n'exécutent pas les mêmes scénarios.
+:::
+
+## Tests d'intégration avec Spring Boot
+
+### Configuration du contexte et du runner `*IT`
+
+Pour les tests d'intégration, ajoutez la dépendance `cucumber-spring` afin que Spring injecte vos services, `MockMvc` ou utilitaires de test dans les classes de glue :
 
 ```xml title="pom.xml"
 <dependency>
@@ -166,52 +193,7 @@ Ajoutez la dépendance `cucumber-spring` :
 </dependency>
 ```
 
-Déclarez vos beans de test avec le scope `cucumber-glue` (réinitialisés entre chaque scénario) puis reliez le contexte à Cucumber via `@CucumberContextConfiguration` :
-
-```java title="RepositoriesConfiguration.java"
-@Configuration
-public class RepositoriesConfiguration {
-
-    @Bean
-    @Scope("cucumber-glue")
-    public VinRepoMock vinRepository() {
-        return new VinRepoMock();
-    }
-}
-```
-
-```java title="ContextConfigurationTest.java"
-import org.springframework.test.context.ContextConfiguration;
-
-@ContextConfiguration(classes = {
-    RepositoriesConfiguration.class
-})
-@CucumberContextConfiguration
-class ContextConfigurationTest {
-}
-```
-
-Le repository est alors injecté par constructeur dans la classe de glue :
-
-```java title="VinGlue.java"
-public class VinGlue implements En {
-    private VinService vinService;
-    private List<Vin> vins;
-
-    public VinGlue(VinRepoMock vinRepository) {
-        Before(() -> {
-            vinService = new VinService(vinRepository);
-        });
-        ...
-    }
-}
-```
-
-## Tests d'intégration avec Spring Boot
-
-### Configuration du contexte et du runner `*IT`
-
-Contrairement aux tests unitaires, le contexte démarre toute l'application Spring Boot avec `@SpringBootTest`. En Cucumber, une seule classe porte `@CucumberContextConfiguration` et `@SpringBootTest` :
+Une **unique** classe porte `@CucumberContextConfiguration` et `@SpringBootTest` pour l'ensemble des tests d'intégration :
 
 ```java title="ContextConfigurationIT.java"
 @SpringBootTest
@@ -224,6 +206,8 @@ Contrairement aux tests unitaires, le contexte démarre toute l'application Spri
 public class ContextConfigurationIT {
 }
 ```
+
+Le runner `CucumberRunnerIT` (suffixé `*IT` pour être exécuté lors de `mvn verify` via Maven Failsafe) pointe vers les scénarios et le package de glue d'intégration :
 
 ```java title="CucumberRunnerIT.java"
 import static io.cucumber.junit.platform.engine.Constants.*;
