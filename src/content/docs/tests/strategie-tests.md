@@ -132,7 +132,17 @@ Grâce au démarrage rapide des conteneurs modernes et à la mise en cache du co
   - *Pyramide :* méthodes Java internes → valide une classe isolée, fragile au refactoring.
   - *Honeycomb / Trophy :* contrat HTTP / JSON → valide sécurité, validation, MVC, SQL/JPA et sérialisation en résistant au refactoring interne.
 
+### Et finalement, quelle stratégie choisir ?
+
+Il n'existe pas une forme unique adaptée à tous les projets : la **Pyramide** reste pertinente pour une bibliothèque ou un moteur purement algorithmique, tandis que le **Testing Honeycomb** et le **Testing Trophy** conviennent nettement mieux aux API Spring Boot orientées données, sécurité et orchestration.
+
 ## Règles d'arbitrage et outillage sur Spring Boot
+
+:::note[Quand une API est-elle « suffisamment testée » ?]
+L'objectif n'est pas d'atteindre 100 % de couverture, mais d'obtenir **assez de confiance pour livrer en production sereinement** tout en respectant le temps et les **ressources de l'équipe**. On priorise donc par **criticité** : sécuriser d'abord les parcours nominaux (*happy paths*), les droits d'accès, la persistance et les règles métier clés plutôt que tester mécaniquement des DTO ou des getters. Sur Spring Boot, un test d'intégration HTTP avec contexte partagé reste rapide à écrire et peu coûteux à maintenir : c'est surtout l'effort sur les derniers pourcents techniques ou la multiplication des E2E navigateur qui devient peu rentable. En pratique, ce point d'équilibre se situe souvent autour de **85–90 %** *(à voir comme un simple repère empirique, jamais comme un seuil rigide)*.
+
+Idéalement, une API est suffisamment testée lorsque l'on n'a plus besoin de retester manuellement sans cesse les mêmes comportements, et surtout **lorsque l'on peut déployer en production les montées de version de bibliothèques sans recette manuelle**.
+:::
 
 ### Quand écrire quel test ?
 
@@ -141,6 +151,10 @@ Grâce au démarrage rapide des conteneurs modernes et à la mise en cache du co
   - **Tout regrouper en intégration (test paramétré ou `Scenario Outline`) :** lorsque le contexte Spring est partagé, que le jeu de données est léger et que le nombre de cas reste raisonnable (< 15–20 cas). Cela évite de maintenir deux suites pour la même règle.
   - **Séparer en 1 test d'intégration nominal + N tests unitaires purs :** uniquement lorsque la combinatoire est élevée (parseurs complexes, regex, matrices de dates) ou que la préparation de la base noie l'intention métier.
 - **Tests de contrat et E2E ciblés :** réserver les tests de contrat (*Pact*, *Spring Cloud Contract*) aux interfaces critiques entre équipes et limiter l'E2E (Playwright) à quelques parcours majeurs.
+
+### Principes d'écriture
+
+- **Tests simples, lisibles et indépendants :** chaque test vérifie un comportement précis, sans dépendre d'un ordre d'exécution ni muter un état partagé pour les tests suivants (données en base ou mocks aux frontières réinitialisés entre deux scénarios).
 
 :::caution[À éviter]
 Appeler directement les méthodes Java des `@RestController` dans les tests d'intégration. Cela contourne les filtres de sécurité, la validation `@Valid`, le binding `@RequestParam` et la sérialisation Jackson.
