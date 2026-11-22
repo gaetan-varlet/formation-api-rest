@@ -1,0 +1,104 @@
+---
+title: "Cache applicatif (Spring Cache)"
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+Le cache applicatif permet d'éviter de répéter des traitements ou des requêtes coûteuses en mémorisant le résultat d'un appel selon ses paramètres.
+
+## Principe et limites
+
+Sans configuration supplémentaire, Spring Boot fournit un cache simple en mémoire basé sur une `ConcurrentHashMap` (pratique pour démarrer, mais sans expiration *TTL* ni limite de taille — en production, on le remplace généralement par **Caffeine** en local ou **Redis** en cache distribué).
+
+:::caution[Limites et risques d'invalidation]
+La gestion de l'invalidation d'un cache en mémoire devient complexe dès que les données évoluent en dehors du chemin d'appel :
+- **Plusieurs instances de l'API** (par exemple plusieurs pods Kubernetes) : chaque instance possède son propre cache mémoire indépendant, ce qui provoque des incohérences.
+- **Partage de la base de données :** une mise à jour effectuée par un autre service ou un batch applicatif ne rafraîchit pas le cache en mémoire de votre API.
+- **Intervention manuelle en base :** un script SQL exécuté directement sur la base rend les données en cache obsolètes.
+:::
+
+## Mise en place
+
+<Steps>
+
+1. **Activer le mécanisme de cache avec `@EnableCaching`**
+
+   *(Ajoutez éventuellement `spring-boot-starter-cache` dans `pom.xml` pour l'auto-configuration de fournisseurs comme Caffeine ou Redis.)*
+
+   ```java title="FormationApiRestApplication.java"
+   @SpringBootApplication
+   @EnableCaching
+   public class FormationApiRestApplication {
+
+       public static void main(String[] args) {
+           SpringApplication.run(FormationApiRestApplication.class, args);
+       }
+   }
+   ```
+
+2. **Annoter la méthode à mettre en cache avec `@Cacheable`**
+
+   ```java title="CalculService.java"
+   @Slf4j
+   @Service
+   public class CalculService {
+
+       @Cacheable("longService")
+       public boolean longService(int number) throws InterruptedException {
+           log.info("Passage dans la méthode longService({})", number);
+           Thread.sleep(2000);
+           return number % 2 == 0;
+       }
+   }
+   ```
+
+3. **Appeler le service depuis un contrôleur**
+
+   ```java title="CalculController.java"
+   @Slf4j
+   @RestController
+   @RequiredArgsConstructor
+   public class CalculController {
+
+       private final CalculService calculService;
+
+       @GetMapping("/long/{number}")
+       public boolean longFonction(@PathVariable int number) throws InterruptedException {
+           log.info("Avant appel du service");
+           boolean resultat = calculService.longService(number);
+           log.info("Après appel du service");
+           return resultat;
+       }
+   }
+   ```
+
+</Steps>
+
+**Comportement observé dans les logs :**
+- **`GET /long/4` (1er appel) :** dure ~2 secondes et affiche `Avant...`, `Passage dans la méthode longService(4)`, `Après...`.
+- **`GET /long/4` (2e appel) :** réponse instantanée ; `Passage dans la méthode...` n'apparaît plus car Spring renvoie directement la valeur en cache pour la clé `4`.
+- **`GET /long/5` :** dure ~2 secondes car la clé `5` n'est pas encore en cache.
+
+:::note[Attention aux appels internes (`this.`)]
+Comme `@Transactional`, `@Cacheable` repose sur un **proxy Spring** : si une méthode de `CalculService` appelle directement `this.longService(...)`, le cache est contourné. L'appel doit passer par un autre bean (comme `CalculController`).
+:::
+
+## Invalider ou mettre à jour le cache
+
+Pour garder le cache cohérent lors d'une écriture, Spring propose deux autres annotations complémentaires :
+
+- **`@CacheEvict`** : supprime une entrée (ou tout le cache avec `allEntries = true`) lors d'une modification ou suppression.
+- **`@CachePut`** : exécute toujours la méthode et met à jour le cache avec la nouvelle valeur retournée.
+
+```java
+@CacheEvict(value = "vins", key = "#id")
+public void deleteById(Integer id) {
+    vinRepository.deleteById(id);
+}
+```
+
+## Pour aller plus loin
+
+- [Guide officiel — Caching Data with Spring](https://spring.io/guides/gs/caching/)
+- [Documentation de référence Spring Boot — Caching](https://docs.spring.io/spring-boot/reference/io/caching.html)
+- [Tutoriel Spring Cache — Baeldung](https://www.baeldung.com/spring-cache-tutorial)
