@@ -13,16 +13,16 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
+			<groupId>tools.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.14.2</version>
+			<version>3.3.0</version>
 		</dependency>
 		<!-- ajout de la dépendance pour JAXB suite au passage à Java 9+ qui ne l'inclut plus
 		d'office -->
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
-			<version>3.0.2</version>
+			<version>4.0.9</version>
 		</dependency>
 	</dependencies>
 
@@ -31,9 +31,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.9.0</version>
+				<version>3.16.0</version>
 				<configuration>
-					<release>17</release>
+					<release>25</release>
 				</configuration>
 			</plugin>
 		</plugins>

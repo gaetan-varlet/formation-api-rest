@@ -4,5 +4,5 @@
 )
 package model;
 
-import javax.xml.bind.annotation.XmlNsForm;
-import javax.xml.bind.annotation.XmlSchema;
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlSchema;

@@ -17,13 +17,10 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
-import javax.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBContext;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import model.User;
 
@@ -67,7 +64,7 @@ public class HttpRequestHttpClient {
 	}
 
 	public static void requetePostSynchroneJson()
-			throws JsonParseException, JsonMappingException, IOException, InterruptedException {
+			throws IOException, InterruptedException {
 		ObjectMapper mapper = new ObjectMapper();
 		User user = new User();
 		user.setUserName("toto");
@@ -118,7 +115,7 @@ public class HttpRequestHttpClient {
 		System.out.println(LocalDateTime.now()); // 16:03:28.104822
 		List<CompletableFuture<HttpResponse<String>>> cfResponses = urls.stream().map(url -> httpClient.sendAsync(
 				HttpRequest.newBuilder().header("Accept", "application/json").uri(URI.create(url)).GET().build(),
-				BodyHandlers.ofString())).collect(Collectors.toList());
+				BodyHandlers.ofString())).toList();
 		System.out.println(LocalDateTime.now()); // 16:03:28.137822
 		// on attend d'avoir toutes les réponses
 		CompletableFuture<Void> conbinedCF = CompletableFuture

@@ -5,15 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import model.User;
 
@@ -29,7 +28,7 @@ public class HttpRequestJava {
 		// System.setProperty("http.proxyHost", "proxy-rie.http.insee.fr");
 		// System.setProperty("http.proxyPort", "8080");
 		// requête en GET avec réponse en XML
-		URL url = new URL("http://fakerestapi.azurewebsites.net/api/v1/Users/1");
+		URL url = URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users/1").toURL();
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("GET");
 		connection.setRequestProperty("Accept", "application/xml");
@@ -43,11 +42,11 @@ public class HttpRequestJava {
 		connection.disconnect();
 	}
 
-	public static void requeteGetJson() throws JsonParseException, JsonMappingException, IOException {
+	public static void requeteGetJson() throws IOException {
 		// System.setProperty("http.proxyHost", "proxy-rie.http.insee.fr");
 		// System.setProperty("http.proxyPort", "8080");
 		// requête en GET avec réponse en JSON
-		URL url = new URL("http://fakerestapi.azurewebsites.net/api/v1/Users/1");
+		URL url = URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users/1").toURL();
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("GET");
 		connection.setRequestProperty("Accept", "application/json");
@@ -58,7 +57,7 @@ public class HttpRequestJava {
 		System.out.println(user);
 	}
 
-	public static void requetePostJson() throws JsonParseException, JsonMappingException, IOException {
+	public static void requetePostJson() throws IOException {
 		// System.setProperty("http.proxyHost", "proxy-rie.http.insee.fr");
 		// System.setProperty("http.proxyPort", "8080");
 
@@ -66,7 +65,7 @@ public class HttpRequestJava {
 		user.setUserName("toto");
 		user.setPassword("azerty");
 		ObjectMapper mapper = new ObjectMapper();
-		URL url = new URL("http://fakerestapi.azurewebsites.net/api/v1/Users");
+		URL url = URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users").toURL();
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("POST");
 		connection.setRequestProperty("Accept", "application/json");

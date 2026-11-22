@@ -58,9 +58,31 @@ http://fakerestapi.azurewebsites.net/api/v1/Users/1
   </TabItem>
 </Tabs>
 
-Création d'un projet Maven en Java 17 avec la dépendance **jackson-databind**, et création d'un Bean **User** :
+Création d'un projet Maven en **Java 25** avec **Jackson 3** (`tools.jackson.core:jackson-databind`, dont `ObjectMapper` est désormais dans `tools.jackson.databind`), et **JAXB 4** si vous consommez aussi du XML :
 
-```java
+```xml title="pom.xml"
+<dependency>
+    <groupId>tools.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>3.3.0</version>
+</dependency>
+<!-- Uniquement si vous devez aussi désérialiser du XML avec JAXB -->
+<dependency>
+    <groupId>org.glassfish.jaxb</groupId>
+    <artifactId>jaxb-runtime</artifactId>
+    <version>4.0.9</version>
+</dependency>
+```
+
+Création du Bean **User** :
+
+```java title="User.java"
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+
 @XmlRootElement(name = "User")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class User {
@@ -82,15 +104,15 @@ public class User {
 <details>
 <summary>Configuration JAXB (package-info.java) si vous devez aussi désérialiser du XML</summary>
 
-```java
+```java title="package-info.java"
 @XmlSchema(
     namespace="http://schemas.datacontract.org/2004/07/FakeRestAPI.Web.Models",
     elementFormDefault=XmlNsForm.QUALIFIED
 )
 package model;
 
-import javax.xml.bind.annotation.XmlNsForm;
-import javax.xml.bind.annotation.XmlSchema;
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlSchema;
 ```
 
 </details>
@@ -285,7 +307,7 @@ List<CompletableFuture<HttpResponse<String>>> cfResponses = urls.stream()
     .map(url -> httpClient.sendAsync(
         HttpRequest.newBuilder().header("Accept", "application/json").uri(URI.create(url)).GET().build(),
         BodyHandlers.ofString())
-    ).collect(Collectors.toList());
+    ).toList();
 System.out.println(LocalDateTime.now()); // 16:03:28.137822
 // on attend d'avoir toutes les réponses
 CompletableFuture<Void> combinedCF = CompletableFuture.allOf(cfResponses.toArray(new CompletableFuture[0]));
@@ -348,7 +370,7 @@ System.setProperty("http.proxyHost", "proxy-rie.http.insee.fr");
 System.setProperty("http.proxyPort", "8080");
 
 // requête en GET avec réponse en XML
-URL url = new URL("http://fakerestapi.azurewebsites.net/api/v1/Users/1");
+URL url = URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users/1").toURL();
 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 connection.setRequestMethod("GET");
 connection.setRequestProperty("Accept", "application/xml");
@@ -361,7 +383,7 @@ System.out.println(connection.getResponseCode()); // 200
 System.out.println(connection.getContentType()); // application/xml; charset=utf-8
 
 // requête en GET avec réponse en JSON
-URL url = new URL("http://fakerestapi.azurewebsites.net/api/v1/Users/1");
+URL url = URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users/1").toURL();
 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 connection.setRequestMethod("GET");
 connection.setRequestProperty("Accept", "application/json");
@@ -377,7 +399,7 @@ System.out.println(user);
 ```java
 User user = new User(); user.setUserName("toto"); user.setPassword("azerty");
 ObjectMapper mapper = new ObjectMapper();
-URL url = new URL("http://fakerestapi.azurewebsites.net/api/v1/Users");
+URL url = URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users").toURL();
 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 connection.setRequestMethod("POST");
 connection.setRequestProperty("Accept", "application/json");
