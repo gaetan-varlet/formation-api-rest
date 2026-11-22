@@ -58,9 +58,10 @@ Avant d'écrire la moindre requête personnalisée, hériter de `JpaRepository<T
   - **Lecture / export de gros volumes :** [Stratégies d'extraction et gros volumes](/formation-api-rest/acces-donnees/extraction-gros-volumes/) et [Le streaming](/formation-api-rest/fichiers-performance/streaming/).
 
 :::tip[Bon réflexe en lecture : `@Transactional(readOnly = true)` sur le `@Service`]
-Sur les lectures simples (*Query Methods*, `@Query` `SELECT`), `@Transactional(readOnly = true)` n'est pas obligatoire pour que la requête fonctionne (`JpaRepository` le gère déjà par défaut). En revanche, l'ajouter sur les méthodes de lecture de votre `@Service` :
-- **désactive les snapshots de *dirty-checking*** dans le cache L1 (gain de RAM et de CPU) ;
-- devient **indispensable** dès que vous enchaînez plusieurs requêtes dans le même appel (ex. 2 `@EntityGraph`), accédez à des relations `LAZY` dans le service, ou utilisez un `Stream<T>`.
+Par défaut, Spring Data JPA applique `@Transactional(readOnly = true)` sur les méthodes de lecture **héritées** de `JpaRepository` (`findAll`, `findById`…), mais **pas sur les méthodes que vous déclarez** (*Query Methods*, `@Query`) :
+- **Sans `@Transactional` sur le `@Service` :** vos *Query Methods* / `@Query` s'exécutent sans `readOnly = true` (snapshots et *dirty-checking* actifs si `open-in-view` est actif), et chaque appel hérité ouvre sa propre transaction (pas de partage du cache L1 ni de `Stream<T>`).
+- **Avec `@Transactional` (sans `readOnly = true`) sur le `@Service` :** la transaction est ouverte en écriture et **écrase** le `readOnly = true` de `JpaRepository` — les snapshots et le *dirty-checking* sont alors **activés** sur toutes vos lectures.
+- **Avec `@Transactional(readOnly = true)` sur le `@Service` :** la transaction se **propage** par défaut (`Propagation.REQUIRED`) à **tous** les appels de repositories exécutés dans la méthode. Vous gardez ainsi une **unique** transaction partagée (enchaîner 2 `@EntityGraph`, lire des relations `LAZY`, `Stream<T>`) tout en **désactivant les snapshots et le *dirty-checking*** dans le cache L1 pour **toutes** les lectures.
 :::
 
 ## Panorama des approches JPA
