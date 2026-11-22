@@ -8,29 +8,34 @@ Cette page pose uniquement les principes d'arbitrage entre **H2** (standard ou e
 
 ## H2 en mémoire vs PostgreSQL en test
 
-Par défaut, les tests d'intégration peuvent s'appuyer sur une base en mémoire **H2** *(voir [Configuration de la BDD](/formation-api-rest/spring-boot/configuration-bdd/))*, qui démarre instantanément sans Docker ni serveur externe.
+Par défaut, les tests d'intégration s'appuient sur une base en mémoire **H2** *(voir [Configuration de la BDD](/formation-api-rest/spring-boot/configuration-bdd/))*, qui démarre instantanément sans Docker ni serveur externe.
 
-Cette approche repose sur le rôle du **dialecte Hibernate** *(détaillé dans [Présentation de Spring Boot](/formation-api-rest/spring-boot/presentation-spring/#h2-vs-postgresql--le-rôle-et-les-limites-dhibernate))* : tant que le code passe par JPA / JPQL standard, Hibernate traduit les requêtes vers H2 en test et vers PostgreSQL en production.
+### Pourquoi l'alternance fonctionne : le rôle d'Hibernate
 
-### Quand H2 ne suffit plus
+- **Abstraction du SQL :** Spring Data génère des requêtes abstraites (JPQL / requêtes dérivées).
+- **Rôle du dialecte :** Hibernate détecte le driver (`H2` ou `PostgreSQL`) et traduit le JPQL en SQL adapté au moteur sous-jacent :
+  - pagination (`LIMIT / OFFSET`) ;
+  - fonctions de date et concaténation adaptées au SGBD ;
+  - stratégies de génération des clés primaires (`IDENTITY` vs `SEQUENCE`).
 
-Les écarts entre H2 et PostgreSQL apparaissent dès que l'application sort du périmètre JPA standard :
+### Où s'arrête la magie : quand H2 ne suffit plus
 
-- **Requêtes SQL natives (`nativeQuery = true`)** utilisant une syntaxe propre à PostgreSQL ;
-- **Types ou opérateurs spécifiques au SGBD** *(ex. `JSONB`, expressions régulières ou fonctions PostgreSQL)* ;
-- **Différences subtiles de comportement SQL** *(gestion des clés, contraintes, schémas, verrouillage)*.
+Les écarts entre H2 et PostgreSQL apparaissent dès que l'on sort du SQL généré par JPA :
+
+- **Requêtes SQL natives (`nativeQuery = true`) :** tolérées tant que le SQL reste strictement standard, mais en échec dès qu'on emploie des types ou fonctions propriétaires (`JSONB`, opérateurs ou fonctions PostgreSQL…) ;
+- **Comportements SGBD spécifiques :** gestion des clés, contraintes, schémas ou verrouillage.
 
 ### Pistes pour limiter les écarts
 
 - **Émulation `MODE=PostgreSQL` dans H2 :** ajuste l'URL JDBC de H2 (`jdbc:h2:mem:testdb;MODE=PostgreSQL`) pour tolérer une partie de la syntaxe PostgreSQL, mais reste une couverture partielle.
-- **Zonky Embedded Postgres :** exécute un véritable PostgreSQL embarqué sans nécessiter Docker *(piste à étudier ultérieurement)*.
-- **Testcontainers (PostgreSQL) :** démarre un conteneur Docker PostgreSQL éphémère pendant les tests, garantissant une parité stricte avec la base de production *(mise en œuvre à venir)*.
+- **Zonky Embedded Postgres :** exécute un véritable PostgreSQL embarqué sans nécessiter Docker.
+- **Testcontainers (PostgreSQL) :** démarre un conteneur Docker PostgreSQL éphémère pendant les tests, garantissant une parité stricte avec la base de production.
 
 ## Règle d'arbitrage
 
 - **Conserver H2 en mémoire** tant que l'accès aux données repose sur du JPA / JPQL standard et que l'on privilégie la rapidité d'exécution.
 - **Basculer sur un vrai moteur PostgreSQL en test** (Testcontainers, Zonky Embedded Postgres ou équivalent) dès l'introduction de requêtes SQL natives ou de types spécifiques à PostgreSQL.
 
-## Mise en œuvre avec Spring Boot
+## Comparatif pratique des 3 pistes *(à venir)*
 
-*Section à construire ultérieurement.*
+*Section à construire ultérieurement : mise en œuvre concrète avec Spring Boot et bilan avantages / inconvénients de chacune des 3 pistes (`H2 MODE=PostgreSQL`, **Zonky Embedded Postgres**, **Testcontainers** — temps de démarrage, prérequis Docker/CI, couverture SQL réelle).*

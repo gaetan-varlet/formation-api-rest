@@ -73,22 +73,4 @@ Avec une sortie mineure tous les 6 mois et 12 mois de support gratuit par branch
 - **H2 Database** : base embarquée en mémoire, démarrage immédiat sans installer de serveur SQL pour travailler en local ou en test.
 - **PostgreSQL** : base relationnelle d'entreprise via le driver `postgresql` pour les environnements hors-prod et production.
 
-## H2 vs PostgreSQL : le rôle et les limites d'Hibernate
-
-### Pourquoi l'alternance fonctionne (la force de l'ORM)
-
-- **Abstraction du SQL** : Spring Data génère du code abstrait (JPQL / requêtes dérivées).
-- **Rôle du dialecte** : Hibernate détecte le driver (H2 ou PostgreSQL) et traduit le JPQL en SQL adapté au moteur sous-jacent :
-  - gestion automatique de la pagination (`LIMIT / OFFSET`) ;
-  - fonctions de date et concaténation adaptées au SGBD ;
-  - stratégies de génération des clés primaires (`IDENTITY` vs `SEQUENCE`).
-
-### Où s'arrête la magie ?
-
-- **Requêtes natives (`nativeQuery = true`)** :
-  - tolérées tant que le SQL reste strictement standard ;
-  - piège immédiat dès qu'on utilise des types ou fonctions propriétaires (JSONB, opérateurs PostgreSQL, etc.).
-
-:::tip[Pour aller plus loin côté tests]
-Pour arbitrer entre H2 en mémoire (standard ou `MODE=PostgreSQL`) et un vrai moteur PostgreSQL lors des tests d'intégration (**Testcontainers**, **Zonky**…), voir [Base de données dans les tests](/formation-api-rest/tests/bdd-tests/).
-:::
+Dans cette formation, nous utilisons **H2** car nous restons sur du JPA et du SQL standard. Dès que l'on sort du SQL standard ou que l'on exploite des spécificités PostgreSQL, H2 atteint toutefois ses limites *(voir [Base de données dans les tests](/formation-api-rest/tests/bdd-tests/))*.
