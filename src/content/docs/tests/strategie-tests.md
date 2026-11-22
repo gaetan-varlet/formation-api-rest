@@ -24,9 +24,27 @@ La recette manuelle valide un instant T, pas les modifications du lendemain. Inv
 
 ![Évolution du coût de maintenance avec et sans tests automatisés](../../../assets/images/cout-maintenance-tests.svg "Coût de maintenance (MCO/MCS) avec et sans tests automatisés")
 
+### Tests manuels vs tests automatisés : deux rôles complémentaires
+
+Automatiser les tests ne rend pas les tests manuels inutiles : **les deux répondent à des besoins différents**. En automatisant les vérifications répétitives, l'équipe libère justement du temps pour les tests humains à forte valeur ajoutée :
+
+- **Tests automatisés :** idéaux pour tout ce qui est **répétitif et déterministe** (non-régression à chaque commit, respect du contrat HTTP, règles métier, sécurité, montées de version).
+- **Tests manuels :** indispensables pour les **tests exploratoires** (chercher des usages imprévus), la validation métier d'une nouvelle fonctionnalité, ainsi que l'évaluation de l'ergonomie (UX) et de l'accessibilité réelle.
+
 ## Typologie des tests
 
-Avant de définir une stratégie de tests, il est indispensable de distinguer les quatre niveaux de tests selon leur périmètre d'isolation et le niveau de confiance apporté.
+Avant de définir une stratégie de tests, il est indispensable de distinguer les **cinq niveaux complémentaires** selon leur périmètre d'isolation et le niveau de confiance apporté, ainsi que deux angles d'approche :
+
+- **Boîte blanche (*clear box*) :** le test s'appuie sur l'implémentation interne des classes (typiquement les tests unitaires avec mocks).
+- **Boîte noire (*opaque box*) :** le test ne connaît que les entrées/sorties externes sans dépendre du découpage interne (typiquement les tests d'intégration HTTP et E2E), ce qui autorise le refactoring sans casser les tests.
+
+### Analyse statique
+
+Contrôle le code **sans l'exécuter**, dès l'IDE et à chaque build : compilateur Java (typage fort), règles de style/formatage (Spotless, Checkstyle) et analyseur statique (**SonarQube**). C'est le filet de sécurité le plus rapide et le moins coûteux pour détecter erreurs de types, code mort, bogues évidents et complexité excessive.
+
+:::tip[Exemple]
+Le compilateur refuse un changement de type de retour dans un DTO, et SonarQube signale une exception avalée silencieusement ou une faille potentielle avant même l'exécution d'un test.
+:::
 
 ### Test unitaire
 
@@ -118,7 +136,6 @@ Grâce au démarrage rapide des conteneurs modernes et à la mise en cache du co
 
 ### Quand écrire quel test ?
 
-- **Analyse statique en continu :** s'appuyer sur la compilation stricte Java, le formatage et SonarQube pour éliminer les erreurs de types et défauts simples avant même de lancer les tests.
 - **Test d'intégration HTTP par défaut :** pour tout cas d'usage métier, contrôle d'accès (`401`/`403`), erreur de validation (`400`), sérialisation JSON et opération en base de données.
 - **Arbitrage « tout en intégration » vs « unitaire + intégration » sur les règles de calcul :**
   - **Tout regrouper en intégration (test paramétré ou `Scenario Outline`) :** lorsque le contexte Spring est partagé, que le jeu de données est léger et que le nombre de cas reste raisonnable (< 15–20 cas). Cela évite de maintenir deux suites pour la même règle.
