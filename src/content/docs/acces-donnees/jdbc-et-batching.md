@@ -40,7 +40,7 @@ public class VinDaoModern {
 ```
 
 - **Zéro `RowMapper` :** instancie directement le Record par correspondance de noms.
-- **Limite sur le `fetchSize` :** l'API fluide n'a pas de méthode `.fetchSize()`. Sans impact pour `.list()`, mais critique pour le **streaming** où il faudra passer par `application.properties` (voir [Benchmark & Stratégies d'extraction](/formation-api-rest/acces-donnees/benchmark-sql/)).
+- **Limite sur le `fetchSize` :** l'API fluide n'a pas de méthode `.fetchSize()`. Sans impact pour `.list()`, mais critique pour le **streaming** où il faudra passer par `application.properties` (voir [Stratégies d'extraction et gros volumes](/formation-api-rest/acces-donnees/extraction-gros-volumes/)).
 
 ### Écritures unitaires (`UPDATE`, `INSERT`, `DELETE`)
 
@@ -65,7 +65,7 @@ public int updatePrix(Integer id, BigDecimal nouveauPrix) {
 | **Réseau** | $N$ requêtes (par défaut) | 1 seul envoi groupé (`executeBatch`) |
 | **Mémoire RAM** | Accumulation dans le cache L1 | Empreinte minimale $O(1)$ |
 
-- **Sous le capot :** par défaut, `saveAll()` boucle sur `save()` et génère **N** requêtes unitaires *(voir le détail du fonctionnement et du batching JPA dans [Spring Data JPA avancé](/formation-api-rest/acces-donnees/jpa-avance/#écriture-synchronisation-et-saveall))*.
+- **Sous le capot :** par défaut, `saveAll()` boucle sur `save()` et génère **N** requêtes unitaires *(voir le détail du fonctionnement et du batching JPA dans [Spring Data JPA : requêtes et optimisation](/formation-api-rest/acces-donnees/spring-data-jpa/#écriture-synchronisation-et-saveall))*.
 
 ### La règle d'arbitrage
 

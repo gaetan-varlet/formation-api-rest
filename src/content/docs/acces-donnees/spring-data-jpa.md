@@ -1,5 +1,5 @@
 ---
-title: "Spring Data JPA avancé"
+title: "Spring Data JPA : requêtes et optimisation"
 ---
 
 ## Méthodes fournies nativement par `JpaRepository`
@@ -28,7 +28,7 @@ Avant d'écrire la moindre requête personnalisée, hériter de `JpaRepository<T
 - **En mémoire vs immédiat (`flush()` / `saveAndFlush()`) :** par défaut, `save()` garde la modification en mémoire dans le cache L1 Hibernate jusqu'au `COMMIT` de la transaction. `flush()` et `saveAndFlush(entity)` forcent l'exécution SQL **immédiate** en base, sans pour autant valider la transaction ni vider le cache L1 (utile par exemple pour lire juste après un champ calculé par un trigger SQL, ou attraper tout de suite une erreur de contrainte). Dans les cas CRUD classiques, `save()` suffit.
 - **`saveAll(entities)` (unitaire vs par lot) :** sous le capot, `saveAll()` boucle simplement sur `save()`. Par défaut, enregistrer 500 entités génère donc **500 requêtes SQL unitaires** :
   - **Activer le batching Hibernate :** configurez `spring.jpa.properties.hibernate.jdbc.batch_size=50` **et** évitez `GenerationType.IDENTITY` (qui oblige Hibernate à exécuter chaque `INSERT` immédiatement pour récupérer l'ID généré ; préférez `GenerationType.SEQUENCE`).
-  - **Gros volumes :** sur plusieurs milliers de lignes, il faut purger régulièrement le cache L1 (voir ci-dessous) ou basculer sur du batch JDBC pur ([Écritures massives : `saveAll()` vs Batch JDBC](/formation-api-rest/acces-donnees/jdbc-sql/#écritures-massives--saveall-vs-batch-jdbc)).
+  - **Gros volumes :** sur plusieurs milliers de lignes, il faut purger régulièrement le cache L1 (voir ci-dessous) ou basculer sur du batch JDBC pur ([Écritures massives : `saveAll()` vs Batch JDBC](/formation-api-rest/acces-donnees/jdbc-et-batching/#écritures-massives--saveall-vs-batch-jdbc)).
 
 ### Suppression
 
@@ -54,8 +54,8 @@ Avant d'écrire la moindre requête personnalisée, hériter de `JpaRepository<T
   - **Manuellement en cours de traitement :** lors d'un import par lots, découpez en paquets et appelez **`flush()` puis `clear()`** dans cet ordre *(exemple dans [Réception de fichier](/formation-api-rest/fichiers-performance/reception-fichier/#traitement-en-flux--transaction-atomique))*.
 - **Alternatives abordées plus loin pour contourner le cache L1 :**
   - **Lecture seule sur colonnes ciblées :** [Projections légères (`Record`)](#projections-légères--requêter-sans-charger-lentité) *(plus bas)* — aucun objet n'entre dans le cache L1.
-  - **Mises à jour / suppressions directes :** [`@Modifying`](#requêtes-décriture--modifying) *(plus bas)* ou [Batch JDBC (`batchUpdate`)](/formation-api-rest/acces-donnees/jdbc-sql/#écritures-massives--saveall-vs-batch-jdbc) *(page suivante)*.
-  - **Lecture / export de gros volumes :** [Benchmark & Stratégies d'extraction](/formation-api-rest/acces-donnees/benchmark-sql/) et [Le streaming](/formation-api-rest/fichiers-performance/streaming/).
+  - **Mises à jour / suppressions directes :** [`@Modifying`](#requêtes-décriture--modifying) *(plus bas)* ou [Batch JDBC (`batchUpdate`)](/formation-api-rest/acces-donnees/jdbc-et-batching/#écritures-massives--saveall-vs-batch-jdbc) *(page suivante)*.
+  - **Lecture / export de gros volumes :** [Stratégies d'extraction et gros volumes](/formation-api-rest/acces-donnees/extraction-gros-volumes/) et [Le streaming](/formation-api-rest/fichiers-performance/streaming/).
 
 ## Panorama des approches JPA
 
@@ -69,7 +69,7 @@ Dès que les méthodes natives de `JpaRepository` ne suffisent plus (filtres mé
 | **Repo Custom (`EntityManager`)** | Impérative | Requêtes dynamiques (critères optionnels) |
 | **Specifications (`Criteria API`)** | Composée | Filtres dynamiques modulaires et pagination |
 
-*(Pour les traitements massifs ou le SQL direct hors ORM, voir [SQL direct avec JDBC & Batching](/formation-api-rest/acces-donnees/jdbc-sql/).)*
+*(Pour les traitements massifs ou le SQL direct hors ORM, voir [SQL direct avec JDBC & Batching](/formation-api-rest/acces-donnees/jdbc-et-batching/).)*
 
 ## Spring Data Query Methods
 

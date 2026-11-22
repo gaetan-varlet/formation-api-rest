@@ -1,5 +1,5 @@
 ---
-title: "Benchmark & Stratégies d'extraction"
+title: "Stratégies d'extraction et gros volumes"
 ---
 
 ## 1. Matrice comparative des approches d'extraction
@@ -53,7 +53,7 @@ public void streamJdbc(OutputStream os) throws IOException {
   - soit globalement : `spring.jdbc.template.fetch-size=2000` dans `application.properties` ;
   - soit en code Java : instancier un `JdbcClient` dédié avec `new JdbcTemplate(dataSource).setFetchSize(2000)`.
 
-*(Pour les écritures massives, voir la comparaison `saveAll()` vs `batchUpdate()` dans [SQL direct avec JDBC & Batching](/formation-api-rest/acces-donnees/jdbc-sql/).)*
+*(Pour les écritures massives, voir la comparaison `saveAll()` vs `batchUpdate()` dans [SQL direct avec JDBC & Batching](/formation-api-rest/acces-donnees/jdbc-et-batching/).)*
 
 ## 4. Synthèse des bonnes pratiques d'extraction
 
