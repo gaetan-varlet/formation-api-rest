@@ -2,42 +2,101 @@
 title: "Les tests unitaires"
 ---
 
-## Les tests unitaires dans Spring Boot (1)
+Un **test unitaire** vérifie une classe ou une méthode métier **en mémoire, sans démarrer le contexte Spring** ni base de données. Les classes de test se placent dans `src/test/java` (dans le même package que la classe testée) et se terminent par **`Test`** pour être exécutées lors de `mvn test`.
 
-- création d'une classe **VinServiceTest** dans *src/test/java* dans le même package qui existe dans *src/main/java*
-- utilisation de Mockito pour mocker la couche repository et tester uniquement la couche service
+*(Comme vu dans [Stratégies de tests](/formation-api-rest/tests/strategie-tests/), privilégiez les tests unitaires purs sur la logique métier sans dépendance technique ; lorsque vous devez isoler une dépendance comme un repository, utilisez **Mockito**.)*
 
-```java
-@ExtendWith(MockitoExtension.class)  // initialise les classes et mocks avant d'exécuter les tests
-@MockitoSettings(strictness = Strictness.LENIENT)
-public class VinServiceTest {
+## Test unitaire pur (sans Spring ni mock)
 
-    @InjectMocks // injecte les mocks dans VinService
-    private VinService vinService;
+Pour une règle de calcul ou un validateur sans dépendance externe, JUnit 5 et AssertJ suffisent — l'exécution prend quelques millisecondes :
 
-    @Mock // crée un mock pour VinRepository
-    private VinRepository vinRepository;
+```java title="TarifCalculateurTest.java"
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.math.BigDecimal;
+import org.junit.jupiter.api.Test;
+
+class TarifCalculateurTest {
+
+    private final TarifCalculateur calculateur = new TarifCalculateur();
+
+    @Test
+    void appliqueRemiseDe10PourCentDesSixBouteilles() {
+        BigDecimal prixUnitaire = new BigDecimal("20.00");
+        int quantite = 6;
+
+        BigDecimal total = calculateur.calculerTotal(prixUnitaire, quantite);
+
+        // 6 × 20 € = 120 €, avec 10 % de remise -> 108 €
+        assertThat(total).isEqualByComparingTo("108.00");
+    }
 }
 ```
 
-## Les tests unitaires dans Spring Boot (2)
+## Isoler une dépendance avec Mockito (`VinServiceTest`)
 
-initialisation d'un jeu de données que l'on mocke et réalisation d'un test
+Lorsque la classe testée collabore avec un `@Repository` ou un autre service, **`@ExtendWith(MockitoExtension.class)`** initialise les doublures déclarées avec `@Mock` et les injecte dans la classe testée via `@InjectMocks` :
 
-```java
-    @BeforeEach
-    public void setUp() {
-        Vin vin1 = new Vin(); vin1.setId(1); vin1.setChateau("Château 1"); vin1.setAppellation("Saint-Julien"); vin1.setPrix(10.0);
-        Vin vin2 = new Vin(); vin2.setId(2); vin2.setChateau("Château 2"); vin2.setAppellation("Pomerol"); vin2.setPrix(25.0);
-        List<Vin> liste = Arrays.asList(vin1, vin2);
+```java title="src/test/java/fr/insee/formationapirest/service/VinServiceTest.java"
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
-        Mockito.when(vinRepository.findAll()).thenReturn(liste);
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class VinServiceTest {
+
+    @Mock
+    private VinRepository vinRepository;
+
+    @InjectMocks
+    private VinService vinService;
+
+    @Test
+    void recupererTousLesVins() {
+        // Given
+        Vin vin1 = creerVin(1, "Château 1", "Saint-Julien", 10.0);
+        Vin vin2 = creerVin(2, "Château 2", "Pomerol", 25.0);
+        when(vinRepository.findAll()).thenReturn(List.of(vin1, vin2));
+
+        // When
+        List<Vin> vinsRetournes = vinService.getAll();
+
+        // Then
+        assertThat(vinsRetournes).hasSize(2);
+        assertThat(vinsRetournes.get(0).getChateau()).isEqualTo("Château 1");
     }
 
     @Test
-    public void recupererTousLesVins() {
-        List<Vin> vinRetournes = vinService.getAll();
-        assertThat(vinRetournes).hasSize(2);
-        assertThat(vinRetournes.get(0).getChateau()).isEqualTo("Château 1");
+    void getByIdLeveExceptionSiVinInconnu() {
+        // Given
+        when(vinRepository.findById(99)).thenReturn(Optional.empty());
+
+        // When / Then
+        assertThatThrownBy(() -> vinService.getById(99))
+            .isInstanceOf(VinInconnuException.class);
     }
+
+    private Vin creerVin(Integer id, String chateau, String appellation, double prix) {
+        Vin vin = new Vin();
+        vin.setId(id);
+        vin.setChateau(chateau);
+        vin.setAppellation(appellation);
+        vin.setPrix(prix);
+        return vin;
+    }
+}
 ```
+
+:::tip[Bonnes pratiques JUnit 5 & Mockito]
+- **Pas de `public` requis :** en JUnit 5, les classes et méthodes `@Test` peuvent rester en visibilité package-private.
+- **Stubber dans chaque test plutôt que dans `@BeforeEach` :** cela garde chaque scénario autonome et évite d'avoir à contourner le mode strict par défaut de Mockito avec `@MockitoSettings(strictness = Strictness.LENIENT)` lorsqu'un test n'utilise pas tous les `when(...)` du `setUp()`.
+- **Privilégier `AssertJ` (`assertThat`, `assertThatThrownBy`) :** plus lisible et mieux typé que les assertions JUnit classiques.
+:::
