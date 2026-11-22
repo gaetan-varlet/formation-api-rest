@@ -167,6 +167,7 @@ export default defineConfig({
 						{ slug: 'tests/tests-integration' },
 						{ slug: 'tests/cucumber' },
 						{ slug: 'tests/api-externes' },
+						{ slug: 'tests/horloge-temps' },
 						{
 							slug: 'tests/cucumber-gitlab',
 							badge: { text: 'À revoir', variant: 'caution' },

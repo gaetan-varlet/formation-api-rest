@@ -1,0 +1,256 @@
+---
+title: "Gérer et tester le temps (Clock)"
+---
+
+import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
+Comment injecter l'horloge dans `src/main` et la maîtriser dans `src/test` sans fragiliser les tests
+
+## Le problème : appeler `.now()` directement dans le code métier
+
+Appeler `LocalDateTime.now()` ou `Instant.now()` directement dans un service crée une dépendance cachée à l'horloge système :
+
+- **Tests non déterministes :** un test peut passer à 14h00 et échouer à 23h59 (changement de jour), un 29 février ou lors du passage à l'heure d'été.
+- **Scénarios datés impossibles à tester proprement :** vérifier qu'une facture expire après 30 jours ou qu'une règle s'applique avant une date limite oblige à bricoler des calculs relatifs (`now().minusDays(...)`) ou à attendre.
+- **Couplage au fuseau système :** `LocalDateTime.now()` sans `ZoneId` dépend de la configuration de la machine ou du conteneur (souvent UTC en CI, `Europe/Paris` en local).
+
+**Principe :** traiter le temps comme une **dépendance externe** (au même titre qu'une [API HTTP tierce](/formation-api-rest/tests/api-externes/)) et l'**injecter par constructeur**.
+
+## Quelle approche choisir : `java.time.Clock` ou interface dédiée ?
+
+Deux approches permettent d'injecter le temps : s'appuyer sur le type standard **`java.time.Clock`** du JDK, ou définir sa propre interface métier (ex. `DateTimeGenerator`).
+
+| Critère | `java.time.Clock` *(recommandé)* | Interface dédiée (`DateTimeGenerator`) |
+|---|---|---|
+| **Code en `src/main`** | Aucune interface à créer : `@Bean Clock` standard | Interface + implémentation à maintenir |
+| **Types supportés** | Tous : `LocalDateTime.now(clock)`, `LocalDate.now(clock)`, `Instant.now(clock)`, `ZonedDateTime.now(clock)` | Uniquement les méthodes exposées par l'interface |
+| **Test unitaire (sans Spring)** | Natif via `Clock.fixed(...)`, zéro mock à écrire | Nécessite une lambda ou un mock manuel |
+| **Test d'intégration (Spring)** | Bean `@Primary` mutable (ex. `MutableClock`) | Bean `@Primary` mutable (ex. `DateTimeGeneratorMock`) |
+| **Lisibilité métier** | Standard Java connu de tous les développeurs | Nommage libre adapté au domaine |
+
+:::tip[Pourquoi privilégier `java.time.Clock` ?]
+`java.time.Clock` fait partie du JDK depuis Java 8. Il évite de réinventer une interface utilitaire tout en gardant exactement la même facilité de simulation en test unitaire (`Clock.fixed(...)`) et en test d'intégration Spring / Cucumber (bean `@Primary` mutable sans redémarrer le contexte Spring).
+:::
+
+## Mise en place dans `src/main` et `src/test`
+
+<Tabs>
+  <TabItem label="Avec java.time.Clock (recommandé)">
+
+<Steps>
+
+1. **Déclarer le bean `Clock` en production (`src/main`)**
+
+   ```java title="src/main/java/.../config/TimeConfig.java"
+   @Configuration
+   public class TimeConfig {
+
+       @Bean
+       public Clock clock() {
+           return Clock.system(ZoneId.of("Europe/Paris"));
+       }
+   }
+   ```
+
+2. **Injecter `Clock` dans le service métier (`src/main`)**
+
+   ```java title="src/main/java/.../service/FactureService.java"
+   @Service
+   @RequiredArgsConstructor
+   public class FactureService {
+
+       private final Clock clock;
+
+       public LocalDateTime calculerEcheance() {
+           return LocalDateTime.now(clock).plusDays(30);
+       }
+   }
+   ```
+
+3. **Fixer la date en test unitaire sans Spring (`src/test`)**
+
+   `Clock.fixed(...)` crée une horloge figée en une ligne, sans aucun mock :
+
+   ```java title="src/test/java/.../service/FactureServiceTest.java"
+   class FactureServiceTest {
+
+       @Test
+       void doitCalculerEcheanceA30Jours() {
+           ZoneId paris = ZoneId.of("Europe/Paris");
+           Clock fixedClock = Clock.fixed(
+               LocalDateTime.of(2026, 1, 15, 10, 0).atZone(paris).toInstant(),
+               paris
+           );
+           FactureService service = new FactureService(fixedClock);
+
+           assertThat(service.calculerEcheance())
+               .isEqualTo(LocalDateTime.of(2026, 2, 14, 10, 0));
+       }
+   }
+   ```
+
+4. **Utiliser une horloge mutable `@Primary` en test d'intégration (`src/test`)**
+
+   Pour les tests d'intégration (JUnit ou Cucumber) avec contexte Spring partagé, on déclare une sous-classe mutable de `Clock` annotée `@Primary`. En cas d'oubli de chargement de date dans un scénario, `reset()` revient sur l'horloge système au lieu de provoquer une `NullPointerException` :
+
+   ```java title="src/test/java/.../cucumber/mock/MutableClock.java"
+   @Component
+   @Primary
+   @Slf4j
+   public class MutableClock extends Clock {
+
+       private static final ZoneId PARIS_ZONE = ZoneId.of("Europe/Paris");
+       private volatile Clock delegate = Clock.system(PARIS_ZONE);
+
+       public void fixAt(LocalDateTime dateTime) {
+           this.delegate = Clock.fixed(dateTime.atZone(PARIS_ZONE).toInstant(), PARIS_ZONE);
+           log.debug("Date chargée dans le mock : {}", dateTime);
+       }
+
+       public void reset() {
+           this.delegate = Clock.system(PARIS_ZONE);
+       }
+
+       @Override
+       public ZoneId getZone() {
+           return delegate.getZone();
+       }
+
+       @Override
+       public Clock withZone(ZoneId zone) {
+           return delegate.withZone(zone);
+       }
+
+       @Override
+       public Instant instant() {
+           return delegate.instant();
+       }
+   }
+   ```
+
+5. **Piloter la date depuis la glue Cucumber (`src/test`)**
+
+   ```java title="src/test/java/.../cucumber/glue/TimeGlue.java"
+   public class TimeGlue implements En {
+
+       private static final DateTimeFormatter DATE_TIME_FORMATTER_INPUT =
+           DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+       public TimeGlue(MutableClock mutableClock) {
+           After(mutableClock::reset);
+
+           Given("La date est {string}", (String dateTime) ->
+               mutableClock.fixAt(LocalDateTime.parse(dateTime, DATE_TIME_FORMATTER_INPUT))
+           );
+       }
+   }
+   ```
+
+   ```gherkin title="src/test/resources/features/echeance.feature"
+   Scenario: calcul de l'échéance à 30 jours
+       Given La date est "2026-01-15T10:00:00"
+       When je crée une facture
+       Then la date d'échéance est "2026-02-14T10:00:00"
+   ```
+
+</Steps>
+
+  </TabItem>
+  <TabItem label="Avec une interface dédiée (DateTimeGenerator)">
+
+Si l'application encapsule déjà la récupération de la date derrière une interface métier, le principe d'injection et de remplacement `@Primary` en test reste identique :
+
+<Steps>
+
+1. **Définir l'interface et son implémentation (`src/main`)**
+
+   ```java title="src/main/java/.../utils/DateTimeGenerator.java"
+   public interface DateTimeGenerator {
+       LocalDateTime now();
+   }
+   ```
+
+   ```java title="src/main/java/.../utils/DateTimeGeneratorImpl.java"
+   @Component
+   public class DateTimeGeneratorImpl implements DateTimeGenerator {
+
+       @Override
+       public LocalDateTime now() {
+           return LocalDateTime.now(ZoneId.of("Europe/Paris"));
+       }
+   }
+   ```
+
+2. **Injecter l'interface dans le service métier (`src/main`)**
+
+   ```java title="src/main/java/.../service/FactureService.java"
+   @Service
+   @RequiredArgsConstructor
+   public class FactureService {
+
+       private final DateTimeGenerator dateTimeGenerator;
+
+       public LocalDateTime calculerEcheance() {
+           return dateTimeGenerator.now().plusDays(30);
+       }
+   }
+   ```
+
+3. **Créer le mock mutable `@Primary` (`src/test`)**
+
+   ```java title="src/test/java/.../cucumber/mock/DateTimeGeneratorMock.java"
+   @Component
+   @Primary
+   @Slf4j
+   public class DateTimeGeneratorMock implements DateTimeGenerator {
+
+       private LocalDateTime localDateTime;
+
+       @Override
+       public LocalDateTime now() {
+           // Repli sur l'horloge réelle si le scénario n'a pas fixé de date (évite un null)
+           return localDateTime != null ? localDateTime : LocalDateTime.now(ZoneId.of("Europe/Paris"));
+       }
+
+       public void load(LocalDateTime localDateTime) {
+           this.localDateTime = localDateTime;
+           log.debug("Date chargée dans le mock : {}", localDateTime);
+       }
+
+       public void clear() {
+           localDateTime = null;
+       }
+   }
+   ```
+
+4. **Piloter le mock depuis la glue Cucumber (`src/test`)**
+
+   ```java title="src/test/java/.../cucumber/glue/TimeGlue.java"
+   public class TimeGlue implements En {
+
+       private static final DateTimeFormatter DATE_TIME_FORMATTER_INPUT =
+           DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+       public TimeGlue(DateTimeGeneratorMock dateTimeGeneratorMock) {
+           After(dateTimeGeneratorMock::clear);
+
+           Given("La date est {string}", (String dateTime) ->
+               dateTimeGeneratorMock.load(
+                   LocalDateTime.parse(dateTime, DATE_TIME_FORMATTER_INPUT)
+               )
+           );
+       }
+   }
+   ```
+
+</Steps>
+
+  </TabItem>
+</Tabs>
+
+## Points d'attention
+
+- **Éviter `@MockitoBean` sur l'horloge :** utiliser un `@MockitoBean` sur `Clock` ou `DateTimeGenerator` dans une seule classe de test force Spring à recréer un nouveau contexte applicatif *(cf. [Stratégie de tests](/formation-api-rest/tests/strategie-tests/))*. Un bean `@Component @Primary` dans `src/test` garde un contexte unique partagé pour toute la suite.
+- **Toujours réinitialiser entre deux scénarios :** sans `After(mutableClock::reset)` (ou `After(dateTimeGeneratorMock::clear)`), la date fixée par un scénario fuit sur tous les scénarios suivants.
+- **Attention au comportement si aucune date n'est chargée :** si `DateTimeGeneratorMock.now()` renvoie `localDateTime` brut après un `clear()`, tout scénario qui ne passe pas par `Given La date est ...` recevra `null` et risque une `NullPointerException`. Prévoir un repli sur l'horloge système (comme dans `MutableClock.reset()` ou la ternaire ci-dessus) évite ce piège.
+- **`LocalDateTime` vs `Instant` :** `LocalDateTime` n'embarque pas de fuseau horaire *(deux créneaux ambigus par an lors du passage à l'heure d'hiver en `Europe/Paris`)*. Pour de l'horodatage technique ou du stockage en base, privilégier `Instant.now(clock)` (ou `OffsetDateTime`) ; réserver `LocalDateTime` / `LocalDate` aux dates métier liées explicitement au fuseau `Europe/Paris`.
