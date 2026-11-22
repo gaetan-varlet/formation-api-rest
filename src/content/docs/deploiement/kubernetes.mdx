@@ -1,0 +1,43 @@
+---
+title: "Déploiement sur Kubernetes"
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+Le déploiement conteneurisé sur **Kubernetes** est aujourd'hui le mode standard : un même livrable (image Docker contenant le JAR exécutable) traverse tous les environnements, piloté par une démarche **GitOps**.
+
+## Chaîne de déploiement
+
+<Steps>
+
+1. **Créer le `Dockerfile`**
+
+   ```dockerfile title="Dockerfile"
+   FROM gitlab-registry.insee.fr/kubernetes/images/run/java:25-rootless-jre
+   # Copie du JAR dans un répertoire avec les bons droits
+   COPY --chown=$JAVA_USER:$JAVA_USER target/*.jar /usr/local/app.jar
+   EXPOSE 8080
+   ENTRYPOINT ["java", "-jar", "/usr/local/app.jar"]
+   ```
+
+   - L'image `25-rootless-jre` embarque uniquement le **JRE Java 25** (image plus légère) et s'exécute avec un utilisateur non-root (`$JAVA_USER`).
+   - `target/*.jar` suppose qu'un seul JAR exécutable est produit par `mvn clean package`.
+
+2. **Construire et publier l'image Docker (GitLab CI)**
+
+   Utilisation des jobs (`.gitlab-ci.yml`) fournis par l'équipe Kubernetes (IDDA) pour construire et publier l'image dans le registre de conteneurs.
+
+3. **Déployer via GitOps et ArgoCD**
+
+   - Mise à jour du dépôt **GitOps** (manuellement ou via un job dédié dans le pipeline CI de l'application).
+   - Suivi et synchronisation des déploiements via **ArgoCD**.
+
+</Steps>
+
+:::tip[Rappels Spring Boot pour Kubernetes]
+- **Livrable unique :** injectez les paramètres propres à chaque environnement via des variables d'environnement (`ConfigMap` / `Secret`) plutôt que de construire une image par environnement (voir [Packaging et configuration par environnement](/formation-api-rest/deploiement/packaging-environnements/)).
+- **Logs :** écrivez uniquement sur la console (`stdout`), la plateforme se charge de les collecter ([Configuration des logs](/formation-api-rest/spring-boot/configuration-logs/)).
+- **Supervision :** exposez `/actuator/health` pour permettre à Kubernetes de vérifier l'état de l'application ([Actuator](/formation-api-rest/deploiement/actuator/)).
+:::
+
+*(Voir la **Formation Kubernetes Insee** pour plus de détails sur les manifestes et la configuration GitOps.)*

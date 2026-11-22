@@ -178,8 +178,16 @@ export default defineConfig({
 						{ slug: 'deploiement/scheduling' },
 						{ slug: 'deploiement/packaging-environnements' },
 						{ slug: 'deploiement/kubernetes' },
-						{ slug: 'deploiement/jar-vm' },
-						{ slug: 'deploiement/war-vm' },
+						{
+							slug: 'deploiement/jar-vm',
+							label: 'Déploiement JAR sur VM',
+							badge: { text: 'Obsolète', variant: 'caution' },
+						},
+						{
+							slug: 'deploiement/war-vm',
+							label: 'Déploiement WAR sur VM',
+							badge: { text: 'Obsolète', variant: 'caution' },
+						},
 					],
 				},
 			],

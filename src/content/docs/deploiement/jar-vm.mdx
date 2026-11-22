@@ -1,0 +1,61 @@
+---
+title: "Déploiement JAR sur VM (Obsolète)"
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+:::caution[Méthode de déploiement obsolète]
+Ce mode de déploiement sur machine virtuelle (VM) via Puppet/Cactus n'est plus utilisé pour les nouveaux projets, désormais conteneurisés et déployés sur [Kubernetes](/formation-api-rest/deploiement/kubernetes/). Cette page est conservée uniquement pour la maintenance d'applications existantes.
+:::
+
+## Workflow de build et déploiement
+
+<Steps>
+
+1. **Configurer le `pom.xml` pour produire `ROOT.jar`**
+
+   Définissez le nom du livrable avec `<finalName>ROOT</finalName>` et conservez `spring-boot-maven-plugin` pour générer le JAR exécutable *(avec `spring-boot-starter-parent`, le filtrage des ressources est déjà actif par défaut, inutile d'ajouter `<resources>`)*.
+
+   ```xml title="pom.xml"
+   <build>
+       <finalName>ROOT</finalName>
+       <plugins>
+           <plugin>
+               <groupId>org.springframework.boot</groupId>
+               <artifactId>spring-boot-maven-plugin</artifactId>
+           </plugin>
+       </plugins>
+   </build>
+   ```
+
+2. **Publier sur Nexus et déployer via Majiba3**
+
+   - La chaîne CI/CD compile et génère le livrable `ROOT.jar`, puis le dépose sur **Nexus** sous le nom `appli-api-X.Y.Z.jar`.
+   - Le déploiement sur VM s'effectue via **Majiba3** : mise à jour du contrat Puppet puis appel de la **FDS** (*fenêtre de service* qui met à jour la VM avec le nouveau livrable).
+
+3. **Configurer la plateforme (mode Cactus / Hiera)**
+
+   Déclaration du rôle Java sur le nœud Puppet :
+
+   ```puppet title="nodes.pp"
+   node 'dvXXXlm001.ad.insee.intra' {
+     include role::serveur_cactus_java
+   }
+   ```
+
+   Paramètres de l'application dans Hiera (version Java, URL du JAR sur Nexus, port, options JVM et variables d'environnement Spring Boot) :
+
+   ```yaml title="hiera.yaml"
+   profile::java::version: '17'
+   cactus::application::nom: toto
+   cactus::application::source_url: https://nexus.insee.fr/repository/.../toto.1.0.0.jar
+   cactus::application::port: 8080
+   cactus::application::service_execstart_options:
+     - -Dserver.port=8080
+   cactus::application::environnement_options:
+     - SPRING_DATASOURCE_DRIVERCLASSNAME=org.postgresql.Driver
+     - SPRING_DATASOURCE_URL=jdbc:postgresql://...
+     - SPRING_OUTPUT_ANSI_ENABLED=NEVER
+   ```
+
+</Steps>

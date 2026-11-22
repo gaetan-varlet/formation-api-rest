@@ -1,0 +1,151 @@
+---
+title: "Déploiement WAR sur VM (Obsolète)"
+---
+
+import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+:::caution[Méthode de déploiement obsolète]
+Le packaging en `.war` déployé sur un Tomcat externe (SNSSI / CEI) correspond à une architecture historique, remplacée aujourd'hui par le déploiement conteneurisé sur [Kubernetes](/formation-api-rest/deploiement/kubernetes/). Cette documentation reste disponible pour comprendre ou maintenir des applications existantes.
+:::
+
+## Principe général
+
+Contrairement au déploiement en JAR exécutable autonome, l'application est empaquetée en **`.war`** (`ROOT.war`) pour tourner dans un serveur **Tomcat externe**, avec un fichier **`formation.properties`** placé à côté du WAR pour surcharger la configuration selon l'environnement.
+
+## Adapter l'application Spring Boot et le build Maven
+
+<Steps>
+
+1. **Étendre `SpringBootServletInitializer` dans la classe principale**
+
+   Pour qu'un Tomcat externe puisse démarrer l'application Spring Boot et charger le fichier de propriétés externe, la classe principale doit hériter de `SpringBootServletInitializer` et redéfinir `configure()` :
+
+   ```java title="FormationApiRestApplication.java"
+   public class FormationApiRestApplication extends SpringBootServletInitializer {
+
+       @Override
+       protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+           // spring.config.location définit les chemins de chargement (les derniers sont prioritaires)
+           return application.properties(
+               "spring.config.location=classpath:/application.properties,file:${catalina.base}/webapps/formation.properties"
+           ).sources(FormationApiRestApplication.class);
+       }
+   }
+   ```
+
+2. **Configurer `pom.xml` pour générer un WAR**
+
+   Passez le packaging à `war`, marquez Tomcat en `provided` (puisqu'il est fourni par le serveur cible) et nommez le livrable `ROOT` pour qu'il soit déployé à la racine (`/`) du serveur Tomcat :
+
+   ```xml title="pom.xml"
+   <packaging>war</packaging>
+
+   <dependencies>
+       <dependency>
+           <groupId>org.springframework.boot</groupId>
+           <artifactId>spring-boot-starter-tomcat</artifactId>
+           <scope>provided</scope>
+       </dependency>
+   </dependencies>
+
+   <build>
+       <!-- Définit le nom du WAR produit (target/ROOT.war) -->
+       <finalName>ROOT</finalName>
+       <plugins>
+           <plugin>
+               <groupId>org.springframework.boot</groupId>
+               <artifactId>spring-boot-maven-plugin</artifactId>
+           </plugin>
+       </plugins>
+   </build>
+   ```
+
+</Steps>
+
+## Plateformes Dev / QF (SNSSI)
+
+Sur les plateformes de développement et qualification, déposez dans le répertoire `/dépôt` de votre instance Tomcat :
+- le livrable **`ROOT.war`** ;
+- le fichier de surcharge **`formation.properties`** (copié automatiquement dans `/webapps` à côté du WAR).
+
+Exemple de fichier de surcharge pour la plateforme de développement :
+
+```properties title="formation.properties (plateforme dev)"
+formationapirest.environnement=environnement de developpement
+springdoc.swagger-ui.oauth.clientId=monappli-frontend
+# Informations de base de données et tout paramètre spécifique à l'environnement
+```
+
+## Plateformes de production (CEI) : archive ZIP
+
+Pour la livraison en production au CEI, **`maven-assembly-plugin`** empaquette dans une archive ZIP (par exemple `formation-api-2.0.0.zip`) le WAR renommé (`FORMATION.war`), le fichier de configuration de production (`formation.properties`, généré à partir de `prod.properties`) et éventuellement le changelog :
+
+<Tabs>
+<TabItem label="pom.xml (plugin Assembly)">
+
+```xml title="pom.xml"
+<plugin>
+    <artifactId>maven-assembly-plugin</artifactId>
+    <version>3.4.2</version>
+    <configuration>
+        <descriptors>
+            <descriptor>src/main/resources/assembly-web.xml</descriptor>
+        </descriptors>
+        <!-- Préfixe du ZIP produit (complété par <id>${project.version}</id>) -->
+        <finalName>formation-api</finalName>
+    </configuration>
+    <executions>
+        <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+                <goal>single</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+</TabItem>
+<TabItem label="assembly-web.xml">
+
+```xml title="src/main/resources/assembly-web.xml"
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+    <id>${project.version}</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <files>
+        <file>
+            <source>target/ROOT.war</source>
+            <!-- Renommage de ROOT.war en FORMATION.war -->
+            <destName>FORMATION.war</destName>
+        </file>
+        <file>
+            <!-- filtered=true résout les variables Maven (ex. ${project.version}) dans le fichier copié -->
+            <source>src/main/resources/prod.properties</source>
+            <destName>formation.properties</destName>
+            <filtered>true</filtered>
+        </file>
+    </files>
+</assembly>
+```
+
+</TabItem>
+<TabItem label="prod.properties">
+
+```properties title="src/main/resources/prod.properties"
+formationapirest.environnement=environnement de production
+keycloak.auth-server-url=https://auth.insee.fr/auth
+springdoc.swagger-ui.oauth.clientId=monappli-frontend
+logging.level.root=INFO
+logging.level.fr.insee=INFO
+logging.file.name=/mnt/applishare/toto/pd/journaux/pdtotolas01/toto.log
+spring.output.ansi.enabled=NEVER
+```
+
+</TabItem>
+</Tabs>

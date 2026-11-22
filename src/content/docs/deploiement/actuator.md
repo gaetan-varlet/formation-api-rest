@@ -2,33 +2,39 @@
 title: "Surveiller votre application avec Spring Boot Actuator"
 ---
 
-- sous-projet de Spring Boot qui permet de superviser l'application
-- donne des informations sur l'application, que l'on va pouvoir personnaliser
-- Spring Boot Actuator est en version 2 depuis la version 2.0.0.M7 de Spring Boot, et est très différent de Spring Boot Actuator en version 1
+:::note[Contenu basé sur Spring Boot 2 — à actualiser]
+**Spring Boot Actuator** reste l'outil de référence pour superviser une API en production, mais les exemples de cette page datent de **Spring Boot 2**. Certaines parties ont évolué dans les versions récentes (Spring Boot 3 / 4) :
+- `/httptrace` et `HttpTraceRepository` ont été remplacés par `/httpexchanges` et `HttpExchangeRepository` ;
+- les propriétés `info.*` nécessitent d'activer `management.info.env.enabled=true` pour apparaître dans `/info` (qui n'est plus exposé par défaut sans configuration) ;
+- le plugin Git s'appelle désormais `io.github.git-commit-id:git-commit-id-maven-plugin`.
 
-```xml
+En cas de doute sur votre version, appuyez-vous sur la [documentation officielle Spring Boot Actuator](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html).
+:::
+
+**Spring Boot Actuator** est un module de Spring Boot qui permet de superviser l'application en production et d'exposer des métriques et indicateurs personnalisables.
+
+```xml title="pom.xml"
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>
 ```
 
-- accéder à l'URL `http://localhost:8080/actuator`
+Une fois démarrée, la liste des endpoints exposés est accessible sur `http://localhost:8080/actuator`.
 
-```properties
-# affichage dans Swagger des endpoints d'Actuator
+```properties title="application.properties"
+# Affichage dans Swagger UI des endpoints d'Actuator
 springdoc.show-actuator=true
 ```
 
 ## Le service `/health`
 
-- l'URL `/health` donne des informations sur la santé de l'application en renvoyant un *status* **UP** ou **DOWN** si l'application fonctionne ou pas
-- fonctionne en analysant le retour de toutes les classes héritant de **HealthIndicator**, qui font des tests et disent si le service est : UP (code HTTP 200 OK) ou DOWN (code 503 Service Unavailable)
-- il faut surcharger la méthode `health()` et faire les tests nécessaires pour dire si le service est UP ou DOWN, par exemple regarder qu'il y ait bien des données en base
+- L'URL `/health` indique l'état de santé de l'application (`UP` avec un code HTTP **`200 OK`**, ou `DOWN` avec un code **`503 Service Unavailable`**).
+- Actuator agrège le résultat de tous les beans implémentant **`HealthIndicator`**. Pour ajouter votre propre vérification (par exemple vérifier que la base de données contient bien des données), implémentez la méthode `health()` :
 
-```java
+```java title="DatabaseHealthIndicator.java"
 @Component("database")
-public class TestController implements HealthIndicator {
+public class DatabaseHealthIndicator implements HealthIndicator {
 
     @Override
     public Health health() {
@@ -37,111 +43,110 @@ public class TestController implements HealthIndicator {
 }
 ```
 
-```properties
-# permet de changer l'URL de /health en /healthcheck
+```properties title="application.properties"
+# Permet de renommer l'URL /health en /healthcheck
 management.endpoints.web.path-mapping.health=healthcheck
-# voir les détails du service health
+# Affiche les détails de santé dans la réponse JSON
 management.endpoint.health.show-details=always
 ```
 
-## Le service `/info` (1)
+## Le service `/info`
 
-- il est vide par défaut, il permet de renvoyer les informations que l'on souhaite, comme la version de l'application ou d'autres informations utiles
-- il faut renseigner dans les properties des properties commençant par `info.`
+### Enrichissement via `application.properties`
 
-```properties
+Vide par défaut, `/info` permet d'exposer des informations sur l'application (version, contexte…) via des clés commençant par `info.` :
+
+```properties title="application.properties"
 maproperty-toto=dada
 
 info.toto=Gaetan
-# obtenir une information présente dans un autre endpoint (/env)
+# Récupérer une propriété système ou issue de /env
 info.java-version=${java.version}
 info.app.version=2.0
-# obtenir les infos d'une autre property
+# Référencer une autre propriété applicative
 info.app.toto=${maproperty-toto}
-# obtenir une property maven
+# Injecter une propriété Maven
 info.app.version-spring=@parent.version@
 ```
 
-## Le service `/info` (2)
+### Enrichissement programmatique (`InfoContributor`)
 
-- il est possible d'enrichir `/info` en implémentant **InfoContributor** et en surchangeant la méthode **contribute(Info.Builder builder)**
-- celà permet par exemple d'appeler un service ou un DAO pour avoir des informations stockées en base
+Il est également possible d'enrichir `/info` dynamiquement (par exemple à partir d'un appel à un service ou à la base de données) en implémentant **`InfoContributor`** et en surchargeant `contribute(Info.Builder builder)` :
 
-```java
+```java title="ExampleInfoContributor.java"
 @Component
 public class ExampleInfoContributor implements InfoContributor {
+
     @Override
-    public void contribute(Builder builder) {
+    public void contribute(Info.Builder builder) {
         builder.withDetail("nbUsers", 4);
         builder.withDetail("example", Collections.singletonMap("key", "value"));
     }
 }
 ```
 
-## Récupérer les informations du dernier commit
+### Informations du dernier commit Git
 
-- ajout d'un plugin dans le POM pour activer par défaut la récupération de quelques informations sur le dernier commit dans `/info`
-- ajout d'une property pour avoir toutes les informations sur le dernier commit
+Ajoutez le plugin Git commit dans le `pom.xml` pour exposer les informations du dernier commit dans `/info` :
 
-```xml
-<!-- plugin qui permet de récupérer les informations sur le dernier commit -->
+```xml title="pom.xml"
+<!-- Récupère les informations Git pour l'endpoint /info -->
 <plugin>
     <groupId>pl.project13.maven</groupId>
     <artifactId>git-commit-id-plugin</artifactId>
 </plugin>
 ```
 
-```properties
-# ajout de toutes les informations du commit dans le endpoint /info
+```properties title="application.properties"
+# Affiche l'ensemble des informations du commit dans /info
 management.info.git.mode=full
 ```
 
-## Activer les autres services
+## Activer et exposer les autres endpoints
 
-`/health` et `/info` sont les 2 services accessibles par défaut, les autres sont protégés. il faut les autoriser explicitement en renseignant dans les properties :
+Par défaut, seuls les endpoints autorisés sont exposés sur le web ; les autres doivent être explicitement ouverts dans `application.properties` :
 
-```properties
-management.endpoints.web.exposure.include=* # expose tous les endpoints
-management.endpoints.web.exposure.include=health,info,metrics # expose uniquement les endpoints spéficiés
+```properties title="application.properties"
+# Expose tous les endpoints
+management.endpoints.web.exposure.include=*
 
-# exposer tous les endpoints sauf un
+# Ou expose uniquement une liste explicite
+management.endpoints.web.exposure.include=health,info,metrics
+
+# Expose tous les endpoints sauf loggers
 management.endpoints.web.exposure.include=*
 management.endpoints.web.exposure.exclude=loggers
 
-# activer explicitement un endpoint
+# Active explicitement un endpoint désactivé par défaut
 management.endpoint.shutdown.enabled=true
 ```
 
-## Les autres service
+## Les autres endpoints disponibles
 
-- `/metrics` donne la liste de toutes les métriques qui donnent des informations sur les paramètres de l'application
-- `/beans` donne la liste des beans créés
-- `/env` affiche les variables d'environnement
-- `/loggers` permet de voir quels sont les différents niveaux de logs activés dans l'application
-- `/httptrace` permet d'obtenir des informations sur les 100 dernières requêtes-réponses
-- `/shutdown` permet d'arrêter proprement l'application (méthode POST)
+- `/metrics` : liste des métriques système et applicatives.
+- `/beans` : liste de tous les beans gérés par le contexte Spring.
+- `/env` : propriétés de configuration actives et variables d'environnement.
+- `/loggers` : niveaux de logs configurés (et modifiables à chaud).
+- `/httptrace` *(remplacé par `/httpexchanges` depuis Spring Boot 3)* : historique des 100 dernières requêtes-réponses HTTP.
+- `/shutdown` : permet d'arrêter proprement l'application (requête `POST`, à activer explicitement avec `management.endpoint.shutdown.enabled=true`).
 
-```properties
-# /shutdown doit être activé explicitement
-management.endpoint.shutdown.enabled=true
-```
+## Personnaliser les traces HTTP (`HttpTraceRepository`)
 
-## Personnaliser `httptrace`
+Sous Spring Boot 2, il est possible d'implémenter `HttpTraceRepository` pour intercepter et personnaliser le suivi des requêtes HTTP :
 
-Il est possible d'implémenter `HttpTraceRepository` pour personnaliser le comportement des traces HTTP
-
-```java
+```java title="LogConf.java"
 @Component
-public class LogConf implements HttpTraceRepository{
+public class LogConf implements HttpTraceRepository {
+
     @Override
     public List<HttpTrace> findAll() {
-        // méthode appelée sur l'url /httptrace : on ne renvoie rien
-        return null;
+        // Endpoint de consultation : ici on ne stocke rien en mémoire
+        return List.of();
     }
 
     @Override
     public void add(HttpTrace trace) {
-        // méthode appelée à chaque requête HTTP : on affiche dans la console les infos
+        // Appelé à chaque requête HTTP : affichage des métadonnées (sans les corps de requête/réponse)
         System.out.println("request (headers) : " + trace.getRequest().getHeaders());
         System.out.println("request (method) : " + trace.getRequest().getMethod());
         System.out.println("request (endpoint) : " + trace.getRequest().getUri().getPath());
@@ -150,31 +155,31 @@ public class LogConf implements HttpTraceRepository{
         System.out.println("response (headers) : " + trace.getResponse().getHeaders());
         System.out.println("heure GMT : " + trace.getTimestamp());
         System.out.println("temps de réponse (en ms) : " + trace.getTimeTaken());
-        // il n'y a ni le corps de la requête, ni le corps de la réponse
-        // si besoin, on peut utiliser une bibliothèque comme Logbook
+        // Si vous avez besoin des corps HTTP, utilisez plutôt une bibliothèque dédiée comme Logbook
     }
 }
 ```
 
-### Créer de endpoints personnalisés
+## Créer des endpoints personnalisés
 
-Création d'un endpoint `/test` qui retourne une liste de String
+Exemple d'un endpoint personnalisé exposé sur `/actuator/test` :
 
-```java
+```java title="TestEndpoint.java"
 @Component
 @Endpoint(id = "test")
 public class TestEndpoint {
-    private List<String> liste = new ArrayList<>();    
-    
+
+    private final List<String> liste = new ArrayList<>();
+
     @ReadOperation
-    public List<String> aze(){
+    public List<String> getValeurs() {
         liste.add("toto");
         return liste;
     }
 }
 ```
 
-### Pour aller plus loin
+## Pour aller plus loin
 
-- `https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html`
-- `https://www.baeldung.com/spring-boot-actuators`
+- [Documentation officielle Spring Boot Actuator](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html)
+- [Guide Spring Boot Actuator — Baeldung](https://www.baeldung.com/spring-boot-actuators)
