@@ -65,7 +65,7 @@ public int updatePrix(Integer id, BigDecimal nouveauPrix) {
 | **Réseau** | $N$ requêtes (par défaut) | 1 seul envoi groupé (`executeBatch`) |
 | **Mémoire RAM** | Accumulation dans le cache L1 | Empreinte minimale $O(1)$ |
 
-- **Sous le capot :** `saveAll()` boucle sur `save()` ; sans configuration avancée (et impossible avec `GenerationType.IDENTITY`), aucune commande n'est groupée au niveau JDBC.
+- **Sous le capot :** par défaut, `saveAll()` boucle sur `save()` et génère **N** requêtes unitaires *(voir le détail du fonctionnement et du batching JPA dans [Spring Data JPA avancé](/formation-api-rest/acces-donnees/jpa-avance/#écriture-synchronisation-et-saveall))*.
 
 ### La règle d'arbitrage
 

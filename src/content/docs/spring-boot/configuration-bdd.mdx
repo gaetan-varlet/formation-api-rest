@@ -113,7 +113,7 @@ public class Vin {
 }
 ```
 
-## Création du DAO (`Repository`)
+## Création du Repository (DAO)
 
 - `JpaRepository<T, ID>` est une interface Spring Data JPA (appuyée sur Hibernate) qui fournit nativement toutes les opérations CRUD (`findAll`, `findById`, `save`, `deleteById`…).
 - En **étendant** cette interface, on précise le type de l'entité (`Vin`) et le type de sa clé primaire (`Integer`) :
