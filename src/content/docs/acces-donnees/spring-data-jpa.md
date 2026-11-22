@@ -57,6 +57,12 @@ Avant d'écrire la moindre requête personnalisée, hériter de `JpaRepository<T
   - **Mises à jour / suppressions directes :** [`@Modifying`](#requêtes-décriture--modifying) *(plus bas)* ou [Batch JDBC (`batchUpdate`)](/formation-api-rest/acces-donnees/jdbc-et-batching/#écritures-massives--saveall-vs-batch-jdbc) *(page suivante)*.
   - **Lecture / export de gros volumes :** [Stratégies d'extraction et gros volumes](/formation-api-rest/acces-donnees/extraction-gros-volumes/) et [Le streaming](/formation-api-rest/fichiers-performance/streaming/).
 
+:::tip[Bon réflexe en lecture : `@Transactional(readOnly = true)` sur le `@Service`]
+Sur les lectures simples (*Query Methods*, `@Query` `SELECT`), `@Transactional(readOnly = true)` n'est pas obligatoire pour que la requête fonctionne (`JpaRepository` le gère déjà par défaut). En revanche, l'ajouter sur les méthodes de lecture de votre `@Service` :
+- **désactive les snapshots de *dirty-checking*** dans le cache L1 (gain de RAM et de CPU) ;
+- devient **indispensable** dès que vous enchaînez plusieurs requêtes dans le même appel (ex. 2 `@EntityGraph`), accédez à des relations `LAZY` dans le service, ou utilisez un `Stream<T>`.
+:::
+
 ## Panorama des approches JPA
 
 Dès que les méthodes natives de `JpaRepository` ne suffisent plus (filtres métier, agrégations, requêtes dynamiques ou optimisations), plusieurs approches s'offrent à vous :
@@ -94,7 +100,13 @@ public interface VinRepository extends JpaRepository<Vin, Integer> {
 
 ## Optimisation des relations : le problème du N+1 SELECT
 
-Par défaut, les relations (`@ManyToOne`, `@OneToMany`) chargées à la demande (*LAZY*) déclenchent une cascade de requêtes SQL lors du parcours des données :
+En JPA, le mode de chargement par défaut dépend de la cardinalité :
+- **Collections (`@OneToMany`, `@ManyToMany`) :** `FetchType.LAZY` par défaut (chargées à la demande).
+- **Objets uniques (`@ManyToOne`, `@OneToOne`) :** `FetchType.EAGER` par défaut (chargés systématiquement).
+
+Or, sur un `findAll()`, **les deux modes provoquent un N+1 SELECT** :
+- **En `EAGER` (`@ManyToOne` par défaut) :** Hibernate ne fait pas de `JOIN` automatique sur une requête liste ; il exécute le `SELECT` principal puis lance **immédiatement** les *N* `SELECT` pour chaque relation, même si vous n'en avez pas besoin.
+- **En `LAZY` (`@OneToMany` par défaut, ou `@ManyToOne(fetch = FetchType.LAZY)`) :** rien n'est chargé au `findAll()`, mais dès que vous parcourez les entités (sérialisation JSON, mapping DTO), Hibernate déclenche les *N* `SELECT` à la volée :
 
 ```sql
 1. SELECT * FROM vin;                         --> 1 requête (ramène N lignes)
@@ -105,43 +117,86 @@ Par défaut, les relations (`@ManyToOne`, `@OneToMany`) chargées à la demande 
 ```
 
 - **Conséquence :** effondrement des performances et saturation de la base de données.
-- **Mauvaise réponse :** passer les relations en `FetchType.EAGER` (dégrade les performances sur toutes les autres requêtes).
+- **Bonne pratique :** passez vos `@ManyToOne` / `@OneToOne` en `FetchType.LAZY` sur l'entité (évite de charger ces relations inutilement), puis utilisez `@EntityGraph` uniquement sur les méthodes qui en ont besoin. *(Laisser ou passer en `FetchType.EAGER` est une mauvaise réponse : cela déclenche le N+1 sur toutes les requêtes JPQL et alourdit chaque appel.)*
 
 ### Résoudre le N+1 avec `@EntityGraph`
 
-L'annotation **`@EntityGraph`** surcharge ponctuellement la stratégie de chargement pour la méthode ciblée en forçant une jointure SQL :
+L'annotation **`@EntityGraph`** surcharge ponctuellement la stratégie de chargement pour la méthode ciblée, en forçant Hibernate à générer une jointure SQL (`LEFT OUTER JOIN`) :
 
 ```java title="VinRepository.java"
 public interface VinRepository extends JpaRepository<Vin, Integer> {
 
-    // Charge Vin, sa Region et son Producteur en une SEULE requête SQL
     @EntityGraph(attributePaths = {"region", "producteur"})
     List<Vin> findAll();
 
-    // Fonctionne également combiné avec une Query Method
     @EntityGraph(attributePaths = {"region", "producteur"})
     List<Vin> findByAppellation(String appellation);
 }
 ```
 
-- **Résultat :** les données liées sont récupérées en un seul aller-retour réseau vers la base de données.
+- **`attributePaths` :** liste les noms des attributs de l'entité `Vin` (`region`, `producteur`) à charger immédiatement en **une seule requête SQL** (un seul aller-retour réseau).
+- **Combinable librement :** s'applique aussi bien sur une méthode héritée de `JpaRepository` (`findAll()`) que sur une *Query Method* (`findByAppellation(...)`).
 
-## Requêtes déclaratives avec `@Query`
+:::caution[Limites de `@EntityGraph` avec les collections (`@OneToMany` / `@ManyToMany`)]
+- **Objets uniques (`@ManyToOne`, `@OneToOne`) :** vous pouvez en joindre plusieurs sans souci (comme `region` et `producteur` ci-dessus).
+- **2 collections ou plus dans le même `@EntityGraph` :**
+  - Avec des `List`, Hibernate lève **`MultipleBagFetchException`** (impossible de dédoublonner plusieurs listes issues d'un produit cartésien).
+  - Avec des `Set`, l'exception disparaît, mais la base renvoie quand même tout le **produit cartésien** (*N* × *M* lignes par parent), ce qui sature le réseau et la JVM.
+- **Solution :** séparez en plusieurs requêtes ou utilisez `@BatchSize` / `spring.jpa.properties.hibernate.default_batch_fetch_size` (`SELECT ... WHERE id IN (...)`).
+:::
 
-Nécessaire dès que la requête comporte des agrégations, des sous-requêtes ou devient trop verbeuse pour une *Query Method* :
+<details>
+<summary>Exemple : charger 2 listes (<code>@OneToMany</code>) en 2 requêtes SQL</summary>
+
+Si `Vin` possède deux listes (`List<Avis> avis` et `List<Recompense> recompenses`), on déclare deux requêtes portant chacune un seul `@EntityGraph` :
 
 ```java title="VinRepository.java"
 public interface VinRepository extends JpaRepository<Vin, Integer> {
 
-    // 1. JPQL : opère sur l'entité Java (vérifié au boot, portable)
+    @EntityGraph(attributePaths = {"avis"})
+    List<Vin> findAll();
+
+    @EntityGraph(attributePaths = {"recompenses"})
+    @Query("SELECT v FROM Vin v")
+    List<Vin> findAllWithRecompenses();
+}
+```
+
+Puis dans le `@Service`, on les enchaîne dans la **même transaction `@Transactional(readOnly = true)`** :
+
+```java title="VinService.java"
+@Transactional(readOnly = true)
+public List<Vin> getAllComplets() {
+    List<Vin> vins = vinRepository.findAll();
+    vinRepository.findAllWithRecompenses();
+    return vins;
+}
+```
+
+- **Requête 1 :** `findAll()` charge les `Vin` et leurs `avis`, puis les place dans le cache L1.
+- **Requête 2 :** `findAllWithRecompenses()` charge les `Vin` et leurs `recompenses` ; Hibernate retrouve les mêmes instances `Vin` dans le cache L1 et leur rattache simplement `recompenses` (**2 requêtes SQL** au total, sans produit cartésien).
+
+</details>
+
+## Requêtes déclaratives avec `@Query`
+
+Nécessaire dès que la requête comporte des agrégations, des sous-requêtes ou devient trop verbeuse pour une *Query Method*. `@Query` propose **2 modes** : **JPQL** (par défaut) et **SQL natif** (`nativeQuery = true`).
+
+```java title="VinRepository.java"
+public interface VinRepository extends JpaRepository<Vin, Integer> {
+
     @Query("SELECT DISTINCT v.appellation FROM Vin v WHERE v.prix <= :prixMax ORDER BY v.appellation")
     List<String> findAppellationsAbordables(BigDecimal prixMax);
 
-    // 2. SQL natif : syntaxe directe du moteur SGBD (PostgreSQL)
     @Query(value = "SELECT DISTINCT appellation FROM formation.vin WHERE date_mise_en_bouteille IS NOT NULL", nativeQuery = true)
     List<String> findAppellationsEnBouteille();
 }
 ```
+
+- **Mode 1 — JPQL (par défaut, `findAppellationsAbordables`) :** opère sur les **entités et attributs Java** (`Vin`, `v.prix`), pas sur les tables SQL. La requête est vérifiée au démarrage de l'application et reste portable entre SGBD.
+- **Mode 2 — SQL natif (`nativeQuery = true`, `findAppellationsEnBouteille`) :** exécute du SQL brut directement sur les **tables et colonnes** (`formation.vin`, `date_mise_en_bouteille`). Pratique pour des fonctionnalités propres au SGBD (ex. PostgreSQL), mais non vérifié au démarrage et non portable.
+- **Paramètres nommés (`:prixMax`) :** avec `spring-boot-starter-parent` (`-parameters`), `@Param("prixMax")` est facultatif si le paramètre Java porte le même nom ; sinon, il devient obligatoire.
+- **Pagination (`Pageable`) :** fonctionne directement en ajoutant `Pageable` en paramètre (en SQL natif complexe avec `GROUP BY` ou sous-requêtes, précisez `countQuery = "SELECT count(*) ..."`).
 
 ## Projections légères : requêter sans charger l'entité
 
