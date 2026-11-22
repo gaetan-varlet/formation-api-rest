@@ -177,7 +177,10 @@ export default defineConfig({
 				{
 					label: 'Production & Déploiement',
 					items: [
-						{ slug: 'deploiement/actuator' },
+						{
+							slug: 'deploiement/actuator',
+							badge: { text: 'À actualiser', variant: 'caution' },
+						},
 						{ slug: 'deploiement/scheduling' },
 						{ slug: 'deploiement/packaging-environnements' },
 						{ slug: 'deploiement/kubernetes' },
