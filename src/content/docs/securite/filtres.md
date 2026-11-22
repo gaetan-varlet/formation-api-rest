@@ -2,90 +2,97 @@
 title: "Filtres, CORS et intercepteurs"
 ---
 
-## La notion de filtre
+## La notion de filtre Servlet
 
-- objet Java qui peut modifier les en-têtes et le contenu d'une requête ou d'une réponse HTTP
-- permet de faire des actions systématiques sur la requête et/ou la réponse
+Un **filtre** (`jakarta.servlet.Filter`) est un composant Java placé en amont du contrôleur qui intercepte les requêtes et les réponses HTTP. Il permet d'exécuter un traitement systématique (logs, en-têtes de sécurité, CORS, contrôle d'accès…) avant et après le traitement métier.
 
-![La chaîne des filtres](../../../assets/images/filter-chain.png "La chaîne des filtres")
+![La chaîne des filtres](../../../assets/images/filter-chain.svg "La chaîne des filtres")
 
-## Exemple de filtre simple
+### Exemple de filtre global (`@Component`)
 
-```java
+En annotant la classe avec `@Component`, le filtre s'applique automatiquement à **toutes** les URLs de l'application :
+
+```java title="SimpleFilter.java"
 import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
-@Component // définition du filtre comme composant Spring
-@Order(2) // définition de l'ordre du filtre dans la chaine des filtres
+@Slf4j
+@Component
+@Order(2) // Ordre d'exécution dans la chaîne des filtres
 public class SimpleFilter implements Filter {
-    private static final Logger log = LoggerFactory.getLogger(SimpleFilter.class);
 
     @Override
-    public void doFilter (ServletRequest request, ServletResponse response, FilterChain chain)
-        throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
-        log.info("Début de la requête {}", httpRequest.getRequestURI())        
+        log.info("Début de la requête {}", httpRequest.getRequestURI());
 
-        chain.doFilter(request, response);
+        chain.doFilter(request, response); // Passe la main au filtre suivant / contrôleur
 
         log.info("Fin de la requête {}", httpRequest.getRequestURI());
     }
 }
 ```
 
-## Exemple de filtre uniquement sur certaines requêtes (1)
+### Restreindre un filtre à certaines URLs (`FilterRegistrationBean`)
 
-```java
-// on ne définit plus la classe comme composant Spring
+Pour n'appliquer un filtre qu'à un motif d'URL précis (par exemple `/vin/*`), **retirez `@Component`** de la classe du filtre et déclarez un `FilterRegistrationBean` dans une classe `@Configuration` :
+
+```java title="PartialFilter.java"
+@Slf4j
 public class PartialFilter implements Filter {
 
-    private static final Logger log = LoggerFactory.getLogger(PartialFilter.class);
-    
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
-        log.info("Filtre uniquement pour les requêtes sur le vin (requête) : {}, {}", req.getMethod(), req.getRequestURI());
+
+        log.info("Requête sur /vin : {} {}", req.getMethod(), req.getRequestURI());
         chain.doFilter(request, response);
-        log.info("Filtre uniquement pour les requêtes sur le vin (Content-Type de la réponse) : {}", res.getContentType());
-        }
-}
-```
-
-## Exemple de filtre uniquement sur certaines requêtes (2)
-
-- création d'une classe pour configurer nos filtres avec l'annotation `@Configuration`
-- création d'un **FilterRegistrationBean** pour le filtre que l'on souhaite configurer avec l'annotation `@Bean`
-
-```java
-@Configuration
-public class FilterConfig {
-    @Bean
-    public FilterRegistrationBean<PartialFilter> loggingFilter(){
-        FilterRegistrationBean<PartialFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new PartialFilter());
-        registrationBean.addUrlPatterns("/vin/*"); // passage dans le filtre uniquement sur les URL /vin
-        registrationBean.setOrder(3); // définition de l'ordre du filtre
-        return registrationBean;    
+        log.info("Réponse /vin (Content-Type) : {}", res.getContentType());
     }
 }
 ```
 
-## Compresser la réponse (1)
+```java title="FilterConfig.java"
+@Configuration
+public class FilterConfig {
 
-Lorsque la réponse HTTP est grosse, il est possible de compresser pour alléger le transfert sur réseau. Charge au client de la décompresser (le navigateur sait le faire tout seul)
+    @Bean
+    public FilterRegistrationBean<PartialFilter> loggingFilter() {
+        FilterRegistrationBean<PartialFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new PartialFilter());
+        registrationBean.addUrlPatterns("/vin/*");
+        registrationBean.setOrder(3);
+        return registrationBean;
+    }
+}
+```
 
-- pour compresser une réponse HTTP, il faut que le client soit d'accord et que le header **Accept-Encoding: gzip** soit présent dans la requête
-- si la réponse est compressée, il y aura le header **Content-Encoding: gzip**
+## Compresser les réponses HTTP
 
-Utilisation d'une bibliothèque [Ziplet](https://github.com/ziplet/ziplet) qui créer un filtre pour zipper la réponse
+Lorsque les réponses JSON sont volumineuses, le serveur peut les compresser à la volée si le client annonce qu'il supporte la compression via l'en-tête **`Accept-Encoding: gzip`** (le serveur renvoie alors **`Content-Encoding: gzip`** et le navigateur décompresse automatiquement).
 
-## Compresser la réponse (2)
+:::note[En pratique avec Spring Boot]
+Avec le serveur embarqué de Spring Boot (Tomcat/Jetty/Undertow), il suffit d'activer `server.compression.enabled=true` dans `application.properties` (voir [Packaging et configuration par environnement](/formation-api-rest/deploiement/packaging-environnements/#activer-la-compression-des-réponses-http)).
 
-Ajouter la dépendance suivante, et créer un package **config** et créer la classe ZipletConfig
+Dans d'anciennes architectures `.war` sur serveur externe, on utilisait parfois une bibliothèque tierce comme [Ziplet](https://github.com/ziplet/ziplet) enregistrée via `FilterRegistrationBean` *(attention : Ziplet 2.x repose sur l'ancien namespace `javax.servlet`)*.
+:::
 
-```xml
+<details>
+<summary>Exemple historique avec Ziplet (hérité javax.servlet)</summary>
+
+```xml title="pom.xml"
 <dependency>
     <groupId>com.github.ziplet</groupId>
     <artifactId>ziplet</artifactId>
@@ -93,74 +100,72 @@ Ajouter la dépendance suivante, et créer un package **config** et créer la cl
 </dependency>
 ```
 
-```java
-// Ajout d'un FilterRegistrationBean pour configurer le filtre de compression de la réponse
-    // Configuration du filtre de compression de la réponse
+```java title="ZipletConfig.java"
+@Configuration
+public class ZipletConfig {
+
     @Bean
-    public FilterRegistrationBean<CompressingFilter> compressingFilter(){
+    public FilterRegistrationBean<CompressingFilter> compressingFilter() {
         FilterRegistrationBean<CompressingFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new CompressingFilter());
         registrationBean.setOrder(1);
         return registrationBean;
     }
-//  @Bean
-//  public Filter compressFilter() {
-//      return new CompressingFilter();
-//  }
-```
-
-## CORS : Cross-origin resource sharing (1)
-
-- contrainte de sécurité du navigateur qui empêche les requêtes HTTP provenant d'un domaine différent que celui dont vient le script
-- pour permettre les requêtes multi-origines, il faut ajouter des en-têtes CORS
-- les navigateurs doivent effectuer une requête préliminaire (« preflight request ») et demander au serveur les méthodes prises en charges via une requête utilisant la méthode OPTIONS puis, après approbation du serveur, envoyer la vraie requête
-- configuration côté serveur avec un filtre Java par exemple
-
-![CORS : Preflight request](../../../assets/images/cors-preflight.png "CORS : Preflight request")
-
-## CORS : Cross-origin resource sharing (2)
-
-- headers de la requête (fait automatiquement par le navigateur)
-  - **Access-Control-Request-Headers**: authorization
-  - **Access-Control-Request-Method**: GET
-- headers dans la réponse (fait par le serveur)
-  - **Access-Control-Allow-Credentials**: true
-  - **Access-Control-Allow-Headers**: authorization
-  - **Access-Control-Allow-Methods**: GET
-  - **Access-Control-Allow-Origin**: url du serveur
-  - **Access-Control-Max-Age**: 3600
-
-## CORS : Cross-origin resource sharing (3)
-
-ajout d'un filtre pour gérer le CORS
-
-```properties
-# URLs autorisées pour faire des requêtes HTTP depuis le navigateur (https://monappli.insee.fr)
-fr.insee.cors.authorized.urls=http://localhost:5173,http://localhost:3000
-```
-
-```java
-@Value("${fr.insee.cors.authorized.urls}") private String[] urls;
-@Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    log.info("URLs autorisées pour faire des requêtes HTTP depuis le navigateur : {}", List.of(urls));
-    CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOriginPatterns(List.of(urls));
-    configuration.setAllowedMethods(List.of("*"));
-    configuration.setAllowedHeaders(List.of("*"));
-    configuration.setMaxAge(3600L);
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
 }
 ```
 
-## Les intercepteurs Spring
+</details>
 
-- surcouche Spring aux filtres Java
-- création d'une classe annotée `@Component` qui implémente l'interface l'**HandlerInterceptor**
-- redéfinition de 3 méthodes :
-  - **preHandle()** : avant de passer dans le controller. Renvoie true ou false (pour savoir s'il faut aller dans le controller)
-  - **postHandle()** : après le passage dans le controller
-  - **afterCompletion()** : après être passé dans la vue
-- l'intercepteur doit ensuite être enregistré dans l'**InterceptorRegistry**
+## CORS (*Cross-Origin Resource Sharing*)
+
+### Principe et requête préliminaire (*Preflight*)
+
+Par sécurité (*Same-Origin Policy*), un navigateur bloque les appels JavaScript émis vers une **origine différente** (protocole, domaine ou port distinct) de celle qui a servi la page web.
+
+Pour autoriser ces appels multi-origines, le serveur doit renvoyer des en-têtes **CORS** (en particulier `Access-Control-Allow-Origin`). Pour les requêtes non simples (avec en-tête `Authorization`, `Content-Type: application/json`, méthode `PUT`/`DELETE`…), le navigateur gère tout **automatiquement côté client** : il envoie d'abord une requête préliminaire **`OPTIONS`** (*preflight*) pour vérifier les droits, puis envoie la vraie requête si le serveur l'y autorise :
+
+![CORS : Preflight request](../../../assets/images/cors-preflight.svg "CORS : Preflight request")
+
+### Configuration côté serveur avec Spring
+
+Il suffit de déclarer les origines front-end autorisées dans `application.properties`, puis d'exposer un bean `CorsConfigurationSource` (automatiquement pris en compte par `http.cors(Customizer.withDefaults())` dans `SecurityFilterChain`) :
+
+```properties title="application.properties"
+# URLs front-end autorisées à appeler l'API depuis un navigateur
+fr.insee.cors.authorized.urls=http://localhost:5173,http://localhost:3000
+```
+
+```java title="CorsConfig.java"
+@Slf4j
+@Configuration
+public class CorsConfig {
+
+    @Value("${fr.insee.cors.authorized.urls}")
+    private String[] urls;
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        log.info("URLs autorisées pour les appels CORS : {}", List.of(urls));
+
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(List.of(urls)); // Origines autorisées
+        configuration.setAllowedMethods(List.of("*"));         // Méthodes HTTP autorisées
+        configuration.setAllowedHeaders(List.of("*"));         // En-têtes autorisés (ex. Authorization)
+        configuration.setMaxAge(3600L);                        // Durée de cache du preflight (1 h)
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+}
+```
+
+## Les intercepteurs Spring (`HandlerInterceptor`)
+
+Alors qu'un **filtre Servlet** intervient au niveau Tomcat (avant même Spring Security et le routage Spring MVC), un **intercepteur Spring** se situe à l'intérieur du `DispatcherServlet`, juste autour de l'appel aux méthodes `@RestController` (ce qui donne accès au `HandlerMethod` ciblé, à ses annotations, etc.).
+
+1. Implémentez l'interface **`HandlerInterceptor`** (`@Component`) en redéfinissant tout ou partie des 3 méthodes :
+   - **`preHandle(...)`** : exécutée **avant** le contrôleur ; retourne `true` pour poursuivre l'appel, ou `false` pour l'interrompre.
+   - **`postHandle(...)`** : exécutée **après** le contrôleur (avant le rendu éventuel d'une vue).
+   - **`afterCompletion(...)`** : exécutée en toute fin de traitement de la requête (y compris en cas d'exception, utile pour nettoyer un `ThreadLocal` ou mesurer la durée totale).
+2. Enregistrez l'intercepteur auprès de Spring MVC en implémentant **`WebMvcConfigurer`** (`addInterceptors(InterceptorRegistry registry)`).

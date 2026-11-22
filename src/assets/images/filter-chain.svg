@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 245" role="img" aria-label="Schéma de la chaîne des filtres Servlet entre le client et le contrôleur">
+  <defs>
+    <marker id="arr-req" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7"/>
+    </marker>
+    <marker id="arr-res" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+    </marker>
+    <style>
+      .title { font: 700 16px system-ui, -apple-system, sans-serif; fill: #0f172a; }
+      .sub { font: 500 12px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .zone { font: 700 11.5px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .box-title { font: 700 13.5px system-ui, -apple-system, sans-serif; fill: #ffffff; }
+      .box-sub { font: 500 11px system-ui, -apple-system, sans-serif; fill: #e2e8f0; }
+      .lbl-req { font: 700 11px system-ui, -apple-system, sans-serif; fill: #0369a1; }
+      .lbl-res { font: 700 11px system-ui, -apple-system, sans-serif; fill: #047857; }
+      .foot { font: 600 11.5px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #334155; }
+    </style>
+  </defs>
+
+  <rect x="8" y="8" width="804" height="229" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="410" y="34" text-anchor="middle" class="title">Chaîne des filtres Servlet (FilterChain)</text>
+  <text x="410" y="52" text-anchor="middle" class="sub">Chaque filtre encadre l'appel suivant avec chain.doFilter(request, response)</text>
+
+  <!-- Zone Conteneur Servlet -->
+  <rect x="176" y="68" width="618" height="154" rx="12" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="485" y="87" text-anchor="middle" class="zone">Conteneur Servlet (Tomcat)</text>
+
+  <!-- Boîte Client -->
+  <rect x="24" y="108" width="116" height="76" rx="10" fill="#0284c7"/>
+  <text x="82" y="142" text-anchor="middle" class="box-title">Client</text>
+  <text x="82" y="161" text-anchor="middle" class="box-sub">Navigateur / API</text>
+
+  <!-- Boîte Filtre 1 -->
+  <rect x="196" y="108" width="142" height="76" rx="10" fill="#0f766e"/>
+  <text x="267" y="142" text-anchor="middle" class="box-title">Filtre 1</text>
+  <text x="267" y="161" text-anchor="middle" class="box-sub">ex. CORS / Sécurité</text>
+
+  <!-- Boîte Filtre 2 -->
+  <rect x="394" y="108" width="142" height="76" rx="10" fill="#0d9488"/>
+  <text x="465" y="142" text-anchor="middle" class="box-title">Filtre 2</text>
+  <text x="465" y="161" text-anchor="middle" class="box-sub">ex. SimpleFilter</text>
+
+  <!-- Boîte Controller -->
+  <rect x="592" y="108" width="184" height="76" rx="10" fill="#4f46e5"/>
+  <text x="684" y="142" text-anchor="middle" class="box-title">DispatcherServlet</text>
+  <text x="684" y="161" text-anchor="middle" class="box-sub">Intercepteurs &amp; Controller</text>
+
+  <!-- Flèches Requête (aller) -->
+  <text x="168" y="118" text-anchor="middle" class="lbl-req">Requête</text>
+  <line x1="143" y1="128" x2="190" y2="128" stroke="#0284c7" stroke-width="2.4" marker-end="url(#arr-req)"/>
+  <line x1="341" y1="128" x2="388" y2="128" stroke="#0284c7" stroke-width="2.4" marker-end="url(#arr-req)"/>
+  <line x1="539" y1="128" x2="586" y2="128" stroke="#0284c7" stroke-width="2.4" marker-end="url(#arr-req)"/>
+
+  <!-- Flèches Réponse (retour) -->
+  <line x1="589" y1="166" x2="542" y2="166" stroke="#059669" stroke-width="2.4" stroke-dasharray="5 3" marker-end="url(#arr-res)"/>
+  <line x1="391" y1="166" x2="344" y2="166" stroke="#059669" stroke-width="2.4" stroke-dasharray="5 3" marker-end="url(#arr-res)"/>
+  <line x1="193" y1="166" x2="146" y2="166" stroke="#059669" stroke-width="2.4" stroke-dasharray="5 3" marker-end="url(#arr-res)"/>
+  <text x="168" y="185" text-anchor="middle" class="lbl-res">Réponse</text>
+
+  <!-- Légende basse -->
+  <text x="485" y="208" text-anchor="middle" class="foot">1. Avant chain.doFilter()  →  2. Contrôleur  →  3. Après chain.doFilter()</text>
+</svg>
