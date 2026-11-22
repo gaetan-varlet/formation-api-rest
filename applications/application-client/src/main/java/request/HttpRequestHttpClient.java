@@ -20,15 +20,14 @@ import java.util.concurrent.CompletableFuture;
 
 import jakarta.xml.bind.JAXBContext;
 
+import model.Person;
 import tools.jackson.databind.ObjectMapper;
-
-import model.User;
 
 public class HttpRequestHttpClient {
 
 	public static void main(String[] args) throws Exception {
-		// requeteGetSynchroneXmlJson("application/xml");
-		requeteGetSynchroneXmlJson("application/json");
+		// requeteGetSynchroneXmlJson("/xml");
+		requeteGetSynchroneXmlJson("/json");
 		// requetePostSynchroneJson();
 		// uneRequeteGetAsynchrone();
 		// multiplesRequetesGetAsynchrone();
@@ -36,96 +35,104 @@ public class HttpRequestHttpClient {
 		// requeteGetSynchroneWithBearerAuth();
 	}
 
-	public static void requeteGetSynchroneXmlJson(String accept) throws Exception {
-		// requête en GET avec réponse en XML ou JSON que l'on récupère dans un String
+	public static void requeteGetSynchroneXmlJson(String path) throws Exception {
+		// requête en GET vers /xml ou /json que l'on récupère dans un String
 		HttpClient httpClient = HttpClient.newBuilder()
 				.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080))).build();
-		HttpRequest httpRequest = HttpRequest.newBuilder().header("Accept", accept)
-				.uri(URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users/1")).GET().build();
+		HttpRequest httpRequest = HttpRequest.newBuilder()
+				.uri(URI.create("https://mocktarget.apigee.net" + path)).GET().build();
 		HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofString());
-		System.out.println(response.statusCode()); // 200
-		System.out.println(response.headers().allValues("content-type"));
-		// [application/xml; charset=utf-8] ou application/json; charset=utf-8]
-		System.out.println(response.body()); // le User en XML ou JSON
-		// même chose avec récupération du body dans un InputStream
-		HttpResponse<InputStream> responseStream = httpClient.send(httpRequest, BodyHandlers.ofInputStream());
-		String contentType = responseStream.headers().firstValue("Content-Type").get();
-		if (contentType.contains("application/xml")) {
-			JAXBContext jc = JAXBContext.newInstance(User.class);
-			User user = (User) jc.createUnmarshaller().unmarshal(responseStream.body());
-			System.out.println(user); // User [id=1, userName=User 1, password=Password1]
-		} else if (contentType.contains("application/json")) {
-			ObjectMapper mapper = new ObjectMapper();
-			User user = mapper.readValue(responseStream.body(), User.class);
-			System.out.println(user); // User [id=1, userName=User 1, password=Password1]
-		} else {
-			throw new Exception("On veut du XML ou du JSON !");
-		}
-	}
-
-	public static void requetePostSynchroneJson()
-			throws IOException, InterruptedException {
-		ObjectMapper mapper = new ObjectMapper();
-		User user = new User();
-		user.setUserName("toto");
-		user.setPassword("azerty");
-		String userString = mapper.writeValueAsString(user);
-
-		HttpClient httpClient = HttpClient.newBuilder()
-				.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080))).build();
-		HttpRequest httpRequest = HttpRequest.newBuilder().header("Accept", "application/json")
-				.header("Content-type", "application/json")
-				.uri(URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users"))
-				.POST(BodyPublishers.ofString(userString)).build();
-		HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofString());
-		System.out.println(response.body());
-		System.out.println("");
-
-		HttpResponse<InputStream> responseStream = httpClient.send(httpRequest, BodyHandlers.ofInputStream());
-		BufferedReader reader = new BufferedReader(
-				new InputStreamReader(responseStream.body(), Charset.defaultCharset()));
-		String line = null;
-		while ((line = reader.readLine()) != null) {
-			System.out.println(line);
-		}
-	}
-
-	public static void uneRequeteGetAsynchrone() throws Exception {
-		HttpClient httpClient = HttpClient.newBuilder()
-				.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080))).build();
-		HttpRequest httpRequest = HttpRequest.newBuilder().header("Accept", "application/json")
-				.uri(URI.create("http://fakerestapi.azurewebsites.net/api/Users/1")).GET().build();
-		System.out.println(LocalDateTime.now()); // 15:44:19.690822
-		CompletableFuture<HttpResponse<String>> cfResponse = httpClient.sendAsync(httpRequest, BodyHandlers.ofString());
-		System.out.println(LocalDateTime.now()); // 15:44:19.717822
-		HttpResponse<String> response = cfResponse.join();
-		System.out.println(LocalDateTime.now()); // 15:44:19.876822
 		System.out.println(response.statusCode()); // 200
 		System.out.println(response.headers().allValues("content-type"));
 		// [application/xml; charset=utf-8] ou [application/json; charset=utf-8]
-		System.out.println(response.body()); // le User en XML ou JSON
+		System.out.println(response.body()); // le Person en XML ou JSON
+
+		// même chose avec récupération du body dans un InputStream
+		HttpResponse<InputStream> responseStream = httpClient.send(httpRequest, BodyHandlers.ofInputStream());
+		String contentType = responseStream.headers().firstValue("Content-Type").orElse("");
+		if (contentType.contains("application/xml")) {
+			JAXBContext jc = JAXBContext.newInstance(Person.class);
+			Person person = (Person) jc.createUnmarshaller().unmarshal(responseStream.body());
+			System.out.println(person); // Person [firstName=John, lastName=Doe, city=San Jose, state=CA]
+		} else if (contentType.contains("application/json")) {
+			ObjectMapper mapper = new ObjectMapper();
+			Person person = mapper.readValue(responseStream.body(), Person.class);
+			System.out.println(person); // Person [firstName=John, lastName=Doe, city=San Jose, state=CA]
+		} else {
+			throw new IllegalStateException("On veut du XML ou du JSON !");
+		}
 	}
 
-	public static void multiplesRequetesGetAsynchrone() throws Exception {
+	public static void requetePostSynchroneJson() throws IOException, InterruptedException {
+		ObjectMapper mapper = new ObjectMapper();
+		Person person = new Person();
+		person.setFirstName("Jean");
+		person.setLastName("Dupont");
+		person.setCity("Paris");
+		person.setState("FR");
+		String personJson = mapper.writeValueAsString(person);
+
 		HttpClient httpClient = HttpClient.newBuilder()
 				.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080))).build();
-		List<String> urls = List.of("http://fakerestapi.azurewebsites.net/api/Users/1",
-				"http://fakerestapi.azurewebsites.net/api/Users/2", "http://fakerestapi.azurewebsites.net/api/Users/3",
-				"http://fakerestapi.azurewebsites.net/api/Users/4", "http://fakerestapi.azurewebsites.net/api/Users/5");
-		System.out.println(LocalDateTime.now()); // 16:03:28.104822
+		HttpRequest httpRequest = HttpRequest.newBuilder().header("Accept", "application/json")
+				.header("Content-Type", "application/json")
+				.uri(URI.create("https://jsonplaceholder.typicode.com/users"))
+				.POST(BodyPublishers.ofString(personJson)).build();
+		HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofString());
+		System.out.println(response.body());
+		System.out.println();
+
+		HttpResponse<InputStream> responseStream = httpClient.send(httpRequest, BodyHandlers.ofInputStream());
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(responseStream.body(), Charset.defaultCharset()))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+			}
+		}
+	}
+
+	public static void uneRequeteGetAsynchrone() {
+		HttpClient httpClient = HttpClient.newBuilder()
+				.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080))).build();
+		HttpRequest httpRequest = HttpRequest.newBuilder().header("Accept", "application/json")
+				.uri(URI.create("https://mocktarget.apigee.net/json")).GET().build();
+		System.out.println(LocalDateTime.now()); // t0 : avant l'envoi
+		// Non bloquant : sendAsync lance la requête en arrière-plan et rend la main immédiatement
+		CompletableFuture<HttpResponse<String>> cfResponse = httpClient.sendAsync(httpRequest, BodyHandlers.ofString());
+		System.out.println(LocalDateTime.now()); // t1 ≈ t0 : le thread n'est pas bloqué
+		// Bloquant : on attend explicitement que la réponse soit disponible
+		HttpResponse<String> response = cfResponse.join();
+		System.out.println(LocalDateTime.now()); // t2 : inclut la durée de l'appel réseau
+		System.out.println(response.statusCode()); // 200
+		System.out.println(response.headers().allValues("content-type"));
+		System.out.println(response.body());
+	}
+
+	public static void multiplesRequetesGetAsynchrone() {
+		HttpClient httpClient = HttpClient.newBuilder()
+				.proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080))).build();
+		List<String> urls = List.of(
+				"https://mocktarget.apigee.net/user?user=Alice",
+				"https://mocktarget.apigee.net/user?user=Bob",
+				"https://mocktarget.apigee.net/user?user=Charlie",
+				"https://mocktarget.apigee.net/user?user=David",
+				"https://mocktarget.apigee.net/user?user=Eve");
+		System.out.println(LocalDateTime.now()); // t0 : avant lancement
+		// Non bloquant : les 5 requêtes partent en parallèle quasi instantanément
 		List<CompletableFuture<HttpResponse<String>>> cfResponses = urls.stream().map(url -> httpClient.sendAsync(
-				HttpRequest.newBuilder().header("Accept", "application/json").uri(URI.create(url)).GET().build(),
+				HttpRequest.newBuilder().uri(URI.create(url)).GET().build(),
 				BodyHandlers.ofString())).toList();
-		System.out.println(LocalDateTime.now()); // 16:03:28.137822
-		// on attend d'avoir toutes les réponses
-		CompletableFuture<Void> conbinedCF = CompletableFuture
-				.allOf(cfResponses.toArray(new CompletableFuture[cfResponses.size()]));
-		conbinedCF.join();
-		System.out.println(LocalDateTime.now()); // 16:03:28.319822
+		System.out.println(LocalDateTime.now()); // t1 ≈ t0
+		// Bloquant : on attend que toutes les requêtes soient terminées
+		CompletableFuture<Void> combinedCF = CompletableFuture
+				.allOf(cfResponses.toArray(new CompletableFuture[0]));
+		combinedCF.join();
+		System.out.println(LocalDateTime.now()); // t2 : temps ≈ durée de la requête la plus lente
 		for (CompletableFuture<HttpResponse<String>> completableFuture : cfResponses) {
 			System.out.println(completableFuture.join().body());
 		}
-		System.out.println(LocalDateTime.now()); // 16:03:28.319822
+		System.out.println(LocalDateTime.now()); // t3 ≈ t2
 	}
 
 	public static void requeteGetSynchroneWithBasicAuth() throws Exception {

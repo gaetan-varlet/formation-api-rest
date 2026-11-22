@@ -12,9 +12,8 @@ import java.nio.charset.Charset;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 
+import model.Person;
 import tools.jackson.databind.ObjectMapper;
-
-import model.User;
 
 public class HttpRequestJava {
 
@@ -27,15 +26,13 @@ public class HttpRequestJava {
 	public static void requeteGetXml() throws JAXBException, IOException {
 		// System.setProperty("http.proxyHost", "proxy-rie.http.insee.fr");
 		// System.setProperty("http.proxyPort", "8080");
-		// requête en GET avec réponse en XML
-		URL url = URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users/1").toURL();
+		URL url = URI.create("https://mocktarget.apigee.net/xml").toURL();
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("GET");
-		connection.setRequestProperty("Accept", "application/xml");
 		InputStream response = connection.getInputStream();
-		JAXBContext jc = JAXBContext.newInstance(User.class);
-		User user = (User) jc.createUnmarshaller().unmarshal(response);
-		System.out.println(user);
+		JAXBContext jc = JAXBContext.newInstance(Person.class);
+		Person person = (Person) jc.createUnmarshaller().unmarshal(response);
+		System.out.println(person);
 		System.out.println(connection.getResponseCode()); // 200
 		System.out.println(connection.getContentType()); // application/xml; charset=utf-8
 
@@ -45,41 +42,41 @@ public class HttpRequestJava {
 	public static void requeteGetJson() throws IOException {
 		// System.setProperty("http.proxyHost", "proxy-rie.http.insee.fr");
 		// System.setProperty("http.proxyPort", "8080");
-		// requête en GET avec réponse en JSON
-		URL url = URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users/1").toURL();
+		URL url = URI.create("https://mocktarget.apigee.net/json").toURL();
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("GET");
-		connection.setRequestProperty("Accept", "application/json");
 		InputStream response = connection.getInputStream();
 		ObjectMapper mapper = new ObjectMapper();
-		User user = mapper.readValue(response, User.class);
+		Person person = mapper.readValue(response, Person.class);
 		connection.disconnect();
-		System.out.println(user);
+		System.out.println(person);
 	}
 
 	public static void requetePostJson() throws IOException {
 		// System.setProperty("http.proxyHost", "proxy-rie.http.insee.fr");
 		// System.setProperty("http.proxyPort", "8080");
 
-		User user = new User();
-		user.setUserName("toto");
-		user.setPassword("azerty");
+		Person person = new Person();
+		person.setFirstName("Jean");
+		person.setLastName("Dupont");
+		person.setCity("Paris");
+		person.setState("FR");
 		ObjectMapper mapper = new ObjectMapper();
-		URL url = URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users").toURL();
+		URL url = URI.create("https://jsonplaceholder.typicode.com/users").toURL();
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("POST");
 		connection.setRequestProperty("Accept", "application/json");
-		connection.setRequestProperty("Content-type", "application/json");
-		connection.setDoOutput(true); // this is to enable writing
-		mapper.writeValue(connection.getOutputStream(), user);
+		connection.setRequestProperty("Content-Type", "application/json");
+		connection.setDoOutput(true);
+		mapper.writeValue(connection.getOutputStream(), person);
 
 		InputStream response = connection.getInputStream();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(response, Charset.defaultCharset()));
-		String line = null;
-		while ((line = reader.readLine()) != null) {
-			System.out.println(line);
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(response, Charset.defaultCharset()))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+			}
 		}
-		reader.close();
 		connection.disconnect();
 	}
 

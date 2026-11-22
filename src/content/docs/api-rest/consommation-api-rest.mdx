@@ -31,34 +31,48 @@ Dans une application Spring Boot, `RestClient` remplace avantageusement `HttpCli
 
 ### Mise en place de l'exemple
 
-Lecture du service :
-
-```http
-http://fakerestapi.azurewebsites.net/api/v1/Users/1
-```
+Lecture du service public `mocktarget.apigee.net` (en JSON ou en XML, sans namespace XML) :
 
 <Tabs>
-  <TabItem label="Réponse JSON">
+  <TabItem label="JSON">
+
+```http title="GET"
+https://mocktarget.apigee.net/json
+```
+
 ```json
 {
-    "id": 1,
-    "userName": "User 1",
-    "password": "Password1"
+    "firstName": "John",
+    "lastName": "Doe",
+    "city": "San Jose",
+    "state": "CA"
 }
 ```
+
   </TabItem>
-  <TabItem label="Réponse XML">
-```xml
-<User xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/FakeRestAPI.Web.Models">
-    <id>1</id>
-    <password>Password1</password>
-    <userName>User 1</userName>
-</User>
+  <TabItem label="XML">
+
+```http title="GET"
+https://mocktarget.apigee.net/xml
 ```
+
+```xml
+<root>
+    <city>San Jose</city>
+    <firstName>John</firstName>
+    <lastName>Doe</lastName>
+    <state>CA</state>
+</root>
+```
+
   </TabItem>
 </Tabs>
 
-Création d'un projet Maven en **Java 25** avec **Jackson 3** (`tools.jackson.core:jackson-databind`, dont `ObjectMapper` est désormais dans `tools.jackson.databind`), et **JAXB 4** si vous consommez aussi du XML :
+:::note[Négociation de format (`Accept`)]
+L'API de démonstration `mocktarget.apigee.net` expose deux chemins distincts (`/json` et `/xml`), ce qui permet de disposer d'un exemple public simple et sans namespace XML (`@XmlSchema` inutile). **Dans une API REST conforme à la norme HTTP, on conserve toutefois une URL unique et on précise le format attendu via l'en-tête HTTP `Accept`** (`Accept: application/json` ou `Accept: application/xml`).
+:::
+
+Création d'un projet Maven en **Java 25** avec **Jackson** *(package `tools.jackson.databind`)* et **JAXB** si vous consommez aussi du XML :
 
 ```xml title="pom.xml"
 <dependency>
@@ -74,48 +88,26 @@ Création d'un projet Maven en **Java 25** avec **Jackson 3** (`tools.jackson.co
 </dependency>
 ```
 
-Création du Bean **User** :
+Création du Bean **Person** *(l'annotation `@XmlRootElement(name = "root")` associe la classe à la balise racine `<root>` en XML — inutile pour du JSON seul avec Jackson)* :
 
-```java title="User.java"
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlElement;
+```java title="Person.java"
 import jakarta.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "User")
-@XmlAccessorType(XmlAccessType.FIELD)
-public class User {
+@XmlRootElement(name = "root")
+public class Person {
 
-    @XmlElement(name = "id")
-    @JsonProperty("id")
-    private int id;
-    @XmlElement(name = "userName")
-    @JsonProperty("userName")
-    private String userName;
-    @XmlElement(name = "password")
-    @JsonProperty("password")
-    private String password;
+    private String firstName;
+    private String lastName;
+    private String city;
+    private String state;
 
     // getters, setters et méthode toString()
 }
 ```
 
-<details>
-<summary>Configuration JAXB (package-info.java) si vous devez aussi désérialiser du XML</summary>
-
-```java title="package-info.java"
-@XmlSchema(
-    namespace="http://schemas.datacontract.org/2004/07/FakeRestAPI.Web.Models",
-    elementFormDefault=XmlNsForm.QUALIFIED
-)
-package model;
-
-import jakarta.xml.bind.annotation.XmlNsForm;
-import jakarta.xml.bind.annotation.XmlSchema;
-```
-
-</details>
+:::note[API utilisée pour les exemples `POST`]
+`mocktarget.apigee.net` est pratique en `GET`, mais ne simule pas une création de ressource en `POST` (`/echo` renvoie une enveloppe technique et `/json` retourne toujours John Doe). Les exemples `POST` s'appuient donc sur **`https://jsonplaceholder.typicode.com/users`**, qui accepte notre objet `Person` en JSON et répond `201 Created` avec l'objet envoyé enrichi d'un `"id"` : on peut ainsi le désérialiser directement dans le même objet `Person`.
+:::
 
 ### Avec Spring Boot : RestClient (recommandé)
 
@@ -124,46 +116,48 @@ import jakarta.xml.bind.annotation.XmlSchema;
 <Tabs>
   <TabItem label="GET">
 ```java
-RestClient restClient = RestClient.create("http://fakerestapi.azurewebsites.net/api/v1");
+RestClient restClient = RestClient.create("https://mocktarget.apigee.net");
 
-User user = restClient.get()
-    .uri("/Users/{id}", 1)
+Person person = restClient.get()
+    .uri("/json")
     .accept(MediaType.APPLICATION_JSON)
     .retrieve()
-    .body(User.class);
+    .body(Person.class);
 ```
   </TabItem>
   <TabItem label="POST">
 ```java
-RestClient restClient = RestClient.create("http://fakerestapi.azurewebsites.net/api/v1");
+RestClient restClient = RestClient.create("https://jsonplaceholder.typicode.com");
 
-User user = new User();
-user.setUserName("toto");
-user.setPassword("azerty");
+Person person = new Person();
+person.setFirstName("Jean");
+person.setLastName("Dupont");
+person.setCity("Paris");
+person.setState("FR");
 
-User created = restClient.post()
-    .uri("/Users")
+Person created = restClient.post()
+    .uri("/users")
     .contentType(MediaType.APPLICATION_JSON)
-    .body(user)
+    .body(person)
     .retrieve()
-    .body(User.class);
+    .body(Person.class);
 ```
   </TabItem>
   <TabItem label="Authentification">
 ```java
 // Mode Bearer
-User userBearer = restClient.get()
-    .uri("/Users/1")
+Person personBearer = restClient.get()
+    .uri("/json")
     .header("Authorization", "Bearer " + token)
     .retrieve()
-    .body(User.class);
+    .body(Person.class);
 
 // Mode Basic
-User userBasic = restClient.get()
-    .uri("/Users/1")
+Person personBasic = restClient.get()
+    .uri("/json")
     .headers(headers -> headers.setBasicAuth("ID", "MDP"))
     .retrieve()
-    .body(User.class);
+    .body(Person.class);
 ```
   </TabItem>
 </Tabs>
@@ -177,32 +171,32 @@ Dans un projet Spring Boot, `RestClient.Builder` est fourni automatiquement par 
 public class RestClientConfig {
 
     @Bean
-    public RestClient userRestClient(RestClient.Builder builder) {
+    public RestClient personRestClient(RestClient.Builder builder) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy-rie.http.insee.fr", 8080)));
 
         return builder
-            .baseUrl("http://fakerestapi.azurewebsites.net/api/v1")
+            .baseUrl("https://mocktarget.apigee.net")
             .requestFactory(factory) // facultatif si pas de proxy
             .build();
     }
 }
 
 @Service
-public class UserApiClient {
+public class PersonApiClient {
 
     private final RestClient restClient;
 
     // Spring injecte automatiquement le @Bean RestClient configuré ci-dessus
-    public UserApiClient(RestClient userRestClient) {
-        this.restClient = userRestClient;
+    public PersonApiClient(RestClient personRestClient) {
+        this.restClient = personRestClient;
     }
 
-    public User getUser(int id) {
+    public Person getPerson() {
         return restClient.get()
-            .uri("/Users/{id}", id)
+            .uri("/json")
             .retrieve()
-            .body(User.class);
+            .body(Person.class);
     }
 }
 ```
@@ -214,31 +208,31 @@ public class UserApiClient {
 <Tabs>
   <TabItem label="GET synchrone">
 ```java
-public static void requeteGetSynchroneXmlJson(String accept) throws Exception {
-    // requête en GET avec réponse en XML ou JSON que l'on récupère dans un String
+public static void requeteGetSynchroneXmlJson(String path) throws Exception {
+    // requête en GET vers /xml ou /json que l'on récupère dans un String
     HttpClient httpClient = HttpClient.newBuilder()
         .proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
         .build();
-    HttpRequest httpRequest = HttpRequest.newBuilder().header("Accept", accept)
-        .uri(URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users/1")).GET().build();
+    HttpRequest httpRequest = HttpRequest.newBuilder()
+        .uri(URI.create("https://mocktarget.apigee.net" + path)).GET().build();
     HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofString());
     System.out.println(response.statusCode()); // 200
     System.out.println(response.headers().allValues("content-type")); // [application/xml; charset=utf-8] ou [application/json; charset=utf-8]
-    System.out.println(response.body()); // le User en XML ou JSON
+    System.out.println(response.body()); // le Person en XML ou JSON
 
     // même chose avec récupération du body dans un InputStream
     HttpResponse<InputStream> responseStream = httpClient.send(httpRequest, BodyHandlers.ofInputStream());
-    String contentType = responseStream.headers().firstValue("Content-Type").get();
+    String contentType = responseStream.headers().firstValue("Content-Type").orElse("");
     if (contentType.contains("application/xml")) {
-        JAXBContext jc = JAXBContext.newInstance(User.class);
-        User user = (User) jc.createUnmarshaller().unmarshal(responseStream.body());
-        System.out.println(user); // User [id=1, userName=User 1, password=Password1]
+        JAXBContext jc = JAXBContext.newInstance(Person.class);
+        Person person = (Person) jc.createUnmarshaller().unmarshal(responseStream.body());
+        System.out.println(person); // Person [firstName=John, lastName=Doe, city=San Jose, state=CA]
     } else if (contentType.contains("application/json")) {
         ObjectMapper mapper = new ObjectMapper();
-        User user = mapper.readValue(responseStream.body(), User.class);
-        System.out.println(user); // User [id=1, userName=User 1, password=Password1]
+        Person person = mapper.readValue(responseStream.body(), Person.class);
+        System.out.println(person); // Person [firstName=John, lastName=Doe, city=San Jose, state=CA]
     } else {
-        throw new Exception("On veut du XML ou du JSON !");
+        throw new IllegalStateException("On veut du XML ou du JSON !");
     }
 }
 ```
@@ -246,26 +240,31 @@ public static void requeteGetSynchroneXmlJson(String accept) throws Exception {
   <TabItem label="POST synchrone">
 ```java
 ObjectMapper mapper = new ObjectMapper();
-User user = new User(); user.setUserName("toto"); user.setPassword("azerty");
-String userString = mapper.writeValueAsString(user);
+Person person = new Person();
+person.setFirstName("Jean");
+person.setLastName("Dupont");
+person.setCity("Paris");
+person.setState("FR");
+String personJson = mapper.writeValueAsString(person);
 
 HttpClient httpClient = HttpClient.newBuilder()
     .proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
     .build();
 HttpRequest httpRequest = HttpRequest.newBuilder()
     .header("Accept", "application/json")
-    .header("Content-type", "application/json")
-    .uri(URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users"))
-    .POST(BodyPublishers.ofString(userString)).build();
+    .header("Content-Type", "application/json")
+    .uri(URI.create("https://jsonplaceholder.typicode.com/users"))
+    .POST(BodyPublishers.ofString(personJson)).build();
 HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofString());
 System.out.println(response.body());
-System.out.println("");
+System.out.println();
 
 HttpResponse<InputStream> responseStream = httpClient.send(httpRequest, BodyHandlers.ofInputStream());
-BufferedReader reader = new BufferedReader(new InputStreamReader(responseStream.body(), Charset.defaultCharset()));
-String line = null;
-while ((line = reader.readLine()) != null) {
-    System.out.println(line);
+try (BufferedReader reader = new BufferedReader(new InputStreamReader(responseStream.body(), Charset.defaultCharset()))) {
+    String line;
+    while ((line = reader.readLine()) != null) {
+        System.out.println(line);
+    }
 }
 ```
   </TabItem>
@@ -280,16 +279,25 @@ HttpClient httpClient = HttpClient.newBuilder()
     .proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
     .build();
 HttpRequest httpRequest = HttpRequest.newBuilder().header("Accept", "application/json")
-    .uri(URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users/1")).GET().build();
-System.out.println(LocalDateTime.now()); // 15:44:19.690822
+    .uri(URI.create("https://mocktarget.apigee.net/json")).GET().build();
+
+System.out.println(LocalDateTime.now()); // t0 : avant l'envoi
+// Non bloquant : sendAsync lance la requête en arrière-plan et rend la main immédiatement
 CompletableFuture<HttpResponse<String>> cfResponse = httpClient.sendAsync(httpRequest, BodyHandlers.ofString());
-System.out.println(LocalDateTime.now()); // 15:44:19.717822
+System.out.println(LocalDateTime.now()); // t1 ≈ t0 (quelques ms) : le thread n'est pas bloqué
+
+// ... on peut exécuter d'autres traitements ici pendant que la requête s'exécute ...
+
+// Bloquant : on attend explicitement que la réponse soit disponible
 HttpResponse<String> response = cfResponse.join();
-System.out.println(LocalDateTime.now()); // 15:44:19.876822
+System.out.println(LocalDateTime.now()); // t2 : inclut la durée de l'appel réseau
 System.out.println(response.statusCode()); // 200
-System.out.println(response.headers().allValues("content-type")); // [application/xml; charset=utf-8] ou [application/json; charset=utf-8]
-System.out.println(response.body()); // le User en XML ou JSON
+System.out.println(response.headers().allValues("content-type"));
+System.out.println(response.body());
 ```
+
+**Différence avec `send(...)` (synchrone)** : `send(...)` bloque le thread dès l'appel jusqu'à réception de la réponse. Avec `sendAsync(...)`, l'envoi est **non bloquant** (le `CompletableFuture` est retourné tout de suite) et le programme ne bloque qu'au moment de `.join()`.
+
   </TabItem>
   <TabItem label="Multiples requêtes en parallèle">
 ```java
@@ -297,27 +305,35 @@ HttpClient httpClient = HttpClient.newBuilder()
     .proxy(ProxySelector.of(new InetSocketAddress("proxy-rie.http.insee.fr", 8080)))
     .build();
 List<String> urls = List.of(
-    "http://fakerestapi.azurewebsites.net/api/v1/Users/1",
-    "http://fakerestapi.azurewebsites.net/api/v1/Users/2",
-    "http://fakerestapi.azurewebsites.net/api/v1/Users/3",
-    "http://fakerestapi.azurewebsites.net/api/v1/Users/4",
-    "http://fakerestapi.azurewebsites.net/api/v1/Users/5");
-System.out.println(LocalDateTime.now()); // 16:03:28.104822
+    "https://mocktarget.apigee.net/user?user=Alice",
+    "https://mocktarget.apigee.net/user?user=Bob",
+    "https://mocktarget.apigee.net/user?user=Charlie",
+    "https://mocktarget.apigee.net/user?user=David",
+    "https://mocktarget.apigee.net/user?user=Eve");
+
+System.out.println(LocalDateTime.now()); // t0 : avant lancement
+// Non bloquant : les 5 requêtes partent en parallèle quasi instantanément
 List<CompletableFuture<HttpResponse<String>>> cfResponses = urls.stream()
     .map(url -> httpClient.sendAsync(
-        HttpRequest.newBuilder().header("Accept", "application/json").uri(URI.create(url)).GET().build(),
+        HttpRequest.newBuilder().uri(URI.create(url)).GET().build(),
         BodyHandlers.ofString())
     ).toList();
-System.out.println(LocalDateTime.now()); // 16:03:28.137822
-// on attend d'avoir toutes les réponses
+System.out.println(LocalDateTime.now()); // t1 ≈ t0
+
+// Bloquant : on attend que TOUTES les requêtes soient terminées
 CompletableFuture<Void> combinedCF = CompletableFuture.allOf(cfResponses.toArray(new CompletableFuture[0]));
 combinedCF.join();
-System.out.println(LocalDateTime.now()); // 16:03:28.319822
+System.out.println(LocalDateTime.now()); // t2 : temps ≈ durée de la requête la plus lente
+
+// Toutes les réponses sont déjà arrivées : join() retourne immédiatement
 for (CompletableFuture<HttpResponse<String>> completableFuture : cfResponses) {
     System.out.println(completableFuture.join().body());
 }
-System.out.println(LocalDateTime.now()); // 16:03:28.319822
+System.out.println(LocalDateTime.now()); // t3 ≈ t2
 ```
+
+**Gain par rapport à `N` appels synchrones** : si chaque appel réseau prend ~200 ms, 5 appels **synchrones** s'enchaînent les uns après les autres et prennent environ **5 × 200 ms = 1 000 ms** *(somme des durées)*. En **asynchrone**, les 5 requêtes s'exécutent en parallèle : le temps total correspond environ à **la requête la plus lente (~200 ms)** au lieu de la somme.
+
   </TabItem>
 </Tabs>
 
@@ -370,50 +386,52 @@ System.setProperty("http.proxyHost", "proxy-rie.http.insee.fr");
 System.setProperty("http.proxyPort", "8080");
 
 // requête en GET avec réponse en XML
-URL url = URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users/1").toURL();
+URL url = URI.create("https://mocktarget.apigee.net/xml").toURL();
 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 connection.setRequestMethod("GET");
-connection.setRequestProperty("Accept", "application/xml");
 InputStream response = connection.getInputStream();
-JAXBContext jc = JAXBContext.newInstance(User.class);
-User user = (User) jc.createUnmarshaller().unmarshal(response);
+JAXBContext jc = JAXBContext.newInstance(Person.class);
+Person person = (Person) jc.createUnmarshaller().unmarshal(response);
 connection.disconnect();
-System.out.println(user);
+System.out.println(person);
 System.out.println(connection.getResponseCode()); // 200
 System.out.println(connection.getContentType()); // application/xml; charset=utf-8
 
 // requête en GET avec réponse en JSON
-URL url = URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users/1").toURL();
+URL url = URI.create("https://mocktarget.apigee.net/json").toURL();
 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 connection.setRequestMethod("GET");
-connection.setRequestProperty("Accept", "application/json");
 InputStream response = connection.getInputStream();
 ObjectMapper mapper = new ObjectMapper();
-User user = mapper.readValue(response, User.class);
+Person person = mapper.readValue(response, Person.class);
 connection.disconnect();
-System.out.println(user);
+System.out.println(person);
 ```
 
 #### Requête HTTP en POST
 
 ```java
-User user = new User(); user.setUserName("toto"); user.setPassword("azerty");
+Person person = new Person();
+person.setFirstName("Jean");
+person.setLastName("Dupont");
+person.setCity("Paris");
+person.setState("FR");
 ObjectMapper mapper = new ObjectMapper();
-URL url = URI.create("http://fakerestapi.azurewebsites.net/api/v1/Users").toURL();
+URL url = URI.create("https://jsonplaceholder.typicode.com/users").toURL();
 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 connection.setRequestMethod("POST");
 connection.setRequestProperty("Accept", "application/json");
-connection.setRequestProperty("Content-type", "application/json");
-connection.setDoOutput(true); //this is to enable writing
-mapper.writeValue(connection.getOutputStream(), user);
+connection.setRequestProperty("Content-Type", "application/json");
+connection.setDoOutput(true);
+mapper.writeValue(connection.getOutputStream(), person);
 
 InputStream response = connection.getInputStream();
-BufferedReader reader = new BufferedReader(new InputStreamReader(response,Charset.defaultCharset()));
-String line = null;
-while ((line=reader.readLine()) != null) {
-    System.out.println(line);
+try (BufferedReader reader = new BufferedReader(new InputStreamReader(response, Charset.defaultCharset()))) {
+    String line;
+    while ((line = reader.readLine()) != null) {
+        System.out.println(line);
+    }
 }
-reader.close();
 connection.disconnect();
 ```
 
