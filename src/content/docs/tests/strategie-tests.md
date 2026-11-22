@@ -2,7 +2,7 @@
 title: "Stratégies de tests sur un backend Spring Boot"
 ---
 
-## 1. Typologie des tests
+## Typologie des tests
 
 Avant de définir une stratégie de tests, il est indispensable de distinguer les quatre niveaux de tests selon leur périmètre d'isolation.
 
@@ -44,9 +44,7 @@ Vérifie un parcours utilisateur complet sur un environnement déployé réuniss
 Piloter un navigateur via Playwright pour s'authentifier sur un serveur OIDC, saisir un formulaire dans l'interface web et vérifier la mise à jour des données affichées.
 :::
 
----
-
-## 2. Stratégie historique vs Stratégies modernes
+## Stratégie historique vs Stratégies modernes
 
 ### La stratégie historique : la Pyramide des tests (Mike Cohn, 2009)
 
@@ -71,15 +69,13 @@ Grâce au démarrage rapide des conteneurs modernes et à la mise en cache du co
 
 | Critère | Stratégie historique (Pyramide) | Stratégies modernes (*Honeycomb* / *Trophy*) |
 |---|---|---|
-| **Volume principal** | Tests unitaires isolés (~80 %) | Tests d'intégration complet par HTTP |
+| **Volume principal** | Tests unitaires isolés (~80 %) | Tests d'intégration complets par HTTP |
 | **Usage des mocks** | Massif sur les dépendances internes (`@Repository`, `@Service`) | Uniquement aux **frontières externes** (APIs tierces, horloge) |
 | **Point d'entrée testé** | Méthodes Java internes | Contrat externe (**requêtes HTTP / payloads JSON**) |
 | **Garanties apportées** | Logique isolée d'une classe | Chaîne complète : sécurité, validation, Spring MVC, SQL/JPA, JSON |
 | **Résistance au refactoring** | Faible (le découpage interne casse les mocks) | Élevée (transparent tant que le contrat HTTP est respecté) |
 
----
-
-## 3. Règles d'arbitrage et outillage
+## Règles d'arbitrage et outillage
 
 ### Quand écrire quel test ? (Approche pragmatique)
 
@@ -87,6 +83,7 @@ Grâce au démarrage rapide des conteneurs modernes et à la mise en cache du co
 - **Arbitrage « tout en intégration » vs « unitaire + intégration » sur les règles de calcul :**
   - **Tout regrouper en intégration (via un test paramétré ou un `Scenario Outline`) :** Lorsque le harnais d'intégration est rapide (contexte Spring partagé), que la préparation des données est légère (quelques lignes en base) et que le nombre de cas reste raisonnable (moins de 15–20 cas). Cela évite de maintenir deux fichiers de tests pour la même fonctionnalité.
   - **Séparer en 1 test d'intégration nominal (pour le câblage) + N tests unitaires purs (pour l'algorithme) :** Uniquement lorsque la combinatoire est élevée (parseurs complexes, regex, matrices de dates) ou que la préparation du contexte d'intégration (multiples tables liées, bouchons HTTP) noie l'intention métier et ralentit l'exécution unitaire dans l'IDE.
+
 :::caution[À éviter]
 Appeler directement les méthodes Java des `@RestController` dans les tests d'intégration. Cela contourne les filtres de sécurité, la validation `@Valid`, le binding `@RequestParam` et la sérialisation Jackson.
 :::
@@ -100,17 +97,15 @@ Appeler directement les méthodes Java des `@RestController` dans les tests d'in
   - **En mémoire (`MockMvc` ou `RestTestClient` lié à `MockMvc`) :** Appelle le `DispatcherServlet` sans ouvrir de port réseau. Couvre les filtres Spring Security, `@Valid`, `@RequestParam`, `@RestControllerAdvice` et la sérialisation Jackson, tout en permettant de simuler facilement l'utilisateur (`@WithMockUser`). Ne teste pas le serveur Tomcat lui-même.
   - **Sur vrai serveur (`RestTestClient` avec `RANDOM_PORT`) :** Démarre un vrai serveur Tomcat et envoie de vraies requêtes HTTP sur le réseau. Couvre en plus le comportement du conteneur web (taille maximale des en-têtes HTTP, compression, encodage réseau, streaming), mais impose d'envoyer un vrai en-tête `Authorization` à la place de `@WithMockUser`.
 - **Simulation des systèmes externes aux frontières :** Plutôt que de mocker les services clients internes avec `@MockitoBean` (ce qui court-circuite les clients HTTP et la désérialisation), simuler les dépendances au niveau du protocole :
-  - **APIs HTTP externes :** Démarrer un serveur HTTP local sur un port de test et rediriger les URLs configurées dans l'application — via un serveur embarqué léger (**`com.sun.net.httpserver.HttpServer`** natif au JDK, **`MockWebServer`** d'OkHttp) ou un serveur de bouchons dédié (**WireMock**, **MockServer**) si l'on doit simuler des latences ou pannes réseau.
-  - **Horloge système :** Injecter un bean standard `java.time.Clock` dans les services métier, et le remplacer en test par une horloge fixe (`Clock.fixed(...)` en unitaire) ou pilotable scénario par scénario (`MutableClock` `@Primary` en intégration, sans redémarrer le contexte Spring).
+  - **APIs HTTP externes :** Démarrer un serveur HTTP local sur un port de test et rediriger les URLs configurées dans l'application — via un serveur embarqué léger (**`com.sun.net.httpserver.HttpServer`** natif au JDK, **`MockWebServer`** d'OkHttp) ou un serveur de bouchons dédié (**[WireMock](/formation-api-rest/tests/wiremock/)**, **MockServer**) si l'on doit simuler des latences ou pannes réseau.
+  - **Horloge système :** Injecter un bean standard `java.time.Clock` dans les services métier, et le remplacer en test par une horloge fixe (`Clock.fixed(...)` en unitaire) ou par une implémentation mutable `@Primary` en intégration (sans redémarrer le contexte Spring).
   - **Messagerie et infrastructures tierces :** Utiliser **GreenMail** ou **Mailpit** pour vérifier les envois SMTP, et **Testcontainers** pour les brokers (Kafka, RabbitMQ) ou stockages (S3/MinIO).
 - **Base de données de test :** Une base en mémoire rapide (H2) convient tant que l'accès aux données repose sur du JPA standard. Basculer sur **Testcontainers (PostgreSQL)** dès l'introduction de requêtes SQL natives (`nativeQuery = true`) ou de types spécifiques au SGBD de production.
 
----
+## Spécificités en développement assisté par agents (IA)
 
-## 4. Spécificités en développement assisté par agents (IA)
-
-:::note[Pourquoi cette stratégie est encore plus clé avec l'IA]
-En développement agentique, cette stratégie de **tests d'intégration en boîte noire par HTTP est encore plus indispensable** qu'en développement manuel.
+:::note[Pourquoi cette stratégie compte encore plus avec l'IA]
+En développement agentique, tester l'application en **boîte noire par HTTP** devient un garde-fou indispensable.
 :::
 
 - **Un filet de sécurité objectif contre les angles morts de l'IA :** Un agent de code génère rapidement une implémentation crédible en apparence, mais peut introduire une régression sur un mapping JPA, une requête SQL, une sérialisation JSON ou une règle de sécurité. S'il écrit des tests unitaires isolés avec des mocks, il risque de mocker ses propres hypothèses fausses et de produire des tests complaisants qui passent au vert. Le test d'intégration HTTP vérifie le comportement réel de bout en bout (de la requête jusqu'à la base de données), ce qui réduit fortement le risque de valider une implémentation défaillante.

@@ -1,88 +1,105 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 936 360" role="img" aria-label="Architecture d'un test d'intégration boîte noire par HTTP sur Spring Boot">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 392" role="img" aria-label="Architecture d'un test d'intégration boîte noire par HTTP sur Spring Boot">
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <linearGradient id="client-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M 0 1 L 10 5 L 0 9 z" fill="#334155"/>
     </marker>
-    <marker id="arrow-ext" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706"/>
+    <marker id="arr-indigo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#4f46e5"/>
     </marker>
     <style>
-      .box-title { font: 700 13px system-ui, -apple-system, sans-serif; fill: #ffffff; }
-      .box-sub { font: 500 11px system-ui, -apple-system, sans-serif; fill: #f1f5f9; }
-      .zone-title { font: 700 13px system-ui, -apple-system, sans-serif; fill: #065f46; }
-      .app-title { font: 700 12px system-ui, -apple-system, sans-serif; fill: #047857; }
-      .ext-title { font: 700 13px system-ui, -apple-system, sans-serif; fill: #92400e; }
-      .edge-lbl { font: 600 11px system-ui, -apple-system, sans-serif; fill: #334155; }
+      .title { font: 700 16px system-ui, -apple-system, sans-serif; fill: #0f172a; }
+      .sub { font: 500 12px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .pill { font: 700 10.5px system-ui, -apple-system, sans-serif; letter-spacing: 0.04em; }
+      .app-title { font: 700 12px system-ui, -apple-system, sans-serif; fill: #065f46; }
+      .box-title { font: 700 12.5px system-ui, -apple-system, sans-serif; fill: #ffffff; }
+      .box-sub { font: 500 10.5px system-ui, -apple-system, sans-serif; fill: #f1f5f9; }
+      .ext-title { font: 700 12px system-ui, -apple-system, sans-serif; fill: #1e1b4b; }
+      .ext-sub { font: 500 10.5px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .lbl { font: 600 11px system-ui, -apple-system, sans-serif; fill: #334155; }
     </style>
   </defs>
 
-  <!-- Fond léger pour lisibilité universelle clair/sombre -->
-  <rect x="8" y="8" width="920" height="344" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <!-- Fond global -->
+  <rect x="8" y="8" width="904" height="376" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="460" y="35" text-anchor="middle" class="title">Architecture d'un test d'intégration boîte noire (HTTP)</text>
+  <text x="460" y="54" text-anchor="middle" class="sub">Aucun mock interne : la requête traverse toute la chaîne applicative ; seules les frontières externes sont simulées</text>
 
   <!-- 1. Client de test HTTP -->
-  <rect x="24" y="108" width="154" height="104" rx="10" fill="#0284c7"/>
-  <text x="101" y="138" text-anchor="middle" class="box-title">Client de test HTTP</text>
-  <text x="101" y="158" text-anchor="middle" class="box-sub">MockMvc</text>
-  <text x="101" y="175" text-anchor="middle" class="box-sub">ou RestTestClient</text>
-  <text x="101" y="195" text-anchor="middle" class="box-sub">Requêtes HTTP + JSON</text>
+  <rect x="24" y="138" width="144" height="100" rx="12" fill="url(#client-grad)"/>
+  <text x="96" y="168" text-anchor="middle" class="box-title">Client de test</text>
+  <text x="96" y="188" text-anchor="middle" class="box-sub">MockMvc</text>
+  <text x="96" y="204" text-anchor="middle" class="box-sub">ou RestTestClient</text>
+  <text x="96" y="224" text-anchor="middle" class="box-sub">Requêtes HTTP + JSON</text>
 
-  <!-- Flèche Client -> Périmètre réel -->
-  <line x1="178" y1="160" x2="216" y2="160" stroke="#334155" stroke-width="2.2" marker-end="url(#arrow)"/>
-  <text x="197" y="148" text-anchor="middle" class="edge-lbl">HTTP</text>
+  <!-- Flèche HTTP bidirectionnelle -->
+  <text x="193" y="176" text-anchor="middle" class="lbl">HTTP</text>
+  <line x1="171" y1="188" x2="213" y2="188" stroke="#334155" stroke-width="2.2" marker-start="url(#arr-slate)" marker-end="url(#arr-slate)"/>
 
-  <!-- 2. Périmètre réel testé (Appli Spring Boot + BDD réelle de test) -->
-  <rect x="220" y="24" width="440" height="312" rx="12" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
-  <text x="440" y="46" text-anchor="middle" class="zone-title">Périmètre réel testé (aucun mock interne)</text>
+  <!-- 2. Périmètre réel testé -->
+  <rect x="218" y="72" width="446" height="296" rx="14" fill="#f0fdf4" stroke="#6ee7b7" stroke-width="1.8"/>
+  <rect x="291" y="82" width="300" height="22" rx="11" fill="#d1fae5"/>
+  <text x="441" y="97" text-anchor="middle" class="pill" fill="#065f46">PÉRIMÈTRE RÉEL TESTÉ · ZÉRO MOCK INTERNE</text>
 
-  <!-- Sous-cadre : Processus Application Spring Boot -->
-  <rect x="236" y="60" width="408" height="168" rx="10" fill="#ffffff" stroke="#6ee7b7" stroke-width="1.5"/>
-  <text x="440" y="80" text-anchor="middle" class="app-title">Application Spring Boot (contexte partagé)</text>
+  <!-- Sous-cadre Application Spring Boot -->
+  <rect x="234" y="114" width="414" height="148" rx="12" fill="#ffffff" stroke="#a7f3d0" stroke-width="1.5"/>
+  <text x="441" y="135" text-anchor="middle" class="app-title">Application Spring Boot (contexte partagé)</text>
 
-  <!-- Chaîne interne -->
-  <rect x="248" y="96" width="114" height="58" rx="8" fill="#059669"/>
-  <text x="305" y="120" text-anchor="middle" class="box-title">Sécurité &amp; MVC</text>
-  <text x="305" y="138" text-anchor="middle" class="box-sub">Filtres, @Valid, JSON</text>
+  <rect x="248" y="149" width="114" height="62" rx="9" fill="#059669"/>
+  <text x="305" y="174" text-anchor="middle" class="box-title">Sécurité &amp; MVC</text>
+  <text x="305" y="193" text-anchor="middle" class="box-sub">Filtres, @Valid, JSON</text>
 
-  <line x1="362" y1="125" x2="380" y2="125" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="364" y1="180" x2="383" y2="180" stroke="#334155" stroke-width="2" marker-end="url(#arr-slate)"/>
 
-  <rect x="384" y="96" width="108" height="58" rx="8" fill="#10b981"/>
-  <text x="438" y="120" text-anchor="middle" class="box-title">@Service</text>
-  <text x="438" y="138" text-anchor="middle" class="box-sub">Logique métier</text>
+  <rect x="386" y="149" width="110" height="62" rx="9" fill="#10b981"/>
+  <text x="441" y="174" text-anchor="middle" class="box-title">@Service</text>
+  <text x="441" y="193" text-anchor="middle" class="box-sub">Logique métier</text>
 
-  <line x1="492" y1="125" x2="510" y2="125" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="498" y1="180" x2="517" y2="180" stroke="#334155" stroke-width="2" marker-end="url(#arr-slate)"/>
 
-  <rect x="514" y="96" width="116" height="58" rx="8" fill="#0d9488"/>
-  <text x="572" y="120" text-anchor="middle" class="box-title">@Repository</text>
-  <text x="572" y="138" text-anchor="middle" class="box-sub">JPA / SQL natif</text>
+  <rect x="520" y="149" width="114" height="62" rx="9" fill="#0d9488"/>
+  <text x="577" y="174" text-anchor="middle" class="box-title">@Repository</text>
+  <text x="577" y="193" text-anchor="middle" class="box-sub">JPA / SQL natif</text>
 
-  <text x="440" y="198" text-anchor="middle" class="edge-lbl">Sécurité, mapping JPA, requêtes SQL et sérialisation JSON réels</text>
+  <text x="441" y="242" text-anchor="middle" class="lbl">Filtres, validation, métier, mapping JPA et sérialisation JSON réels</text>
 
-  <!-- Flèche Repository -> BDD -->
-  <line x1="572" y1="154" x2="572" y2="256" stroke="#334155" stroke-width="2.2" marker-end="url(#arrow)"/>
-  <text x="606" y="244" text-anchor="middle" class="edge-lbl">JDBC</text>
+  <!-- Flèche JDBC centrée -->
+  <line x1="441" y1="264" x2="441" y2="294" stroke="#334155" stroke-width="2.2" marker-start="url(#arr-slate)" marker-end="url(#arr-slate)"/>
+  <text x="466" y="284" text-anchor="middle" class="lbl">JDBC</text>
 
-  <!-- 3. Base de données de test (dans le périmètre réel, hors JVM Spring si Testcontainers) -->
-  <rect x="316" y="260" width="314" height="60" rx="10" fill="#334155"/>
-  <text x="473" y="285" text-anchor="middle" class="box-title">Base de données de test (réelle)</text>
-  <text x="473" y="303" text-anchor="middle" class="box-sub">H2 en mémoire (JPA) ou Testcontainers PostgreSQL</text>
+  <!-- Base de données de test -->
+  <rect x="248" y="298" width="386" height="56" rx="10" fill="#334155"/>
+  <text x="441" y="321" text-anchor="middle" class="box-title">Base de données de test (réelle)</text>
+  <text x="441" y="340" text-anchor="middle" class="box-sub">H2 en mémoire (JPA) ou Testcontainers PostgreSQL</text>
 
-  <!-- 4. Frontières externes simulées -->
-  <rect x="720" y="24" width="190" height="312" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6 4"/>
-  <text x="815" y="48" text-anchor="middle" class="ext-title">Frontières simulées</text>
+  <!-- Connecteur en bus vers les 3 frontières simulées -->
+  <text x="686" y="136" text-anchor="middle" class="lbl" style="fill: #4338ca;">I/O</text>
+  <line x1="648" y1="188" x2="686" y2="188" stroke="#4f46e5" stroke-width="2" stroke-dasharray="4 3"/>
+  <line x1="686" y1="148" x2="686" y2="316" stroke="#4f46e5" stroke-width="2" stroke-dasharray="4 3"/>
+  <line x1="686" y1="148" x2="718" y2="148" stroke="#4f46e5" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arr-indigo)"/>
+  <line x1="686" y1="232" x2="718" y2="232" stroke="#4f46e5" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arr-indigo)"/>
+  <line x1="686" y1="316" x2="718" y2="316" stroke="#4f46e5" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arr-indigo)"/>
 
-  <rect x="736" y="72" width="158" height="68" rx="8" fill="#d97706"/>
-  <text x="815" y="100" text-anchor="middle" class="box-title">APIs HTTP externes</text>
-  <text x="815" y="120" text-anchor="middle" class="box-sub">HttpServer / WireMock</text>
+  <!-- 3. Frontières externes simulées -->
+  <rect x="708" y="72" width="188" height="296" rx="14" fill="#eef2ff" stroke="#a5b4fc" stroke-width="1.8" stroke-dasharray="6 4"/>
+  <rect x="727" y="82" width="150" height="22" rx="11" fill="#e0e7ff"/>
+  <text x="802" y="97" text-anchor="middle" class="pill" fill="#3730a3">FRONTIÈRES SIMULÉES</text>
 
-  <rect x="736" y="158" width="158" height="68" rx="8" fill="#b45309"/>
-  <text x="815" y="186" text-anchor="middle" class="box-title">Horloge système</text>
-  <text x="815" y="206" text-anchor="middle" class="box-sub">java.time.Clock</text>
+  <rect x="722" y="114" width="160" height="68" rx="10" fill="#ffffff" stroke="#a5b4fc" stroke-width="1.4"/>
+  <rect x="722" y="114" width="6" height="68" rx="3" fill="#4f46e5"/>
+  <text x="805" y="143" text-anchor="middle" class="ext-title">APIs HTTP externes</text>
+  <text x="805" y="162" text-anchor="middle" class="ext-sub">HttpServer · WireMock</text>
 
-  <rect x="736" y="244" width="158" height="68" rx="8" fill="#92400e"/>
-  <text x="815" y="272" text-anchor="middle" class="box-title">Messagerie / Brokers</text>
-  <text x="815" y="292" text-anchor="middle" class="box-sub">GreenMail / Testcontainers</text>
+  <rect x="722" y="198" width="160" height="68" rx="10" fill="#ffffff" stroke="#a5b4fc" stroke-width="1.4"/>
+  <rect x="722" y="198" width="6" height="68" rx="3" fill="#6366f1"/>
+  <text x="805" y="227" text-anchor="middle" class="ext-title">Horloge système</text>
+  <text x="805" y="246" text-anchor="middle" class="ext-sub">java.time.Clock</text>
 
-  <!-- Flèche Spring -> Frontières -->
-  <line x1="644" y1="125" x2="732" y2="125" stroke="#d97706" stroke-width="2.2" stroke-dasharray="4 3" marker-end="url(#arrow-ext)"/>
-  <text x="690" y="114" text-anchor="middle" class="edge-lbl" style="fill: #92400e;">Appels I/O</text>
+  <rect x="722" y="282" width="160" height="68" rx="10" fill="#ffffff" stroke="#a5b4fc" stroke-width="1.4"/>
+  <rect x="722" y="282" width="6" height="68" rx="3" fill="#818cf8"/>
+  <text x="805" y="311" text-anchor="middle" class="ext-title">Messagerie &amp; Brokers</text>
+  <text x="805" y="330" text-anchor="middle" class="ext-sub">GreenMail · Testcontainers</text>
 </svg>
