@@ -76,8 +76,14 @@ Conçue à une époque où le démarrage d'un serveur d'applications était long
 
 **Limites sur une API Spring Boot orientée données / orchestration :**
 
+- **Couplage fort à l'implémentation (coût de maintenance) :** les tests reproduisent le câblage interne des classes ; dès qu'on renomme, fusionne ou découpe un service lors d'un refactoring, il faut réécrire les configurations de mocks.
 - **Faux sentiment de sécurité :** une couverture élevée avec des mocks ne détecte ni les requêtes JPQL/SQL invalides, ni les erreurs de mapping JPA, ni les oublis de `@Transactional`, ni les régressions de sérialisation JSON ou de sécurité (`@RolesAllowed`).
-- **Couplage fort à l'implémentation :** les tests reproduisent le câblage interne des classes. Renommer ou découper un service oblige à réécrire les configurations de mocks.
+
+#### Exemple : l'analogie des deux tiroirs
+
+![Analogie des deux tiroirs d'angle : 2 tests unitaires isolés au vert ne garantissent pas l'absence de blocage mutuel sans test d'intégration](../../../assets/images/tiroirs-unitaire-vs-integration.svg "Tests unitaires isolés vs test d'intégration : l'analogie des tiroirs")
+
+*Chaque tiroir fonctionne parfaitement individuellement (tests unitaires au vert), mais combinés ensemble, ils se bloquent mutuellement : l'objectif est que les composants fonctionnent ensemble et soient utilisables en même temps, ce que valide un test d'intégration.*
 
 ### Les stratégies modernes : *Testing Honeycomb* et *Testing Trophy*
 

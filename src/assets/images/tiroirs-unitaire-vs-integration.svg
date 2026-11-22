@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 310" role="img" aria-label="Analogie des deux tiroirs d'angle : tests unitaires isolés réussis, blocage mutuel sans test d'intégration, puis fonctionnement simultané validé par un test d'intégration">
+  <defs>
+    <style>
+      .badge { font: 700 10px system-ui, -apple-system, sans-serif; letter-spacing: 0.04em; }
+      .lbl { font: 700 12px system-ui, -apple-system, sans-serif; fill: #0f172a; }
+      .sub { font: 500 11px system-ui, -apple-system, sans-serif; fill: #475569; }
+      .ok { font: 700 11px system-ui, -apple-system, sans-serif; fill: #166534; }
+      .err { font: 700 11px system-ui, -apple-system, sans-serif; fill: #991b1b; }
+      .foot { font: 600 11.5px system-ui, -apple-system, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Panneau 1 : Tests unitaires isolés -->
+  <rect x="12" y="12" width="292" height="286" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <rect x="38" y="24" width="240" height="22" rx="11" fill="#dcfce7"/>
+  <text x="158" y="39" text-anchor="middle" class="badge" fill="#166534">1. TESTS UNITAIRES ISOLÉS (2 / 2 OK)</text>
+
+  <!-- Cas 1 : Tiroir A seul -->
+  <path d="M 32 62 H 146 V 144 H 116 V 92 H 32 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="1.5" stroke-linejoin="round"/>
+  <rect x="56" y="92" width="44" height="40" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <line x1="69" y1="137" x2="87" y2="137" stroke="#1e40af" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="78" y="116" text-anchor="middle" class="lbl">A</text>
+  <rect x="111" y="104" width="5" height="28" rx="1" fill="#94a3b8"/>
+  <text x="166" y="90" class="lbl">Test unitaire 1</text>
+  <text x="166" y="106" class="sub">Tiroir A ouvert seul</text>
+  <rect x="166" y="116" width="66" height="20" rx="10" fill="#dcfce7" stroke="#86efac"/>
+  <text x="199" y="130" text-anchor="middle" class="ok">✓ PASS</text>
+
+  <line x1="28" y1="158" x2="288" y2="158" stroke="#e2e8f0" stroke-width="1.5"/>
+
+  <!-- Cas 2 : Tiroir B seul -->
+  <path d="M 32 170 H 146 V 252 H 116 V 200 H 32 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="1.5" stroke-linejoin="round"/>
+  <rect x="60" y="200" width="34" height="5" rx="1" fill="#94a3b8"/>
+  <rect x="74" y="206" width="42" height="36" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/>
+  <line x1="69" y1="216" x2="69" y2="232" stroke="#9a3412" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="95" y="228" text-anchor="middle" class="lbl">B</text>
+  <text x="166" y="198" class="lbl">Test unitaire 2</text>
+  <text x="166" y="214" class="sub">Tiroir B ouvert seul</text>
+  <rect x="166" y="224" width="66" height="20" rx="10" fill="#dcfce7" stroke="#86efac"/>
+  <text x="199" y="238" text-anchor="middle" class="ok">✓ PASS</text>
+
+  <text x="158" y="280" text-anchor="middle" class="foot" fill="#475569">Chaque tiroir fonctionne seul</text>
+
+  <!-- Panneau 2 : Collision sans test d'intégration -->
+  <rect x="322" y="12" width="308" height="286" rx="14" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
+  <rect x="348" y="24" width="256" height="22" rx="11" fill="#fee2e2"/>
+  <text x="476" y="39" text-anchor="middle" class="badge" fill="#991b1b">2. SANS INTÉGRATION · BLOQUÉS</text>
+
+  <path d="M 358 64 H 592 V 226 H 544 V 112 H 358 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="1.8" stroke-linejoin="round"/>
+  <rect x="396" y="112" width="84" height="72" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <line x1="420" y1="189" x2="456" y2="189" stroke="#1e40af" stroke-width="3" stroke-linecap="round"/>
+  <text x="424" y="138" text-anchor="middle" class="lbl">Tiroir A</text>
+
+  <rect x="448" y="138" width="96" height="70" rx="4" fill="#ffedd5" fill-opacity="0.92" stroke="#ea580c" stroke-width="2"/>
+  <line x1="443" y1="160" x2="443" y2="186" stroke="#9a3412" stroke-width="3" stroke-linecap="round"/>
+  <text x="510" y="186" text-anchor="middle" class="lbl">Tiroir B</text>
+
+  <rect x="448" y="138" width="32" height="46" fill="#ef4444" fill-opacity="0.25" stroke="#dc2626" stroke-width="2" stroke-dasharray="4 3"/>
+  <polygon points="464,145 468,154 478,151 472,159 480,167 469,167 464,176 459,167 448,167 456,159 450,151 460,154" fill="#dc2626" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
+  <rect x="424" y="198" width="80" height="22" rx="11" fill="#ffffff" stroke="#dc2626" stroke-width="1.5"/>
+  <text x="464" y="213" text-anchor="middle" class="err">Bloqué !</text>
+
+  <rect x="338" y="250" width="276" height="34" rx="9" fill="#ffffff" stroke="#fca5a5" stroke-width="1"/>
+  <text x="476" y="271" text-anchor="middle" class="foot" fill="#991b1b">Combinés, ils se bloquent mutuellement</text>
+
+  <!-- Panneau 3 : Fonctionnent ensemble avec test d'intégration -->
+  <rect x="648" y="12" width="300" height="286" rx="14" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+  <rect x="670" y="24" width="256" height="22" rx="11" fill="#d1fae5"/>
+  <text x="798" y="39" text-anchor="middle" class="badge" fill="#065f46">3. TEST D'INTÉGRATION · OK ENSEMBLE</text>
+
+  <path d="M 680 64 H 914 V 226 H 866 V 112 H 680 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- Tiroir A décalé à gauche -->
+  <rect x="692" y="112" width="76" height="68" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <line x1="714" y1="185" x2="746" y2="185" stroke="#1e40af" stroke-width="3" stroke-linecap="round"/>
+  <text x="730" y="150" text-anchor="middle" class="lbl">Tiroir A</text>
+
+  <!-- Tiroir B décalé en bas (aucune collision) -->
+  <rect x="786" y="158" width="80" height="62" rx="4" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/>
+  <line x1="781" y1="178" x2="781" y2="200" stroke="#9a3412" stroke-width="3" stroke-linecap="round"/>
+  <text x="826" y="193" text-anchor="middle" class="lbl">Tiroir B</text>
+
+  <!-- Pastille OK dans l'espace libre -->
+  <rect x="782" y="122" width="68" height="22" rx="11" fill="#ffffff" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="816" y="137" text-anchor="middle" class="ok">✓ Libres</text>
+
+  <rect x="664" y="250" width="268" height="34" rx="9" fill="#ffffff" stroke="#86efac" stroke-width="1"/>
+  <text x="798" y="271" text-anchor="middle" class="foot" fill="#065f46">Utilisables en même temps</text>
+</svg>
