@@ -1,0 +1,410 @@
+---
+title: "Tests d'intégration avec JUnit"
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Principes
+
+Contrairement aux tests unitaires isolés, un **test d'intégration** démarre le contexte Spring complet et envoie des requêtes HTTP vers votre API :
+
+- La requête traverse toute la chaîne réelle : filtres de sécurité, validation `@Valid`, contrôleur, service, repository et base de données de test (H2 en mémoire ou Testcontainers).
+- Les assertions vérifient la réponse HTTP complète (statut, corps JSON, en-têtes).
+- Par convention Maven Failsafe, ces classes peuvent être suffixées par `*IT.java` (exécutées lors de `mvn verify`, voir [Configuration pour les tests](/formation-api-rest/tests/configuration-tests/)).
+
+### Quel client et quel mode choisir ?
+
+Avec Spring Boot 4, **`RestTestClient`** est l'outil recommandé : son API fluide est alignée sur `RestClient`, il sérialise directement les objets en JSON sans nécessiter `ObjectMapper` et s'utilise dans les deux modes ci-dessous (`MockMvc` reste couvert en alternative pour les projets existants) :
+
+:::tip[Par défaut : `WebEnvironment.MOCK` — `RestTestClient` ou `MockMvc`]
+- **Configuration :** un simple `@SpringBootTest` suffit *(inutile de préciser `webEnvironment = WebEnvironment.MOCK`, c'est la valeur par défaut)*.
+- **Clients compatibles :** **`RestTestClient`** *(recommandé)* ou `MockMvc`.
+- **Exécution :** en mémoire via le `DispatcherServlet` (rapide, sans port réseau).
+- **Couverture & sécurité :** filtres Spring Security, `@Valid`, `@RestControllerAdvice`, JSON et simulation d'utilisateur (`@WithMockUser`).
+:::
+
+:::note[Sur vrai serveur : `WebEnvironment.RANDOM_PORT` — `RestTestClient` uniquement]
+- **Configuration :** `@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)`.
+- **Client compatible :** **`RestTestClient` uniquement** *(pas de `MockMvc`)*.
+- **Exécution :** démarre un vrai serveur Tomcat et envoie des requêtes HTTP sur le réseau.
+- **Quand l'utiliser :** pour tester le conteneur Tomcat lui-même (taille des en-têtes HTTP, compression, streaming) ou une authentification HTTP réelle par jeton (pas de `@WithMockUser`).
+:::
+
+## Mise en place
+
+### Surcharger les propriétés de test
+
+Pour éviter de maintenir un second fichier `application.properties` dans `src/test/resources/` *(qui remplacerait intégralement celui de `src/main/resources/`)*, privilégiez `@TestPropertySource(properties = { ... })` afin de ne surcharger que ce qui change (base de test, scripts SQL d'initialisation…) :
+
+```java
+@TestPropertySource(properties = {
+    "spring.sql.init.schema-locations=classpath:/tables.sql",
+    "spring.sql.init.data-locations=classpath:/donnees.sql"
+})
+```
+
+### Mutualiser la configuration sur plusieurs classes `*IT`
+
+Contrairement à Cucumber (qui s'appuie sur une classe « lanceur » unique), **en JUnit 5 chaque classe `*IT` doit porter la configuration `@SpringBootTest`**. Spring met automatiquement ce contexte en cache : tant que vos classes partagent exactement la même configuration, Spring **ne démarre qu'une seule fois** pour toute la suite de tests.
+
+Si vous n'avez qu'une seule classe de test, vous pouvez poser les annotations directement dessus. Dès que vous avez plusieurs classes `*IT`, regroupez-les dans une **méta-annotation** `@IntegrationTest` *(ou une classe abstraite mère)* afin de ne rien dupliquer et garantir le partage du même contexte en cache :
+
+<Tabs syncKey="client-test">
+<TabItem label="RestTestClient (Spring Boot 4)">
+
+```java title="IntegrationTest.java"
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.TestPropertySource;
+
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@SpringBootTest
+@AutoConfigureMockMvc
+@AutoConfigureRestTestClient
+@TestPropertySource(properties = {
+    "spring.sql.init.schema-locations=classpath:/tables.sql",
+    "spring.sql.init.data-locations=classpath:/donnees.sql"
+})
+public @interface IntegrationTest {
+}
+```
+
+</TabItem>
+<TabItem label="MockMvc">
+
+```java title="IntegrationTest.java"
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.TestPropertySource;
+
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@SpringBootTest
+@AutoConfigureMockMvc
+@TestPropertySource(properties = {
+    "spring.sql.init.schema-locations=classpath:/tables.sql",
+    "spring.sql.init.data-locations=classpath:/donnees.sql"
+})
+public @interface IntegrationTest {
+}
+```
+
+</TabItem>
+</Tabs>
+
+Il suffit ensuite d'annoter chaque classe de test avec `@IntegrationTest`, comme ci-dessous.
+
+:::note[Pourquoi associer `@AutoConfigureMockMvc` à `@AutoConfigureRestTestClient` ?]
+Si vous utilisez **`MockMvc` directement**, `@AutoConfigureMockMvc` est **toujours obligatoire** pour injecter `MockMvc`. En revanche, si vous utilisez **`RestTestClient`** *(onglet par défaut)* en mode `WebEnvironment.MOCK` :
+
+- **Sans Spring Security** *(exemples `GET`, `POST` et upload sur une API ouverte)* : `@AutoConfigureRestTestClient` seul suffit.
+- **Avec Spring Security ou `@WithMockUser`** *(section sécurité en fin de page)* : ajoutez `@AutoConfigureMockMvc`, car `@AutoConfigureRestTestClient` seul n'active pas les filtres Spring Security de test sur le `MockMvc` sous-jacent.
+
+Le laisser dès le départ dans `IntegrationTest.java` reste sans impact sur une API ouverte et rend tous les tests compatibles d'emblée.
+:::
+
+## Exemples de requêtes HTTP (`RestTestClient` et `MockMvc`)
+
+### Requête `GET`
+
+<Tabs syncKey="client-test">
+<TabItem label="RestTestClient (Spring Boot 4)">
+
+```java title="VinControllerIT.java"
+import org.springframework.test.web.servlet.client.RestTestClient;
+
+@IntegrationTest
+class VinControllerIT {
+
+    private final RestTestClient restTestClient;
+
+    @Autowired
+    VinControllerIT(RestTestClient restTestClient) {
+        this.restTestClient = restTestClient;
+    }
+
+    @Test
+    void doitRecupererTousLesVins() {
+        restTestClient.get()
+            .uri("/vin")
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.length()").isEqualTo(4)
+            .jsonPath("$[0].chateau").isEqualTo("Château Margaux");
+    }
+}
+```
+
+</TabItem>
+<TabItem label="MockMvc">
+
+```java title="VinControllerIT.java"
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@IntegrationTest
+class VinControllerIT {
+
+    private final MockMvc mvc;
+
+    @Autowired
+    VinControllerIT(MockMvc mvc) {
+        this.mvc = mvc;
+    }
+
+    @Test
+    void doitRecupererTousLesVins() throws Exception {
+        mvc.perform(get("/vin"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(4)))
+            .andExpect(jsonPath("$[0].chateau", is("Château Margaux")));
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Requête `POST`
+
+<Tabs syncKey="client-test">
+<TabItem label="RestTestClient (Spring Boot 4)">
+
+```java
+@Test
+void doitAjouterVin() {
+    Vin nouveauVin = new Vin();
+    nouveauVin.setChateau("Château 1");
+    nouveauVin.setAppellation("Saint-Julien");
+    nouveauVin.setPrix(10.0);
+
+    restTestClient.post()
+        .uri("/vin")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(nouveauVin)
+        .exchange()
+        .expectStatus().isCreated();
+
+    restTestClient.get()
+        .uri("/vin")
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody()
+        .jsonPath("$.length()").isEqualTo(5)
+        .jsonPath("$[1].chateau").isEqualTo("Château Cantemerle")
+        .jsonPath("$[1].prix").isEqualTo(30.5)
+        .jsonPath("$[4].chateau").isEqualTo("Château 1")
+        .jsonPath("$[4].appellation").isEqualTo("Saint-Julien")
+        .jsonPath("$[4].id").isEqualTo(5);
+}
+```
+
+</TabItem>
+<TabItem label="MockMvc">
+
+*(Dans ce cas avec `MockMvc`, injectez aussi `ObjectMapper mapper` par constructeur pour sérialiser l'objet en JSON.)*
+
+```java
+@Test
+void doitAjouterVin() throws Exception {
+    Vin nouveauVin = new Vin();
+    nouveauVin.setChateau("Château 1");
+    nouveauVin.setAppellation("Saint-Julien");
+    nouveauVin.setPrix(10.0);
+
+    mvc.perform(post("/vin")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(nouveauVin)))
+        .andExpect(status().isCreated());
+
+    mvc.perform(get("/vin"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(5)))
+        .andExpect(jsonPath("$[1].chateau", is("Château Cantemerle")))
+        .andExpect(jsonPath("$[1].prix", is(30.5)))
+        .andExpect(jsonPath("$[4].chateau", is("Château 1")))
+        .andExpect(jsonPath("$[4].appellation", is("Saint-Julien")))
+        .andExpect(jsonPath("$[4].id", is(5)));
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Envoi de fichiers (`multipart/form-data`)
+
+Vous pouvez fournir le contenu en mémoire ou charger un fichier réel depuis `src/test/resources/` :
+
+<Tabs syncKey="client-test">
+<TabItem label="RestTestClient (Spring Boot 4)">
+
+```java
+@Test
+void doitUploaderUnFichierEnMemoire() {
+    MultipartBodyBuilder builder = new MultipartBodyBuilder();
+    builder.part("fichier", new ByteArrayResource("Contenu généré en mémoire".getBytes()))
+        .filename("note-memoire.txt")
+        .contentType(MediaType.TEXT_PLAIN);
+
+    restTestClient.post()
+        .uri("/upload")
+        .contentType(MediaType.MULTIPART_FORM_DATA)
+        .body(builder.build())
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody(String.class).isEqualTo("Contenu généré en mémoire");
+}
+
+@Test
+void doitUploaderDepuisTestResources() {
+    MultipartBodyBuilder builder = new MultipartBodyBuilder();
+    builder.part("fichier", new ClassPathResource("exemple-import.txt"))
+        .filename("exemple-import.txt")
+        .contentType(MediaType.TEXT_PLAIN);
+
+    restTestClient.post()
+        .uri("/upload")
+        .contentType(MediaType.MULTIPART_FORM_DATA)
+        .body(builder.build())
+        .exchange()
+        .expectStatus().isOk();
+}
+```
+
+</TabItem>
+<TabItem label="MockMvc">
+
+```java
+@Test
+void doitUploaderUnFichierEnMemoire() throws Exception {
+    MockMultipartFile fichier = new MockMultipartFile(
+        "fichier",
+        "note-memoire.txt",
+        MediaType.TEXT_PLAIN_VALUE,
+        "Contenu généré en mémoire".getBytes()
+    );
+
+    mvc.perform(multipart("/upload").file(fichier))
+        .andExpect(status().isOk())
+        .andExpect(content().string("Contenu généré en mémoire"));
+}
+
+@Test
+void doitUploaderDepuisTestResources() throws Exception {
+    try (InputStream is = getClass().getClassLoader().getResourceAsStream("exemple-import.txt")) {
+        MockMultipartFile fichier = new MockMultipartFile(
+            "fichier",
+            "exemple-import.txt",
+            MediaType.TEXT_PLAIN_VALUE,
+            is
+        );
+
+        mvc.perform(multipart("/upload").file(fichier))
+            .andExpect(status().isOk());
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+:::note[Bonnes pratiques : injection par constructeur, contexte partagé et BDD]
+- **Injection par constructeur avec JUnit 5 :** contrairement à un `@Service`, JUnit 5 gère lui-même le constructeur des classes de test et exige de le marquer avec `@Autowired` *(ou d'ajouter `@TestConstructor(autowireMode = AutowireMode.ALL)` si vous souhaitez utiliser `@RequiredArgsConstructor` directement)*.
+- `@SpringBootTest` inclut déjà `@ExtendWith(SpringExtension.class)` : inutile de la répéter.
+- **Évitez `@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)` :** cette annotation détruit et redémarre tout le contexte Spring avant chaque méthode de test, ce qui ralentit énormément l'exécution. Pour garder des tests indépendants, réinitialisez plutôt les données entre deux tests (ex. `@Sql` ou nettoyage explicite en `@BeforeEach` / fin de test).
+- **Passer sur un vrai serveur Tomcat :** ajoutez `webEnvironment = WebEnvironment.RANDOM_PORT` sur `@SpringBootTest` *(votre code `RestTestClient` reste inchangé)*. ⚠️ **Attention :** ce mode démarre Tomcat et, si vous panachez des classes en `MOCK` et d'autres en `RANDOM_PORT`, Spring crée un **second contexte en cache** distinct, ce qui allonge le temps de démarrage global.
+:::
+
+## Tester des endpoints sécurisés (`spring-security-test`)
+
+Si vos endpoints sont protégés par Spring Security, ajoutez la dépendance `spring-security-test` (inutile si aucune route n'est sécurisée). C'est précisément cette bibliothèque qui fournit `@WithMockUser` (ainsi que des utilitaires comme `SecurityMockMvcRequestPostProcessors`) pour simuler un utilisateur authentifié, ses rôles et son `Principal` sans avoir besoin d'un jeton Keycloak réel :
+
+```xml title="pom.xml"
+<dependency>
+    <groupId>org.springframework.security</groupId>
+    <artifactId>spring-security-test</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+:::note[Cas de `RestTestClient` avec `@WithMockUser`]
+- En mode `WebEnvironment.MOCK` (par défaut), `@WithMockUser` fonctionne directement avec `RestTestClient` grâce à `@AutoConfigureMockMvc` déclaré dans `IntegrationTest.java`.
+- En mode `WebEnvironment.RANDOM_PORT`, les requêtes passent par de vrais appels HTTP : `@WithMockUser` ne s'applique plus, il faut transmettre un vrai en-tête `Authorization` (jeton ou identifiants).
+:::
+
+### Simuler un rôle
+
+Utilisez `@WithMockUser(roles = "ADMIN_TOUCAN")` pour simuler un utilisateur disposant du rôle attendu et tester l'accès à un endpoint protégé :
+
+<Tabs syncKey="client-test">
+<TabItem label="RestTestClient (Spring Boot 4)">
+
+```java
+@Test
+@WithMockUser(roles = "ADMIN_TOUCAN")
+void doitRecupererEnvironnement() {
+    restTestClient.get()
+        .uri("/environnement")
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody()
+        .jsonPath("$").isEqualTo("environnement local");
+}
+```
+
+</TabItem>
+<TabItem label="MockMvc">
+
+```java
+@Test
+@WithMockUser(roles = "ADMIN_TOUCAN")
+void doitRecupererEnvironnement() throws Exception {
+    mvc.perform(get("/environnement"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", is("environnement local")));
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Simuler l'identifiant utilisateur (`Principal`)
+
+Utilisez `@WithMockUser(username = "toto")` pour simuler un utilisateur connecté et alimenter `Principal.getName()` :
+
+<Tabs syncKey="client-test">
+<TabItem label="RestTestClient (Spring Boot 4)">
+
+```java
+@Test
+@WithMockUser(username = "toto")
+void doitRetournerIdepAvecUtilisateurAuthentifie() {
+    restTestClient.get()
+        .uri("/principal")
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody(String.class).isEqualTo("Mon idep est toto.");
+}
+```
+
+</TabItem>
+<TabItem label="MockMvc">
+
+```java
+@Test
+@WithMockUser(username = "toto")
+void doitRetournerIdepAvecUtilisateurAuthentifie() throws Exception {
+    mvc.perform(get("/principal"))
+        .andExpect(status().isOk())
+        .andExpect(content().string("Mon idep est toto."));
+}
+```
+
+</TabItem>
+</Tabs>
