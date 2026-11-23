@@ -50,6 +50,36 @@ GET https://api.insee.fr/entreprises/sirene/V3/siren/{siren}?date={date}
 ```
 :::
 
+## Les codes de statut de réponse HTTP
+
+Les statuts sont regroupés en **5 familles** ([référence MDN](https://developer.mozilla.org/fr/docs/Web/HTTP/Status)) :
+
+| Famille | Signification | Exemples courants |
+| --- | --- | --- |
+| **1xx** | Information | `100 Continue`, `101 Switching Protocols` |
+| **2xx** | Succès | `200 OK`, `201 Created`, `204 No Content` |
+| **3xx** | Redirection | `301 Moved Permanently`, `304 Not Modified` |
+| **4xx** | Erreur du client | `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found` |
+| **5xx** | Erreur du serveur | `500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable` |
+
+### Quel code renvoyer dans votre API ?
+
+| Situation | Code recommandé | Précision |
+| --- | :---: | --- |
+| Lecture ou mise à jour réussie (avec corps) | **`200 OK`** | Retourne la ressource ou la liste en JSON |
+| Création réussie (`POST`) | **`201 Created`** | Indique qu'une nouvelle ressource a été créée |
+| Suppression réussie (sans corps) | **`204 No Content`** | Succès sans corps JSON à renvoyer |
+| Données invalides ou JSON mal formé | **`400 Bad Request`** | Erreur de validation métier ou de syntaxe |
+| Jeton absent ou expiré | **`401 Unauthorized`** | L'appelant n'est pas authentifié |
+| Authentifié, mais droits insuffisants | **`403 Forbidden`** | Rôle manquant pour cette action |
+| Ressource introuvable | **`404 Not Found`** | L'identifiant demandé n'existe pas |
+| `Content-Type` absent ou non supporté | **`415 Unsupported Media Type`** | Ex. texte envoyé au lieu de `application/json` |
+| Bug imprévu côté serveur | **`500 Internal Server Error`** | Exception non gérée (à logguer côté serveur) |
+
+:::caution[Piège classique : tout renvoyer en `200 OK`]
+Ne renvoyez jamais un `200 OK` contenant `{"erreur": "Vin introuvable"}` : les clients HTTP, les proxies, les outils de supervision et vos tests automatisés s'appuient sur le **statut HTTP** pour savoir si l'appel a réussi ou échoué.
+:::
+
 ## Anatomie d'un échange HTTP (requête et réponse)
 
 Tout échange HTTP suit toujours la même structure texte : une première ligne (méthode/URL côté requête, statut côté réponse), des **en-têtes** `clé: valeur`, une ligne vide, puis un **corps** optionnel :
@@ -182,36 +212,6 @@ response.setContentType("text/html; charset=UTF-8");
 ```
 
 *(Équivalent en deux appels : `response.setContentType("text/html");` suivi de `response.setCharacterEncoding("UTF-8");`.)*
-
-## Les codes de statut de réponse HTTP
-
-Les statuts sont regroupés en **5 familles** ([référence MDN](https://developer.mozilla.org/fr/docs/Web/HTTP/Status)) :
-
-| Famille | Signification | Exemples courants |
-| --- | --- | --- |
-| **1xx** | Information | `100 Continue`, `101 Switching Protocols` |
-| **2xx** | Succès | `200 OK`, `201 Created`, `204 No Content` |
-| **3xx** | Redirection | `301 Moved Permanently`, `304 Not Modified` |
-| **4xx** | Erreur du client | `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found` |
-| **5xx** | Erreur du serveur | `500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable` |
-
-### Quel code renvoyer dans votre API ?
-
-| Situation | Code recommandé | Précision |
-| --- | :---: | --- |
-| Lecture ou mise à jour réussie (avec corps) | **`200 OK`** | Retourne la ressource ou la liste en JSON |
-| Création réussie (`POST`) | **`201 Created`** | Indique qu'une nouvelle ressource a été créée |
-| Suppression réussie (sans corps) | **`204 No Content`** | Succès sans corps JSON à renvoyer |
-| Données invalides ou JSON mal formé | **`400 Bad Request`** | Erreur de validation métier ou de syntaxe |
-| Jeton absent ou expiré | **`401 Unauthorized`** | L'appelant n'est pas authentifié |
-| Authentifié, mais droits insuffisants | **`403 Forbidden`** | Rôle manquant pour cette action |
-| Ressource introuvable | **`404 Not Found`** | L'identifiant demandé n'existe pas |
-| `Content-Type` absent ou non supporté | **`415 Unsupported Media Type`** | Ex. texte envoyé au lieu de `application/json` |
-| Bug imprévu côté serveur | **`500 Internal Server Error`** | Exception non gérée (à logguer côté serveur) |
-
-:::caution[Piège classique : tout renvoyer en `200 OK`]
-Ne renvoyez jamais un `200 OK` contenant `{"erreur": "Vin introuvable"}` : les clients HTTP, les proxies, les outils de supervision et vos tests automatisés s'appuient sur le **statut HTTP** pour savoir si l'appel a réussi ou échoué.
-:::
 
 ## Tester des requêtes HTTP en pratique
 
