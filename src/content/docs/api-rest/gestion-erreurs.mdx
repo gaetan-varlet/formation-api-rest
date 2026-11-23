@@ -33,7 +33,7 @@ public class VinInvalideException extends RuntimeException {
 Mettez à jour `VinService` pour lever ces exceptions dès qu'un cas d'erreur se présente (par exemple lors de la suppression d'un vin) :
 
 ```java title="VinService.java"
-public void deleteById(Integer id) {
+public void deleteById(Long id) {
     if (id == null || !vinRepository.existsById(id)) {
         throw new VinInconnuException("Le vin avec l'id " + id + " n'existe pas");
     }
@@ -87,7 +87,7 @@ public class VinService {
 
     private final VinRepository vinRepository;
 
-    public Vin getById(Integer id) {
+    public Vin getById(Long id) {
         verifierIdValide(id);
         return vinRepository.findById(id)
                 .orElseThrow(() -> new VinInconnuException("Le vin avec l'id " + id + " n'existe pas"));
@@ -113,7 +113,7 @@ public class VinService {
         return vinRepository.save(vin);
     }
 
-    public void deleteById(Integer id) {
+    public void deleteById(Long id) {
         verifierIdValide(id);
         if (!vinRepository.existsById(id)) {
             throw new VinInconnuException("Le vin avec l'id " + id + " n'existe pas");
@@ -121,7 +121,7 @@ public class VinService {
         vinRepository.deleteById(id);
     }
 
-    private void verifierIdValide(Integer id) {
+    private void verifierIdValide(Long id) {
         if (id == null || id <= 0) {
             throw new VinInvalideException("L'id du vin doit être strictement positif");
         }

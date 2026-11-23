@@ -92,7 +92,7 @@ Pour garder le cache cohérent lors d'une écriture, Spring propose deux autres 
 
 ```java
 @CacheEvict(value = "vins", key = "#id")
-public void deleteById(Integer id) {
+public void deleteById(Long id) {
     vinRepository.deleteById(id);
 }
 ```

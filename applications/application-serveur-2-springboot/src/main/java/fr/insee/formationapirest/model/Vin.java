@@ -22,7 +22,7 @@ public class Vin {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
+	private Long id;
 
 	private String chateau;
 	private String appellation;

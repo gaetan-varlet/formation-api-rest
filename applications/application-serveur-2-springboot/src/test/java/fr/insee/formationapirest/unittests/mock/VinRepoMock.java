@@ -25,12 +25,12 @@ public class VinRepoMock implements VinRepository {
     }
 
     @Override
-    public boolean existsById(Integer id) {
+    public boolean existsById(Long id) {
         throw new UnsupportedOperationException("Unimplemented method 'existsById'");
     }
 
     @Override
-    public Optional<Vin> findById(Integer id) {
+    public Optional<Vin> findById(Long id) {
         throw new UnsupportedOperationException("Unimplemented method 'findById'");
     }
 
@@ -41,7 +41,7 @@ public class VinRepoMock implements VinRepository {
     }
 
     @Override
-    public void deleteById(Integer id) {
+    public void deleteById(Long id) {
         throw new UnsupportedOperationException("Unimplemented method 'deleteById'");
     }
 

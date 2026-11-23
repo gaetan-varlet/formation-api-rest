@@ -31,12 +31,12 @@ public class VinServiceTest {
 	@BeforeEach
 	public void setUp() {
 		Vin vin1 = new Vin();
-		vin1.setId(1);
+		vin1.setId(1L);
 		vin1.setChateau("Château 1");
 		vin1.setAppellation("Saint-Julien");
 		vin1.setPrix(10.0);
 		Vin vin2 = new Vin();
-		vin2.setId(2);
+		vin2.setId(2L);
 		vin2.setChateau("Château 2");
 		vin2.setAppellation("Pomerol");
 		vin2.setPrix(25.0);
@@ -55,30 +55,30 @@ public class VinServiceTest {
 	@Test
 	public void controleValiditeVinTest() {
 		assertThat(vinService.controleValiditeVin(null)).isFalse();
-		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", 100d))).isTrue();
+		assertThat(vinService.controleValiditeVin(new Vin(1L, "Château Lascombes", "Margaux", 100d))).isTrue();
 		assertThat(vinService.controleValiditeVin(new Vin(null, "Château Lascombes", "Margaux", 100d))).isTrue();
 
-		assertThat(vinService.controleValiditeVin(new Vin(1, null, "Margaux", 100d))).isFalse();
-		assertThat(vinService.controleValiditeVin(new Vin(1, "", "Margaux", 100d))).isFalse();
-		assertThat(vinService.controleValiditeVin(new Vin(1, "C", "Margaux", 100d))).isTrue();
+		assertThat(vinService.controleValiditeVin(new Vin(1L, null, "Margaux", 100d))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1L, "", "Margaux", 100d))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1L, "C", "Margaux", 100d))).isTrue();
 		assertThat(vinService.controleValiditeVin(
-				new Vin(1, "12345678901234567890123456789012345678901234567890", "Margaux", 100d))).isTrue();
+				new Vin(1L, "12345678901234567890123456789012345678901234567890", "Margaux", 100d))).isTrue();
 		assertThat(vinService.controleValiditeVin(
-				new Vin(1, "123456789012345678901234567890123456789012345678901", "Margaux", 100d))).isFalse();
+				new Vin(1L, "123456789012345678901234567890123456789012345678901", "Margaux", 100d))).isFalse();
 
-		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", null, 100d))).isFalse();
-		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "", 100d))).isFalse();
-		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "M", 100d))).isTrue();
+		assertThat(vinService.controleValiditeVin(new Vin(1L, "Château Lascombes", null, 100d))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1L, "Château Lascombes", "", 100d))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1L, "Château Lascombes", "M", 100d))).isTrue();
 		assertThat(vinService.controleValiditeVin(
-				new Vin(1, "Château Lascombes", "12345678901234567890123456789012345678901234567890", 100d))).isTrue();
+				new Vin(1L, "Château Lascombes", "12345678901234567890123456789012345678901234567890", 100d))).isTrue();
 		assertThat(vinService.controleValiditeVin(
-				new Vin(1, "Château Lascombes", "123456789012345678901234567890123456789012345678901", 100d)))
+				new Vin(1L, "Château Lascombes", "123456789012345678901234567890123456789012345678901", 100d)))
 				.isFalse();
-		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", null))).isFalse();
-		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", -5d))).isFalse();
-		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", -0.1d))).isFalse();
-		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", 0d))).isTrue();
-		assertThat(vinService.controleValiditeVin(new Vin(1, "Château Lascombes", "Margaux", 0.1d))).isTrue();
+		assertThat(vinService.controleValiditeVin(new Vin(1L, "Château Lascombes", "Margaux", null))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1L, "Château Lascombes", "Margaux", -5d))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1L, "Château Lascombes", "Margaux", -0.1d))).isFalse();
+		assertThat(vinService.controleValiditeVin(new Vin(1L, "Château Lascombes", "Margaux", 0d))).isTrue();
+		assertThat(vinService.controleValiditeVin(new Vin(1L, "Château Lascombes", "Margaux", 0.1d))).isTrue();
 	}
 
 }

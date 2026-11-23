@@ -14,13 +14,13 @@ public interface VinRepository {
 
     List<Vin> findByAppellation(String app);
 
-    boolean existsById(Integer id);
+    boolean existsById(Long id);
 
-    Optional<Vin> findById(Integer id);
+    Optional<Vin> findById(Long id);
 
     Vin save(Vin vin);
 
-    void deleteById(Integer id);
+    void deleteById(Long id);
 
     Page<Vin> findAll(Pageable p);
 

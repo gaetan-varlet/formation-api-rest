@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import fr.insee.formationapirest.model.Trace;
 
 @Repository
-public interface TraceRepository extends JpaRepository<Trace, Integer> {
+public interface TraceRepository extends JpaRepository<Trace, Long> {
 	
 }

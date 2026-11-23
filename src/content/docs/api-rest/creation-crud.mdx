@@ -19,7 +19,7 @@ Récupère un vin par son identifiant :
 
 ```java
 @GetMapping("/{id}")
-public Vin getById(@PathVariable Integer id) {
+public Vin getById(@PathVariable Long id) {
     return vinRepository.findById(id).orElse(null);
 }
 ```
@@ -73,7 +73,7 @@ Supprime un vin par son identifiant :
 
 ```java
 @DeleteMapping("/{id}")
-public void deleteById(@PathVariable Integer id) {
+public void deleteById(@PathVariable Long id) {
     // Renvoie un code HTTP 200 par défaut, que l'id existe ou non
     vinRepository.deleteById(id);
 }

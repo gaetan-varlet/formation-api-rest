@@ -33,12 +33,12 @@ public class VinRepositoryCustomImpl implements VinRepository {
 	}
 
 	@Override
-	public boolean existsById(Integer id) {
+	public boolean existsById(Long id) {
 		return vinRepositorySpringData.existsById(id);
 	}
 
 	@Override
-	public Optional<Vin> findById(Integer id) {
+	public Optional<Vin> findById(Long id) {
 		return vinRepositorySpringData.findById(id);
 	}
 
@@ -48,7 +48,7 @@ public class VinRepositoryCustomImpl implements VinRepository {
 	}
 
 	@Override
-	public void deleteById(Integer id) {
+	public void deleteById(Long id) {
 		vinRepositorySpringData.deleteById(id);
 	}
 

@@ -7,7 +7,7 @@ import { Steps } from '@astrojs/starlight/components';
 ## Méthodes fournies nativement par `JpaRepository`
 
 :::note[Prérequis]
-La déclaration de l'interface `JpaRepository<T, ID>` est présentée dans [Configuration de la BDD](/formation-api-rest/spring-boot/configuration-bdd/#création-du-dao-repository), et sa première utilisation dans un contrôleur REST dans [Création d'une API CRUD](/formation-api-rest/api-rest/creation-crud/).
+La déclaration de l'interface `JpaRepository<T, ID>` est présentée dans [Configuration de la BDD](/formation-api-rest/spring-boot/configuration-bdd/#création-du-repository-dao), et sa première utilisation dans un contrôleur REST dans [Création d'une API CRUD](/formation-api-rest/api-rest/creation-crud/).
 :::
 
 Avant d'écrire la moindre requête personnalisée, hériter de `JpaRepository<T, ID>` fournit un socle complet de méthodes prêtes à l'emploi (issues de `ListCrudRepository` et `ListPagingAndSortingRepository`) :
@@ -85,7 +85,7 @@ Dès que les méthodes natives de `JpaRepository` ne suffisent plus (filtres mé
 Spring Data analyse le **nom de la méthode** dans l'interface et génère automatiquement la requête au démarrage :
 
 ```java title="VinRepository.java"
-public interface VinRepository extends JpaRepository<Vin, Integer> {
+public interface VinRepository extends JpaRepository<Vin, Long> {
 
     // WHERE appellation = ?
     List<Vin> findByAppellation(String appellation);
@@ -127,7 +127,7 @@ Or, sur un `findAll()`, **les deux modes provoquent un N+1 SELECT** :
 L'annotation **`@EntityGraph`** surcharge ponctuellement la stratégie de chargement pour la méthode ciblée, en forçant Hibernate à générer une jointure SQL (`LEFT OUTER JOIN`) :
 
 ```java title="VinRepository.java"
-public interface VinRepository extends JpaRepository<Vin, Integer> {
+public interface VinRepository extends JpaRepository<Vin, Long> {
 
     @EntityGraph(attributePaths = {"region", "producteur"})
     List<Vin> findAll();
@@ -154,7 +154,7 @@ public interface VinRepository extends JpaRepository<Vin, Integer> {
 Si `Vin` possède deux listes (`List<Avis> avis` et `List<Recompense> recompenses`), on déclare deux requêtes portant chacune un seul `@EntityGraph` :
 
 ```java title="VinRepository.java"
-public interface VinRepository extends JpaRepository<Vin, Integer> {
+public interface VinRepository extends JpaRepository<Vin, Long> {
 
     @EntityGraph(attributePaths = {"avis"})
     List<Vin> findAll();
@@ -186,7 +186,7 @@ public List<Vin> getAllComplets() {
 Nécessaire dès que la requête comporte des agrégations, des sous-requêtes ou devient trop verbeuse pour une *Query Method*. `@Query` propose **2 modes** : **JPQL** (par défaut) et **SQL natif** (`nativeQuery = true`).
 
 ```java title="VinRepository.java"
-public interface VinRepository extends JpaRepository<Vin, Integer> {
+public interface VinRepository extends JpaRepository<Vin, Long> {
 
     @Query("SELECT DISTINCT v.appellation FROM Vin v WHERE v.prix <= :prixMax ORDER BY v.appellation")
     List<String> findAppellationsAbordables(BigDecimal prixMax);
@@ -206,9 +206,9 @@ public interface VinRepository extends JpaRepository<Vin, Integer> {
 Évite de charger l'entité complète (`Vin`) en projetant directement le résultat vers un **Record** :
 
 ```java title="VinRepository.java"
-public record VinResponse(Integer id, String chateau, String appellation, Integer annee, BigDecimal prix) {}
+public record VinResponse(Long id, String chateau, String appellation, Integer annee, BigDecimal prix) {}
 
-public interface VinRepository extends JpaRepository<Vin, Integer> {
+public interface VinRepository extends JpaRepository<Vin, Long> {
 
     List<VinResponse> findByAppellation(String appellation);
 
@@ -234,11 +234,11 @@ Seules les colonnes utiles sont lues en base (pas de `SELECT *`) et aucun objet 
 Par défaut, `@Query` n'accepte que des lectures (`SELECT`). Pour exécuter directement un `UPDATE` ou un `DELETE` en base (sans charger les entités en mémoire), il faut ajouter `@Modifying` sur la méthode du repository et s'assurer qu'elle s'exécute dans une transaction portée par le `@Service` :
 
 ```java title="VinRepository.java"
-public interface VinRepository extends JpaRepository<Vin, Integer> {
+public interface VinRepository extends JpaRepository<Vin, Long> {
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Vin v SET v.prix = :nouveauPrix WHERE v.id = :id")
-    int updatePrix(Integer id, BigDecimal nouveauPrix);
+    int updatePrix(Long id, BigDecimal nouveauPrix);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Vin v WHERE v.annee < :anneeLimite")
@@ -254,7 +254,7 @@ public class VinService {
     private final VinRepository vinRepository;
 
     @Transactional
-    public int appliquerRemise(Integer id, BigDecimal nouveauPrix) {
+    public int appliquerRemise(Long id, BigDecimal nouveauPrix) {
         return vinRepository.updatePrix(id, nouveauPrix);
     }
 }
@@ -278,7 +278,7 @@ public class VinService {
   - **Le piège si `clearAutomatically = true` est utilisé seul :**
     ```java
     @Transactional
-    public void corrigerVin(Integer id) {
+    public void corrigerVin(Long id) {
         Vin vin = vinRepository.findById(id).orElseThrow();
         vin.setChateau("Château Margaux"); // Modifié en mémoire uniquement (pas encore en base)
 
@@ -356,7 +356,7 @@ Indispensable quand la requête doit être construite **dynamiquement** avec des
 3. **Étendre l'interface et utiliser dans le Service**
 
    ```java title="VinRepository.java"
-   public interface VinRepository extends JpaRepository<Vin, Integer>, VinRepositoryCustom {
+   public interface VinRepository extends JpaRepository<Vin, Long>, VinRepositoryCustom {
        // Combine JpaRepository, les Query Methods, @EntityGraph et le code Custom
    }
    ```

@@ -12,7 +12,7 @@ Une première approche consiste à annoter directement l'entité JPA pour exclur
 
 ```java title="Vin.java"
 public class Vin {
-    private Integer id;
+    private Long id;
     private String chateau;
     private String appellation;
 
@@ -63,7 +63,7 @@ public record CreateVinRequest(
 
 ```java title="VinResponse.java"
 public record VinResponse(
-    Integer id,
+    Long id,
     String chateau,
     String appellation,
     BigDecimal prix

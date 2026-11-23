@@ -10,7 +10,7 @@ public class VinInconnuException extends RuntimeException {
 		super(message);
 	}
 
-	public VinInconnuException(Integer id) {
+	public VinInconnuException(Long id) {
 		super("Le vin avec l'id " + id + " n'existe pas");
 	}
 }

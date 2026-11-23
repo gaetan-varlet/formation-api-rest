@@ -46,7 +46,7 @@ public class VinDaoModern {
 
 ```java
 // Retourne le nombre de lignes modifiées
-public int updatePrix(Integer id, BigDecimal nouveauPrix) {
+public int updatePrix(Long id, BigDecimal nouveauPrix) {
     return jdbcClient.sql("UPDATE vin SET prix = :prix WHERE id = :id")
             .param("prix", nouveauPrix)
             .param("id", id)

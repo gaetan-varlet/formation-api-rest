@@ -16,7 +16,7 @@ public class Trace {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
+	private Long id;
 	private String idep;
 	private LocalDateTime time;
 	private String urlServeur;

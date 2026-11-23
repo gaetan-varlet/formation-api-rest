@@ -136,6 +136,7 @@ export default defineConfig({
 				{
 					label: 'Accès aux données & SQL',
 					items: [
+						{ slug: 'acces-donnees/rappels-jpa' },
 						{ slug: 'acces-donnees/spring-data-jpa' },
 						{ slug: 'acces-donnees/jdbc-et-batching' },
 						{ slug: 'acces-donnees/extraction-gros-volumes' },

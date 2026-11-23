@@ -72,12 +72,12 @@ public class VinController {
 	}
 
 	@GetMapping("{id}")
-	public Vin getById(@PathVariable Integer id) {
+	public Vin getById(@PathVariable Long id) {
 		return vinService.getById(id);
 	}
 
 	@DeleteMapping("{id}")
-	public void deleteById(@PathVariable Integer id) {
+	public void deleteById(@PathVariable Long id) {
 		vinService.deleteById(id);
 	}
 

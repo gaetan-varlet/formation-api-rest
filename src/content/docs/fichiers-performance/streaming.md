@@ -35,7 +35,7 @@ Au lieu de charger une collection en RAM, les données circulent dans un tuyau c
 Déclarer un retour `Stream<T>` couplé au `fetchSize` :
 
 ```java
-public interface VinRepository extends JpaRepository<Vin, Integer> {
+public interface VinRepository extends JpaRepository<Vin, Long> {
     @QueryHints(value = {
         // OBLIGATOIRE PostgreSQL : active le curseur par lots de X lignes
         @QueryHint(name = HibernateHints.HINT_FETCH_SIZE, value = "2000")
@@ -52,7 +52,7 @@ public interface VinRepository extends JpaRepository<Vin, Integer> {
 Pour garantir une vraie mémoire en **O(1)** sur des centaines de milliers de lignes, projeter directement le stream dans un **Record** :
 
 ```java
-public interface VinRepository extends JpaRepository<Vin, Integer> {
+public interface VinRepository extends JpaRepository<Vin, Long> {
     @QueryHints(value = {
         @QueryHint(name = HibernateHints.HINT_FETCH_SIZE, value = "2000")
     })

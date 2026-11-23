@@ -45,7 +45,7 @@ public class VinService {
 		}
 	}
 
-	public Vin getById(Integer id) {
+	public Vin getById(Long id) {
 		if (id > 0) {
 			if (vinRepository.existsById(id)) {
 				return vinRepository.findById(id).orElse(null);
@@ -57,7 +57,7 @@ public class VinService {
 		}
 	}
 
-	public void deleteById(Integer id) {
+	public void deleteById(Long id) {
 		if (vinRepository.existsById(id)) {
 			vinRepository.deleteById(id);
 		} else {

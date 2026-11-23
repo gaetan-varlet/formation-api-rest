@@ -62,8 +62,8 @@ class VinServiceTest {
     @Test
     void recupererTousLesVins() {
         // Given
-        Vin vin1 = creerVin(1, "Château 1", "Saint-Julien", 10.0);
-        Vin vin2 = creerVin(2, "Château 2", "Pomerol", 25.0);
+        Vin vin1 = creerVin(1L, "Château 1", "Saint-Julien", 10.0);
+        Vin vin2 = creerVin(2L, "Château 2", "Pomerol", 25.0);
         when(vinRepository.findAll()).thenReturn(List.of(vin1, vin2));
 
         // When
@@ -77,14 +77,14 @@ class VinServiceTest {
     @Test
     void getByIdLeveExceptionSiVinInconnu() {
         // Given
-        when(vinRepository.findById(99)).thenReturn(Optional.empty());
+        when(vinRepository.findById(99L)).thenReturn(Optional.empty());
 
         // When / Then
-        assertThatThrownBy(() -> vinService.getById(99))
+        assertThatThrownBy(() -> vinService.getById(99L))
             .isInstanceOf(VinInconnuException.class);
     }
 
-    private Vin creerVin(Integer id, String chateau, String appellation, double prix) {
+    private Vin creerVin(Long id, String chateau, String appellation, double prix) {
         Vin vin = new Vin();
         vin.setId(id);
         vin.setChateau(chateau);
