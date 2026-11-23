@@ -67,32 +67,41 @@ Elle combine deux annotations Spring MVC :
 
 Swagger génère automatiquement une documentation interactive et standardisée (**OpenAPI**) de votre API à partir du code.
 
-Ajoutez la dépendance **springdoc-openapi** dans votre `pom.xml` :
+<Steps>
 
-```xml title="pom.xml"
-<dependency>
-    <groupId>org.springdoc</groupId>
-    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-    <version>3.2.0</version>
-</dependency>
-```
+1. **Ajouter la dépendance `springdoc-openapi`**
 
-Déclarez explicitement l'activation dans `application.properties` pour éviter le warning au démarrage dans la console (et faciliter la désactivation de Swagger en production si besoin) en passant ces valeurs à `false` :
+   Ajoutez ce starter dans votre `pom.xml` :
 
-```properties title="application.properties"
-springdoc.api-docs.enabled=true
-springdoc.swagger-ui.enabled=true
-```
+   ```xml title="pom.xml"
+   <dependency>
+       <groupId>org.springdoc</groupId>
+       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+       <version>3.2.0</version>
+   </dependency>
+   ```
 
-Une fois l'application démarrée, deux URLs sont disponibles :
-- **Spécification OpenAPI (JSON) :** [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
-- **Interface interactive Swagger UI :** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+2. **Configurer `application.properties`**
 
-:::tip[Rediriger la page d'accueil vers Swagger UI]
-Vous pouvez rediriger directement `/` vers Swagger UI en ajoutant cette propriété : les utilisateurs de votre API arrivent ainsi directement sur la documentation interactive et peuvent découvrir vos endpoints plus facilement (la personnalisation complète est détaillée dans la page [Documenter son API avec Swagger](/formation-api-rest/api-rest/swagger/)) :
+   Déclarez explicitement les propriétés d'activation (pour éviter le warning au démarrage dans la console et pouvoir désactiver Swagger en production si besoin en passant ces valeurs à `false`). Vous pouvez également rediriger `/` vers Swagger UI afin que les utilisateurs arrivent directement sur la documentation interactive et découvrent vos endpoints plus facilement :
 
-```properties title="application.properties"
-# Redirection de l'URL racine vers Swagger UI
-springdoc.swagger-ui.use-root-path=true
-```
+   ```properties title="application.properties"
+   # Activation explicite d'OpenAPI et de Swagger UI (passer à false en production)
+   springdoc.api-docs.enabled=true
+   springdoc.swagger-ui.enabled=true
+
+   # Optionnel : redirection de la page d'accueil (/) vers Swagger UI
+   springdoc.swagger-ui.use-root-path=true
+   ```
+
+3. **Vérifier l'accès à la documentation**
+
+   Une fois l'application démarrée, les endpoints suivants sont disponibles :
+   - **Spécification OpenAPI (JSON) :** [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+   - **Interface interactive Swagger UI :** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) (ou directement [http://localhost:8080/](http://localhost:8080/) si la redirection est activée)
+
+</Steps>
+
+:::note[Aller plus loin avec Swagger]
+La personnalisation avancée (métadonnées, version Maven, annotations `@Tag` / `@Operation` et intégration Keycloak) est détaillée dans la page [Documenter son API avec Swagger](/formation-api-rest/api-rest/swagger/).
 :::
