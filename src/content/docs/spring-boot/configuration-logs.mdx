@@ -16,7 +16,9 @@ logging.level.fr.insee=DEBUG
 spring.output.ansi.enabled=ALWAYS
 ```
 
-:::note[Écrire les logs dans un fichier (facultatif)]
+<details>
+<summary>Écrire les logs dans un fichier (facultatif)</summary>
+
 Dans la majorité des cas (conteneurs Docker/Kubernetes, `systemd`, collecteurs centralisés), **écrire uniquement dans la console suffit** : la sortie standard est automatiquement captée par la plateforme ou l'outil de centralisation des logs.
 
 Si vous devez tout de même écrire dans un fichier avec rotation automatique :
@@ -30,7 +32,8 @@ logging.logback.rollingpolicy.max-file-size=10MB
 # Encodage du fichier de log
 logging.charset.file=UTF-8
 ```
-:::
+
+</details>
 
 ## Écrire des logs dans son code Java
 

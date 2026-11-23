@@ -26,13 +26,19 @@ monNom=Gaetan
 
 ```java title="TestController.java"
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Value("${monNom:Inconnu}")
-private String nom;
+@RestController
+public class TestController {
 
-@GetMapping("/mon-nom")
-public String getNom() {
-    return nom;
+    @Value("${monNom:Inconnu}")
+    private String nom;
+
+    @GetMapping("/mon-nom")
+    public String getNom() {
+        return nom;
+    }
 }
 ```
 
