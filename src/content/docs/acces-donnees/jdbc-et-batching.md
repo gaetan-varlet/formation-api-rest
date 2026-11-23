@@ -28,7 +28,7 @@ public class VinDaoModern {
     public List<VinResponse> findVinsAbordables(String appellation, BigDecimal prixMax) {
         return jdbcClient.sql("""
                     SELECT id, chateau, appellation, annee, prix
-                    FROM formation.vin
+                    FROM vin
                     WHERE appellation = :appellation AND prix <= :prixMax
                 """)
                 .param("appellation", appellation)
@@ -47,7 +47,7 @@ public class VinDaoModern {
 ```java
 // Retourne le nombre de lignes modifiées
 public int updatePrix(Integer id, BigDecimal nouveauPrix) {
-    return jdbcClient.sql("UPDATE formation.vin SET prix = :prix WHERE id = :id")
+    return jdbcClient.sql("UPDATE vin SET prix = :prix WHERE id = :id")
             .param("prix", nouveauPrix)
             .param("id", id)
             .update();
@@ -83,7 +83,7 @@ public class VinDaoModern {
 
     public void updatePrixEnMasse(List<VinResponse> vins) {
         // Les noms des paramètres nommés (:prix, :id) DOIVENT correspondre aux champs du Record
-        String sql = "UPDATE formation.vin SET prix = :prix WHERE id = :id";
+        String sql = "UPDATE vin SET prix = :prix WHERE id = :id";
         // Mapping automatique : vin.prix() -> :prix, vin.id() -> :id
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(vins);
         // Exécute l'ensemble de la liste en un seul lot JDBC (executeBatch)
@@ -109,7 +109,7 @@ public class VinDaoClassic {
     public List<VinResponse> findVinsAbordables(String appellation, BigDecimal prixMax) {
         String sql = """
             SELECT id, chateau, appellation, annee, prix
-            FROM formation.vin
+            FROM vin
             WHERE appellation = :appellation AND prix <= :prixMax
         """;
 
@@ -143,7 +143,7 @@ public class VinDaoLegacyJdbc {
 
     public List<String> findAllAppellationsJdbc() {
         List<String> retour = new ArrayList<>();
-        String sql = "SELECT DISTINCT appellation FROM formation.vin";
+        String sql = "SELECT DISTINCT appellation FROM vin";
 
         // Try-with-resources pour fermer manuellement Connection, Statement et ResultSet
         try (Connection conn = dataSource.getConnection();

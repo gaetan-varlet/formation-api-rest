@@ -191,13 +191,13 @@ public interface VinRepository extends JpaRepository<Vin, Integer> {
     @Query("SELECT DISTINCT v.appellation FROM Vin v WHERE v.prix <= :prixMax ORDER BY v.appellation")
     List<String> findAppellationsAbordables(BigDecimal prixMax);
 
-    @Query(value = "SELECT DISTINCT appellation FROM formation.vin WHERE date_mise_en_bouteille IS NOT NULL", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT appellation FROM vin WHERE date_mise_en_bouteille IS NOT NULL", nativeQuery = true)
     List<String> findAppellationsEnBouteille();
 }
 ```
 
 - **Mode 1 — JPQL (par défaut, `findAppellationsAbordables`) :** opère sur les **entités et attributs Java** (`Vin`, `v.prix`), pas sur les tables SQL. La requête est vérifiée au démarrage de l'application et reste portable entre SGBD.
-- **Mode 2 — SQL natif (`nativeQuery = true`, `findAppellationsEnBouteille`) :** exécute du SQL brut directement sur les **tables et colonnes** (`formation.vin`, `date_mise_en_bouteille`). Pratique pour des fonctionnalités propres au SGBD (ex. PostgreSQL), mais non vérifié au démarrage et non portable.
+- **Mode 2 — SQL natif (`nativeQuery = true`, `findAppellationsEnBouteille`) :** exécute du SQL brut directement sur les **tables et colonnes** (`vin`, `date_mise_en_bouteille`). Pratique pour des fonctionnalités propres au SGBD (ex. PostgreSQL), mais non vérifié au démarrage et non portable.
 - **Paramètres nommés (`:prixMax`) :** avec `spring-boot-starter-parent` (`-parameters`), `@Param("prixMax")` est facultatif si le paramètre Java porte le même nom ; sinon, il devient obligatoire.
 - **Pagination (`Pageable`) :** fonctionne directement en ajoutant `Pageable` en paramètre (en SQL natif complexe avec `GROUP BY` ou sous-requêtes, précisez `countQuery = "SELECT count(*) ..."`).
 

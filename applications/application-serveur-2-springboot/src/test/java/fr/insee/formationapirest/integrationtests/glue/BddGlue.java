@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class BddGlue implements En {
 
-    private static final String SCHEMA = "formation";
+    private static final String SCHEMA = "public";
 
     public BddGlue(DatabaseManager databaseManager) {
 

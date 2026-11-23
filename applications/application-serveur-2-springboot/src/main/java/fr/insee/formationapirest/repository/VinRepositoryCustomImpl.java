@@ -60,7 +60,7 @@ public class VinRepositoryCustomImpl implements VinRepository {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<String> getListeAppellationJpa() {
-		String sql = "select distinct appellation from formation.vin";
+		String sql = "select distinct appellation from vin";
 		Query query = entityManager.createNativeQuery(sql);
 		return query.getResultList();
 	}

@@ -38,7 +38,7 @@ public class DatabaseManager {
 
     private static final Pattern FORMAT_IDENTIFIANT_SQL = Pattern.compile("^[a-zA-Z0-9_]+$");
     private static final List<String> TABLES_A_EXCLURE = List.of("MODULE");
-    private static final String SCHEMA_PAR_DEFAUT = "FORMATION";
+    private static final String SCHEMA_PAR_DEFAUT = "PUBLIC";
 
     private final DataSource dataSource;
 

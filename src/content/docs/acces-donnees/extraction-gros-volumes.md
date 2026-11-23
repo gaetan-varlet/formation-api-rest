@@ -36,7 +36,7 @@ Accès direct via `jdbcClient`, **100 % indépendant de JPA/Hibernate** :
 public void streamJdbc(OutputStream os) throws IOException {
     try (SequenceWriter writer = objectMapper.writerFor(VinResponse.class).writeValuesAsArray(os);
          Stream<VinResponse> stream = jdbcClient
-                 .sql("SELECT id, chateau, appellation, annee, prix FROM formation.vin")
+                 .sql("SELECT id, chateau, appellation, annee, prix FROM vin")
                  .query(VinResponse.class)
                  .stream()) {
 
