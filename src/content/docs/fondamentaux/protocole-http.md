@@ -164,11 +164,21 @@ Pour appeler une URL ou tester une API sans écrire de code applicatif :
 - 🌐 **Navigateur web :** pratique directement depuis la barre d'adresse, mais limité aux requêtes `GET`.
 - 🧪 **Client REST dédié (`Insomnia`, `Postman`) :** indispensable pour envoyer des requêtes `POST`, `PUT`, `PATCH` ou `DELETE`, configurer des en-têtes (`Content-Type`, `Authorization`…) et inspecter le statut et le corps de réponse.
 - 📘 **Documentation interactive Swagger :** lorsque l'API en expose une, elle permet d'exécuter des requêtes directement dans l'interface (par exemple [FakeRestAPI](http://fakerestapi.azurewebsites.net/)).
-- 💻 **Ligne de commande (`curl`) :** idéal pour reproduire ou scripter un appel depuis un terminal :
+- 💻 **Ligne de commande (`curl` + `jq`) :** idéal pour reproduire ou scripter un appel depuis un terminal.
+
+  Afficher les en-têtes HTTP de la réponse en plus du corps (`--include`) :
 
   ```bash
-  curl -i https://jsonplaceholder.typicode.com/posts/1
+  curl --include https://jsonplaceholder.typicode.com/posts/1
   ```
+
+  Masquer la barre de progression (`--silent`) et formater le JSON dans `jq` :
+
+  ```bash
+  curl --silent https://jsonplaceholder.typicode.com/posts/1 | jq .
+  ```
+
+  *(**`jq`** est un utilitaire en ligne de commande dédié au JSON : il permet de **l'indenter et le colorer** pour le rendre lisible (`jq .`), ou d'**extraire et filtrer** des champs dans un script, par exemple `| jq '.title'`.)*
 
 - 📊 **Autres outils :** `LibreOffice`, `R`, `Python`, etc. — tout logiciel capable d'émettre une requête HTTP peut interroger une API.
 
