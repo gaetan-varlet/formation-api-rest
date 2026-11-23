@@ -6,15 +6,29 @@ import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## Configuration de Logback
 
-Spring Boot utilise **Logback** par défaut. Les niveaux et le format de sortie se configurent directement dans `src/main/resources/application.properties` :
+Spring Boot utilise **Logback** par défaut. C'est l'implémentation de référence de **SLF4J** (*Simple Logging Facade for Java*), le standard de fait pour le logging dans l'écosystème Java : votre code Java passe par la façade SLF4J (ce qui le découple du moteur utilisé), et Logback exécute concrètement l'écriture et le formatage des logs.
+
+Les niveaux de logs se configurent directement via les properties :
 
 ```properties title="src/main/resources/application.properties"
 # Niveaux de logs (ERROR, WARN, INFO, DEBUG, TRACE)
 logging.level.root=INFO
 logging.level.fr.insee=DEBUG
-# Coloration syntaxique des logs dans la console
-spring.output.ansi.enabled=ALWAYS
 ```
+
+Les niveaux suivent une **hiérarchie stricte** (du plus grave au plus détaillé) : activer un niveau affiche automatiquement tous les niveaux plus critiques situés au-dessus (ainsi, `INFO` affiche `INFO`, `WARN` et `ERROR`, et masque `DEBUG` et `TRACE`).
+
+| Niveau | Quand l'utiliser ? | Exemple |
+| :--- | :--- | :--- |
+| **`ERROR`** | Erreur bloquante ou exception inattendue nécessitant une action | Base de données inaccessible, échec d'un appel critique |
+| **`WARN`** | Anomalie non bloquante ou comportement dégradé | Donnée facultative absente, nouvelle tentative (*retry*) |
+| **`INFO`** *(défaut)* | Étapes clés du cycle de vie ou événements métier importants | Démarrage de l'application, lancement d'un traitement |
+| **`DEBUG`** | Détails techniques utiles au diagnostic en développement | Paramètres reçus, réponse d'une API externe |
+| **`TRACE`** | Suivi très fin et verbeux (rarement activé en continu) | Détail itération par itération, contenu complet d'un flux |
+
+:::tip[Cibler par package plutôt que tout passer en `DEBUG`]
+Gardez `logging.level.root=INFO` pour ne pas être noyé par les logs internes des frameworks (Spring, Tomcat, Hibernate…), et passez uniquement votre package (`fr.insee`) — ou ponctuellement un package tiers précis comme `logging.level.org.springframework.security=DEBUG` — en `DEBUG` lors d'un diagnostic. *(Le niveau `OFF` permet à l'inverse de couper totalement un logger.)*
+:::
 
 <details>
 <summary>Écrire les logs dans un fichier (facultatif)</summary>
@@ -37,7 +51,7 @@ logging.charset.file=UTF-8
 
 ## Écrire des logs dans son code Java
 
-On utilise la façade **SLF4J** (jamais `System.out.println` dans une application). Avec **Lombok**, l'annotation `@Slf4j` génère automatiquement l'attribut `log` à la compilation, ce qui évite la déclaration manuelle via `LoggerFactory` :
+Dans votre code, on utilise donc l'interface **SLF4J** (jamais `System.out.println` dans une application). Avec **Lombok**, l'annotation `@Slf4j` génère automatiquement l'attribut `log` à la compilation, ce qui évite la déclaration manuelle via `LoggerFactory` :
 
 <Tabs>
 <TabItem label="Avec Lombok (@Slf4j)">
@@ -79,6 +93,10 @@ public class TestController {
 
 </TabItem>
 </Tabs>
+
+:::note[Bon réflexe : passez les variables avec `{}` plutôt qu'avec `+`]
+Écrivez `log.debug("Vin récupéré : {}", vinId)` plutôt que `"Vin récupéré : " + vinId` : SLF4J ne construit la chaîne finale que si le niveau correspondant (`DEBUG` ici) est réellement activé.
+:::
 
 ## Logger les requêtes SQL
 
