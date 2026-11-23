@@ -62,15 +62,15 @@ public int updatePrix(Long id, BigDecimal nouveauPrix) {
 | :--- | :--- | :--- |
 | **Usage cible** | Petits volumes (< 1 000 lignes) | Imports / Batchs (> 10 000 lignes) |
 | **Maintenance** | Standard Spring, 1 ligne de code | Requête SQL et DAO dédiés |
-| **Réseau** | $N$ requêtes (par défaut) | 1 seul envoi groupé (`executeBatch`) |
-| **Mémoire RAM** | Accumulation dans le cache L1 | Empreinte minimale $O(1)$ |
+| **Réseau** | *N* requêtes (par défaut) | 1 seul envoi groupé (`executeBatch`) |
+| **Mémoire RAM** | Accumulation dans le cache L1 | Empreinte minimale O(1) |
 
 - **Sous le capot :** par défaut, `saveAll()` boucle sur `save()` et génère **N** requêtes unitaires *(voir le détail du fonctionnement et du batching JPA dans [Spring Data JPA : requêtes et optimisation](/formation-api-rest/acces-donnees/spring-data-jpa/#écriture-synchronisation-et-saveall))*.
 
 ### La règle d'arbitrage
 
 1. **Réflexe par défaut (`saveAll()`) :** pour les CRUD standards d'API REST (quelques dizaines à centaines de lignes), productivité maximale et gestion automatique des relations/cascades.
-2. **Bascule vers le batch JDBC (`batchUpdate()`) :** pour les traitements lourds (imports CSV, synchronisations, batchs de nuit), afin de passer de $N$ allers-retours réseau à un envoi groupé sans saturer la mémoire de l'ORM.
+2. **Bascule vers le batch JDBC (`batchUpdate()`) :** pour les traitements lourds (imports CSV, synchronisations, batchs de nuit), afin de passer de *N* allers-retours réseau à un envoi groupé sans saturer la mémoire de l'ORM.
 
 ### Exemple avec `NamedParameterJdbcTemplate.batchUpdate()`
 

@@ -6,11 +6,11 @@ title: "Stratégies d'extraction et gros volumes"
 
 | Approche | RAM | Débit | Usage cible |
 | :--- | :---: | :---: | :--- |
-| **JPA Entités (`List`)** | $O(N)$ | Chute (GC) | CRUD unitaire (< 1 000) |
+| **JPA Entités (`List`)** | O(N) | Chute (GC) | CRUD unitaire (< 1 000) |
 | **JPA Entités (`Stream`)** | **OOM** | Crash | Fausse piste (saturation session L1) |
-| **JPA DTOs (`List`)** | $O(N)$ | Baisse | Synchrone modéré (< 20 000) |
-| **JPA DTO (`Stream`)** | $O(1)$ | Stable | Flux pérenne + Spring Data |
-| **JDBC Stream (`JdbcClient`)** | $O(1)$ | Max | Export brut massif (CSV / JSON) |
+| **JPA DTOs (`List`)** | O(N) | Baisse | Synchrone modéré (< 20 000) |
+| **JPA DTO (`Stream`)** | O(1) | Stable | Flux pérenne + Spring Data |
+| **JDBC Stream (`JdbcClient`)** | O(1) | Max | Export brut massif (CSV / JSON) |
 
 :::caution[Piège du `Stream` d'entités JPA]
 La session Hibernate garde chaque entité en mémoire (cache L1). Pour streamer de gros volumes, utilisez obligatoirement une **projection DTO Record** ou **`JdbcClient`** (voir aussi la mise en place HTTP dans [Le streaming](/formation-api-rest/fichiers-performance/streaming/)).
