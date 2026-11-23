@@ -136,26 +136,43 @@ Voir la [documentation Mozilla des statuts HTTP](https://developer.mozilla.org/f
 | **4xx** | Erreur du client | `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found` |
 | **5xx** | Erreur du serveur | `500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable` |
 
-## L'en-tête Content-Type
+## L'en-tête `Content-Type` (et `Accept`)
 
-- L'en-tête HTTP **`Content-Type`** :
-  - indique au client le format de ce qu'il reçoit : `text/html` (HTML), `text/plain` (texte brut), `application/pdf` (PDF), `application/json` (JSON), `application/xml` (XML). On parle de **type MIME** ([liste des types MIME](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types)) ;
-  - précise aussi le jeu de caractères (**charset**) que le navigateur doit utiliser pour afficher le contenu (historiquement *ISO-8859-1* / *Latin-1* en HTML ; en JSON, UTF-8 est toujours la norme).
+L'en-tête HTTP **`Content-Type`** indique le format (**type MIME** ou *Media Type*) du **corps** transporté dans le message HTTP. Il s'utilise dans les deux sens :
+
+- **Dans une requête** (`POST`, `PUT`, `PATCH`) : indique au **serveur** comment interpréter les données envoyées par le client (s'il est absent ou non géré, l'API répond **`415 Unsupported Media Type`**).
+- **Dans une réponse** : indique au **client** le format des données renvoyées par le serveur.
+
+> **Ne pas confondre `Content-Type` et `Accept` :**
+> - `Content-Type` décrit **ce qui est envoyé** dans le corps du message courant (requête ou réponse).
+> - `Accept` est envoyé par le client dans la **requête** pour indiquer **le format qu'il souhaite recevoir** en réponse (négociation de contenu ; si le serveur ne peut pas le produire, il répond **`406 Not Acceptable`**).
+
+### Principaux types MIME
+
+Un type MIME s'écrit `type/sous-type`, éventuellement suivi de paramètres (`; charset=UTF-8`, `; boundary=...` pour `multipart/form-data`) :
+
+| Type MIME | Usage courant |
+| :--- | :--- |
+| `application/json` | Format standard des API REST (UTF-8 natif selon la RFC 8259) |
+| `application/xml` | Échanges XML (services historiques, flux structurés) |
+| `application/x-www-form-urlencoded` | Formulaire HTML classique (`cle1=val1&cle2=val2`) |
+| `multipart/form-data` | Envoi de fichiers accompagnés de champs de formulaire |
+| `text/plain`, `text/html`, `text/csv` | Contenu textuel (préciser `; charset=UTF-8` pour préserver les accents) |
+| `application/pdf`, `application/octet-stream` | Fichiers binaires (document PDF, téléchargement générique) |
+
+*(Voir aussi la [liste des types MIME sur MDN](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types).)*
 
 :::tip[Bonne pratique : UTF-8 partout]
-Utilisez systématiquement **UTF-8** pour l'encodage de vos fichiers sources et pour l'en-tête `Content-Type` des réponses HTTP.
+Utilisez systématiquement **UTF-8** pour vos fichiers sources et vos échanges HTTP. En **`application/json`**, UTF-8 est implicite (il est inutile d'ajouter `; charset=UTF-8`). En revanche, pour les formats **`text/*`** (`text/html`, `text/csv`, `text/plain`), précisez explicitement `; charset=UTF-8` afin d'éviter les problèmes d'accents (historiquement *ISO-8859-1* / *Latin-1*).
 :::
 
-Exemple pour ajouter ces en-têtes en Java :
+Côté serveur, Spring Boot renseigne automatiquement `application/json` sur un `@RestController` (et permet de le configurer finement avec `consumes` et `produces`, vus dans [Annotations Spring Web & formats](/formation-api-rest/api-rest/annotations/)). En Java EE (Servlet), on le définit directement sur `HttpServletResponse` :
 
 ```java
-response.setContentType("text/html");
-
-response.setContentType("text/html;charset=UTF-8");
-
-response.setContentType("text/html");
-response.setCharacterEncoding("UTF-8");
+response.setContentType("text/html; charset=UTF-8");
 ```
+
+*(Équivalent en deux appels : `response.setContentType("text/html");` suivi de `response.setCharacterEncoding("UTF-8");`.)*
 
 ## Tester des requêtes HTTP en pratique
 
