@@ -71,10 +71,18 @@ Pour démarrer et déployer facilement l'application sur Tomcat depuis IntelliJ 
 
 ## Évolution progressive : de la JSP à l'API JSON
 
-Parcourez les 5 étapes ci-dessous pour voir comment on passe d'une page web classique (HTML/JSP) à une véritable API JSON avec Jackson :
+Parcourez les 5 étapes ci-dessous pour comprendre comment on passe historiquement d'une application **monolithique** (où le serveur génère toute la page HTML) à une **API JSON** moderne — tout en constatant la plomberie technique encore nécessaire avec les servlets brutes :
+
+:::tip[Inspectez chaque réponse dans votre navigateur (F12 — onglet Réseau)]
+À chaque étape, ouvrez les outils de développement du navigateur (`F12` → onglet *Réseau* / *Network*, puis rechargez la page et cliquez sur la requête) pour comparer :
+- l'en-tête **`Content-Type`** retourné (`text/html`, `text/plain`, `application/json`) ;
+- le **corps brut de la réponse** généré par le serveur et son rendu dans le navigateur.
+:::
 
 <Tabs>
   <TabItem label="1. Servlet + JSP">
+
+**Point de départ historique (application monolithique) :** le serveur effectue le traitement Java, puis passe le relais à une page **JSP** qui génère tout le HTML envoyé au navigateur.
 
 Créez la servlet dans `src/main/java/servlet/` et la JSP dans `/WEB-INF/jsp/` :
 
@@ -121,7 +129,7 @@ Test (après déploiement à la racine de Tomcat) : [http://localhost:8080/calcu
   </TabItem>
   <TabItem label="2. Servlet HTML">
 
-Sans JSP, on écrit directement le HTML dans le flux de réponse (`PrintWriter`) :
+**Toujours monolithique, sans moteur de vue :** on supprime la JSP et on écrit directement le HTML dans le flux de réponse (`PrintWriter`). On constate vite à quel point mélanger du HTML dans du Java est pénible à maintenir — et ce résultat reste destiné à un humain, pas à une autre application.
 
 ```java title="CalculServlet.java"
 package servlet;
@@ -160,7 +168,7 @@ Test : [http://localhost:8080/calcul?nombre1=3&nombre2=4](http://localhost:8080/
   </TabItem>
   <TabItem label="3. API text/plain">
 
-Première tentative d'API en renvoyant du texte brut (`text/plain`) :
+**Première étape vers une API (données uniquement) :** le serveur ne renvoie plus de mise en forme HTML, mais uniquement le résultat brut en `text/plain`. Problème : ce format libre est compliqué à lire automatiquement et oblige chaque client à écrire un découpage de chaîne fragile — d'où le passage à un format structuré comme **XML** ou **JSON** à l'étape suivante.
 
 ```java title="CalculTextPlainServlet.java"
 package servlet;
@@ -185,12 +193,10 @@ public class CalculTextPlainServlet extends HttpServlet {
 
 Test : [http://localhost:8080/calcul-text-plain?nombre1=3&nombre2=4](http://localhost:8080/calcul-text-plain?nombre1=3&nombre2=4)
 
-Compliqué à lire de manière automatique : on va plutôt utiliser un format structuré comme **XML** ou **JSON**.
-
   </TabItem>
   <TabItem label="4. API JSON manuel">
 
-En renvoyant du JSON construit à la main (`application/json`) :
+**Passage à un format structuré (`application/json`) :** les données deviennent facilement exploitables par n'importe quel client, mais construire le JSON par concaténation de chaînes reste laborieux et très fragile (guillemets, échappement, listes ou objets imbriqués).
 
 ```java title="CalculJsonServlet.java"
 @WebServlet("/calcul-json")
@@ -216,7 +222,7 @@ Test : [http://localhost:8080/calcul-json?nombre1=3&nombre2=4](http://localhost:
   </TabItem>
   <TabItem label="5. API JSON + Jackson">
 
-Construire du JSON par concaténation est fastidieux et source d'erreurs. On ajoute **Jackson** dans le `pom.xml` :
+**Sérialisation automatique (véritable API JSON) :** pour éviter la concaténation manuelle, on ajoute **Jackson** dans le `pom.xml` afin de convertir directement nos objets Java en JSON :
 
 ```xml title="pom.xml"
 <dependency>
@@ -276,13 +282,17 @@ public class CalculJacksonServlet extends HttpServlet {
 
 Test : [http://localhost:8080/calcul-jackson?nombre1=3&nombre2=4](http://localhost:8080/calcul-jackson?nombre1=3&nombre2=4)
 
+> **Bilan à l'étape 5 :** on dispose bien d'une API JSON fonctionnelle, mais le code reste **très technique et répétitif** avec `HttpServlet` : il faut encore récupérer et convertir les paramètres à la main (`Integer.parseInt(request.getParameter(...))`), configurer manuellement `Content-Type` / UTF-8, ouvrir un `PrintWriter` et piloter `ObjectMapper` dans chaque servlet.
+
   </TabItem>
 </Tabs>
 
-## Présentation de la spécification JAX-RS (Jakarta REST)
+## Présentation de la spécification JAX-RS
 
-- **JAX-RS** (*Jakarta RESTful Web Services*, anciennement Java EE) est la spécification standard pour exposer des API REST.
-- Il faut utiliser une implémentation : **Eclipse Jersey** est l'**implémentation de référence** (en version **4.0.x** pour Tomcat 11 / Jakarta EE 11) :
+Pour s'affranchir de toute cette plomberie `HttpServlet` et écrire des endpoints REST de façon déclarative, Java EE / Jakarta EE propose la spécification **JAX-RS**, dédiée aux API REST :
+
+- **JAX-RS** (*Jakarta RESTful Web Services*, anciennement Java) est la spécification standard pour exposer des API REST.
+- Il faut utiliser une implémentation : **Jersey** est l'**implémentation de référence** (en version **4.0.x** pour Tomcat 11 / Jakarta EE 11) :
   - la bibliothèque Jersey ;
   - Jackson pour Jersey (conversion automatique des objets en JSON) ;
   - le framework d'injection (`jersey-hk2`).
