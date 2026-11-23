@@ -122,7 +122,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "vin") // possibilité de surcharger le schéma : @Table(name = "vin", schema = "nomSchema")
+@Table(name = "vin")
 public class Vin {
 
     @Id
@@ -132,10 +132,22 @@ public class Vin {
     private String chateau;
     private String appellation;
     private Double prix;
-
-    // Ajouter les getters et setters (ou utiliser @Getter @Setter de Lombok)
 }
 ```
+
+*(Note : `@Table(name = "vin")` est optionnelle ici — par défaut, JPA associe automatiquement la classe `Vin` à une table du même nom. Elle n'est nécessaire que si le nom de table en base diffère ou pour préciser un `schema`.)*
+
+:::caution[N'oubliez pas les getters et setters]
+Sans getters/setters, Jackson ne pourra pas sérialiser les champs en JSON lors de vos appels API. Si vous utilisez **Lombok**, placez les annotations **`@Getter`** et **`@Setter` sur la classe** (et non sur les attributs) :
+
+```java
+@Getter
+@Setter
+@Entity
+@Table(name = "vin")
+public class Vin { ... }
+```
+:::
 
 ## Création du Repository (DAO)
 
