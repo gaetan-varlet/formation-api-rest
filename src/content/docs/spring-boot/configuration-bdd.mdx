@@ -130,8 +130,38 @@ public interface VinRepository extends JpaRepository<Vin, Integer> {
 
 *(Note : `@Repository` est facultatif sur une interface qui étend `JpaRepository`, Spring la détecte automatiquement.)*
 
-## Préparer le livrable : exclure H2 du JAR
+## Tester le bon fonctionnement avec un premier endpoint
 
+Pour vérifier dès maintenant que les scripts SQL, l'entité `Vin` et `VinRepository` fonctionnent ensemble, créez un contrôleur minimal exposant `GET /vin` :
+
+```java title="src/main/java/fr/insee/formationapirest/controller/VinController.java"
+package fr.insee.formationapirest.controller;
+
+import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import fr.insee.formationapirest.model.Vin;
+import fr.insee.formationapirest.repository.VinRepository;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/vin")
+@RequiredArgsConstructor
+public class VinController {
+
+    private final VinRepository vinRepository;
+
+    @GetMapping
+    public List<Vin> getAll() {
+        return vinRepository.findAll();
+    }
+}
+```
+
+Démarrez l'application et accédez à [http://localhost:8080/vin](http://localhost:8080/vin) : vous devez obtenir la liste des 4 vins de `data.sql` au format JSON. *(Nous complèterons ce contrôleur avec le reste du CRUD dans [Création d'une API CRUD](/formation-api-rest/api-rest/creation-crud/).)*
+
+:::note[En projet (hors formation) : exclure H2 du JAR]
 Si H2 reste présent dans le `pom.xml` pour le développement local, pensez à l'exclure lors du packaging du `.jar` de production :
 
 ```xml title="pom.xml"
@@ -148,3 +178,4 @@ Si H2 reste présent dans le `pom.xml` pour le développement local, pensez à l
     </configuration>
 </plugin>
 ```
+:::

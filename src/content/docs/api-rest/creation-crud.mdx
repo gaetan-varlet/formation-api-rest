@@ -4,38 +4,13 @@ title: "Création d'une API CRUD"
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-## Création du controller `VinController`
-
-Créons un contrôleur REST exposant la ressource `/vin`, avec une première méthode pour récupérer tous les vins :
-
-```java title="VinController.java"
-package fr.insee.formationapirest.controller;
-
-import java.util.List;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import lombok.RequiredArgsConstructor;
-
-@RestController
-@RequestMapping("/vin")
-@RequiredArgsConstructor
-public class VinController {
-
-    private final VinRepository vinRepository;
-
-    @GetMapping
-    public List<Vin> getAll() {
-        return vinRepository.findAll();
-    }
-}
-```
-
-Testez en accédant à [http://localhost:8080/vin](http://localhost:8080/vin) pour obtenir la liste des vins en JSON.
-
-*(Note : `@GetMapping`, `@PostMapping`, `@PutMapping` et `@DeleteMapping` sont des raccourcis de `@RequestMapping(method = ...)` détaillés dans la page [Annotations Spring Web & formats](/formation-api-rest/api-rest/annotations/).)*
+:::note[Point de départ : `VinController` (`GET /vin`)]
+Nous complétons ici le contrôleur `VinController` déjà mis en place avec `GET /vin` dans [Configuration de la BDD](/formation-api-rest/spring-boot/configuration-bdd/#tester-le-bon-fonctionnement-avec-un-premier-endpoint).
+:::
 
 ## Opérations CRUD par identifiant et création
+
+*(Note : `@GetMapping`, `@PostMapping`, `@PutMapping` et `@DeleteMapping` sont des raccourcis de `@RequestMapping(method = ...)` détaillés dans la page [Annotations Spring Web & formats](/formation-api-rest/api-rest/annotations/).)*
 
 <Tabs>
 <TabItem label="GET /{id}">
