@@ -23,8 +23,6 @@ HTTP définit un [ensemble de méthodes](https://developer.mozilla.org/fr/docs/W
 | **PATCH** | Applique des modifications partielles à une ressource | Oui |
 | **DELETE** | Supprime la ressource indiquée | Non |
 | **OPTIONS** | Décrit les options de communication avec la ressource visée (utilisé pour CORS) | Non |
-| **CONNECT** | Établit un tunnel vers le serveur identifié par la ressource cible | Non |
-| **TRACE** | Réalise un message de test aller/retour en suivant le chemin de la ressource | Non |
 
 ## La requête HTTP
 
