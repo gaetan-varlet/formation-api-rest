@@ -1,0 +1,278 @@
+---
+title: "Le protocole HTTP"
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Définition
+
+HTTP (*Hypertext Transfer Protocol*) est le protocole client-serveur sur lequel reposent le Web et les API REST : un client envoie une **requête** vers une URL, le serveur lui retourne une **réponse**.
+
+HTTP est un protocole **sans état (*stateless*)** : chaque requête est traitée indépendamment des précédentes, sans que le protocole ne conserve de contexte entre deux appels *(les mécanismes de session web via cookies ont justement été ajoutés par-dessus HTTP pour permettre au serveur de conserver des informations d'une requête à l'autre, par exemple l'utilisateur connecté, un panier d'achat ou la progression d'un formulaire multi-étapes)*.
+
+![Schéma illustrant les échanges entre le client et le serveur](../../../assets/images/client-serveur.svg "Schéma illustrant les échanges entre le client et le serveur")
+
+## Les méthodes (verbes) HTTP
+
+En API REST, la méthode HTTP exprime **l'intention de l'action** sur la ressource ciblée par l'URL ([référence MDN](https://developer.mozilla.org/fr/docs/Web/HTTP/M%C3%A9thode)) :
+
+| Méthode | Rôle | Corps de requête | Exemple API (`/vins`) |
+| --- | --- | :---: | --- |
+| **GET** | Récupère une représentation de la ressource (lecture seule) | Non | `GET /vins/42` |
+| **HEAD** | Identique à `GET`, mais en-têtes uniquement (sans corps) | Non | `HEAD /vins/42` |
+| **POST** | Crée une ressource (ou déclenche un traitement côté serveur) | Oui | `POST /vins` |
+| **PUT** | Remplace **intégralement** la ressource ciblée | Oui | `PUT /vins/42` |
+| **PATCH** | Modifie **partiellement** la ressource ciblée | Oui | `PATCH /vins/42` |
+| **DELETE** | Supprime la ressource ciblée | Non | `DELETE /vins/42` |
+| **OPTIONS** | Décrit les options acceptées (utilisé automatiquement par CORS) | Non | `OPTIONS /vins` |
+
+:::tip[PUT vs PATCH et idempotence : 2 réflexes d'API]
+- **`PUT` vs `PATCH` :** avec `PUT`, le client envoie l'objet complet (tout champ absent est écrasé ou remis à `null`). Avec `PATCH`, il n'envoie que les champs à modifier (ex. `{"prix": 42}`).
+- **Idempotence :** `GET`, `HEAD`, `PUT` et `DELETE` sont *idempotents* — exécuter la même requête 1 fois ou 5 fois laisse le serveur dans le même état final (le client peut donc réessayer sans risque après une coupure réseau). À l'inverse, `POST` n'est **pas** idempotent : l'appeler deux fois crée deux ressources.
+:::
+
+### Structure d'une URL d'API HTTP
+
+```http
+https://mon-api/{variable-de-chemin}?parametre-de-requete-1=valeur&parametre-de-requete-2=valeur
+```
+
+- **Variables de chemin** : utilisées pour identifier précisément une ressource obligatoire (ex. `/vins/42`).
+- **Paramètres de requête** (`?cle=valeur&...`) : utilisés pour les options facultatives, le filtrage, le tri ou la pagination.
+
+:::tip[Exemple concret : API Sirene (Insee)]
+```http
+# Sans paramètre : retourne l'historique complet du SIREN
+GET https://api.insee.fr/entreprises/sirene/V3/siren/{siren}
+
+# Avec paramètre de requête : filtre uniquement la période à cette date
+GET https://api.insee.fr/entreprises/sirene/V3/siren/{siren}?date={date}
+```
+:::
+
+## Anatomie d'un échange HTTP (requête et réponse)
+
+Tout échange HTTP suit toujours la même structure texte : une première ligne (méthode/URL côté requête, statut côté réponse), des **en-têtes** `clé: valeur`, une ligne vide, puis un **corps** optionnel :
+
+<Tabs>
+<TabItem label="API REST — GET (lecture)">
+
+**Requête :**
+
+```http
+GET /vins/42 HTTP/1.1
+Host: api.ma-cave.fr
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+**Réponse :**
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": 42,
+  "chateau": "Château Margaux",
+  "appellation": "Margaux",
+  "prix": 500
+}
+```
+
+</TabItem>
+<TabItem label="API REST — POST (création JSON)">
+
+**Requête :**
+
+```http
+POST /vins HTTP/1.1
+Host: api.ma-cave.fr
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+{
+  "chateau": "Château Gloria",
+  "appellation": "Saint-Julien",
+  "prix": 35
+}
+```
+
+**Réponse :**
+
+```http
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /vins/43
+
+{
+  "id": 43,
+  "chateau": "Château Gloria",
+  "appellation": "Saint-Julien",
+  "prix": 35
+}
+```
+
+*(Note : la convention RESTful pure prévoit l'en-tête `Location` avec l'URL de la ressource créée ; en pratique, beaucoup d'API s'appuient surtout sur le corps JSON retourné contenant déjà l'`id`.)*
+
+</TabItem>
+<TabItem label="Formulaire HTML (Web classique)">
+
+Pour un formulaire HTML envoyé en `POST`, le navigateur utilise l'un de ces deux formats :
+- `application/x-www-form-urlencoded` (valeur par défaut pour du texte) ;
+- `multipart/form-data` (obligatoire pour envoyer des fichiers).
+
+```http
+POST /contact HTTP/1.1
+Host: mon-site.fr
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 23
+
+nom=Dupont&prenom=Alice
+```
+
+</TabItem>
+</Tabs>
+
+### Les en-têtes essentiels en API REST
+
+Parmi les nombreux [en-têtes HTTP standards](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers), cinq reviennent en permanence dans la conception d'API :
+
+- **`Content-Type`** : format des données envoyées dans le corps du message (requête ou réponse).
+- **`Accept`** : format souhaité par le client dans la réponse (ex. `application/json`).
+- **`Authorization`** : transporte les informations d'authentification (ex. jeton JWT `Bearer ...`).
+- **`Origin`** : domaine d'origine du front-end dans un navigateur (contrôlé par le serveur pour **CORS**).
+- **`Location`** : URI de la ressource créée après un `201 Created` (convention RESTful peu exploitée en pratique lorsque la réponse renvoie déjà l'objet créé avec son `id`).
+
+## L'en-tête `Content-Type` (et `Accept`)
+
+L'en-tête HTTP **`Content-Type`** indique le format (**type MIME** ou *Media Type*) du **corps** transporté dans le message HTTP. Il s'utilise dans les deux sens :
+
+- **Dans une requête** (`POST`, `PUT`, `PATCH`) : indique au **serveur** comment interpréter les données envoyées par le client (s'il est absent ou non géré, l'API répond **`415 Unsupported Media Type`**).
+- **Dans une réponse** : indique au **client** le format des données renvoyées par le serveur.
+
+> **Ne pas confondre `Content-Type` et `Accept` :**
+> - `Content-Type` décrit **ce qui est envoyé** dans le corps du message courant (requête ou réponse).
+> - `Accept` est envoyé par le client dans la **requête** pour indiquer **le format qu'il souhaite recevoir** en réponse (négociation de contenu ; si le serveur ne peut pas le produire, il répond **`406 Not Acceptable`**).
+
+### Principaux types MIME
+
+Un type MIME s'écrit `type/sous-type`, éventuellement suivi de paramètres (`; charset=UTF-8`, `; boundary=...` pour `multipart/form-data`) :
+
+| Type MIME | Usage courant |
+| :--- | :--- |
+| `application/json` | Format standard des API REST (UTF-8 natif selon la RFC 8259) |
+| `application/xml` | Échanges XML (services historiques, flux structurés) |
+| `application/x-www-form-urlencoded` | Formulaire HTML classique (`cle1=val1&cle2=val2`) |
+| `multipart/form-data` | Envoi de fichiers accompagnés de champs de formulaire |
+| `text/plain`, `text/html`, `text/csv` | Contenu textuel (préciser `; charset=UTF-8` pour préserver les accents) |
+| `application/pdf`, `application/octet-stream` | Fichiers binaires (document PDF, téléchargement générique) |
+
+*(Voir aussi la [liste des types MIME sur MDN](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types).)*
+
+:::tip[Bonne pratique : UTF-8 partout]
+Utilisez systématiquement **UTF-8** pour vos fichiers sources et vos échanges HTTP. En **`application/json`**, UTF-8 est implicite (il est inutile d'ajouter `; charset=UTF-8`). En revanche, pour les formats **`text/*`** (`text/html`, `text/csv`, `text/plain`), précisez explicitement `; charset=UTF-8` afin d'éviter les problèmes d'accents (historiquement *ISO-8859-1* / *Latin-1*).
+:::
+
+Côté serveur, Spring Boot renseigne automatiquement `application/json` sur un `@RestController` (et permet de le configurer finement avec `consumes` et `produces`, vus dans [Annotations Spring Web & formats](/formation-api-rest/api-rest/annotations/)). En Java EE (Servlet), on le définit directement sur `HttpServletResponse` :
+
+```java
+response.setContentType("text/html; charset=UTF-8");
+```
+
+*(Équivalent en deux appels : `response.setContentType("text/html");` suivi de `response.setCharacterEncoding("UTF-8");`.)*
+
+## Les codes de statut de réponse HTTP
+
+Les statuts sont regroupés en **5 familles** ([référence MDN](https://developer.mozilla.org/fr/docs/Web/HTTP/Status)) :
+
+| Famille | Signification | Exemples courants |
+| --- | --- | --- |
+| **1xx** | Information | `100 Continue`, `101 Switching Protocols` |
+| **2xx** | Succès | `200 OK`, `201 Created`, `204 No Content` |
+| **3xx** | Redirection | `301 Moved Permanently`, `304 Not Modified` |
+| **4xx** | Erreur du client | `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found` |
+| **5xx** | Erreur du serveur | `500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable` |
+
+### Quel code renvoyer dans votre API ?
+
+| Situation | Code recommandé | Précision |
+| --- | :---: | --- |
+| Lecture ou mise à jour réussie (avec corps) | **`200 OK`** | Retourne la ressource ou la liste en JSON |
+| Création réussie (`POST`) | **`201 Created`** | Indique qu'une nouvelle ressource a été créée |
+| Suppression réussie (sans corps) | **`204 No Content`** | Succès sans corps JSON à renvoyer |
+| Données invalides ou JSON mal formé | **`400 Bad Request`** | Erreur de validation métier ou de syntaxe |
+| Jeton absent ou expiré | **`401 Unauthorized`** | L'appelant n'est pas authentifié |
+| Authentifié, mais droits insuffisants | **`403 Forbidden`** | Rôle manquant pour cette action |
+| Ressource introuvable | **`404 Not Found`** | L'identifiant demandé n'existe pas |
+| `Content-Type` absent ou non supporté | **`415 Unsupported Media Type`** | Ex. texte envoyé au lieu de `application/json` |
+| Bug imprévu côté serveur | **`500 Internal Server Error`** | Exception non gérée (à logguer côté serveur) |
+
+:::caution[Piège classique : tout renvoyer en `200 OK`]
+Ne renvoyez jamais un `200 OK` contenant `{"erreur": "Vin introuvable"}` : les clients HTTP, les proxies, les outils de supervision et vos tests automatisés s'appuient sur le **statut HTTP** pour savoir si l'appel a réussi ou échoué.
+:::
+
+## Tester des requêtes HTTP en pratique
+
+Pour appeler une URL ou tester une API sans écrire de code applicatif :
+
+- 🌐 **Navigateur web :** pratique directement depuis la barre d'adresse, mais limité aux requêtes `GET` (pensez à ouvrir `F12` → onglet **Réseau** pour inspecter statut et en-têtes).
+- 🧪 **Client REST dédié (`Insomnia`, `Postman`) :** indispensable pour envoyer des requêtes `POST`, `PUT`, `PATCH` ou `DELETE`, configurer des en-têtes (`Content-Type`, `Authorization`…) et inspecter le statut et le corps de réponse.
+- 📘 **Documentation interactive Swagger :** lorsque l'API en expose une, elle permet d'exécuter des requêtes directement dans l'interface (par exemple [FakeRestAPI](http://fakerestapi.azurewebsites.net/)).
+- 💻 **Ligne de commande (`curl` + `jq`) :** idéal pour reproduire ou scripter un appel depuis un terminal (**`jq`** indente/colore le JSON avec `jq .` et permet aussi de filtrer des champs dans un script, ex. `| jq '.title'`).
+- 📊 **Autres outils :** `LibreOffice`, `R`, `Python`, etc. — tout logiciel capable d'émettre une requête HTTP peut interroger une API.
+
+### Mini-atelier : 3 requêtes à tester sur JSONPlaceholder
+
+Testez ces 3 cas sur l'API publique `https://jsonplaceholder.typicode.com` (dans votre terminal avec `curl` + `jq`, ou en créant ces 3 requêtes dans **Insomnia** / **Postman**) :
+
+- `--include` affiche la ligne de statut et les **en-têtes HTTP** au-dessus du corps *(incompatible avec `| jq .`, qui attend du JSON pur)*.
+- `--silent` masque la barre de progression de `curl` dans le terminal *(utile avant un pipe vers `jq`)*.
+
+<Tabs>
+<TabItem label="1. Lire (200 OK)">
+
+Afficher les en-têtes HTTP, puis formater le corps JSON avec `jq` :
+
+```bash
+curl --include https://jsonplaceholder.typicode.com/posts/1
+```
+
+```bash
+curl --silent https://jsonplaceholder.typicode.com/posts/1 | jq .
+```
+
+Observez le statut `200 OK`, le `Content-Type: application/json; charset=utf-8` et le corps JSON.
+
+</TabItem>
+<TabItem label="2. Créer (201 Created)">
+
+Envoyer un JSON en `POST` en précisant `Content-Type: application/json` :
+
+```bash
+curl --include \
+  --request POST https://jsonplaceholder.typicode.com/posts \
+  --header "Content-Type: application/json" \
+  --data '{"title":"Mon premier vin","body":"Margaux","userId":1}'
+```
+
+Observez le statut **`201 Created`** et le corps JSON renvoyé contenant l'identifiant généré (`"id": 101`).
+
+</TabItem>
+<TabItem label="3. Ressource absente (404 Not Found)">
+
+Appeler un identifiant inexistant :
+
+```bash
+curl --include https://jsonplaceholder.typicode.com/posts/999999
+```
+
+Observez le statut **`404 Not Found`** retourné par le serveur.
+
+</TabItem>
+</Tabs>
+
+:::note[Pour aller plus loin : appels depuis du code]
+Au-delà de ces tests manuels, les appels programmatiques depuis une application **Java** (`RestClient`, `HttpClient`) ou **JavaScript** (`fetch`) sont détaillés dans la page [Consommation d'une API REST](/formation-api-rest/api-rest/consommation-api-rest/).
+:::
