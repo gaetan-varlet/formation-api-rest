@@ -6,7 +6,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## Configuration de la source de données (H2 vs PostgreSQL)
 
-Dans `src/main/resources/application.properties`, vous configurez la connexion à la base de données selon l'environnement :
+Dans `src/main/resources/application.properties`, commencez par configurer la connexion propre au moteur de base de données :
 
 <Tabs>
 <TabItem label="H2 (en mémoire / local)">
@@ -14,16 +14,13 @@ Dans `src/main/resources/application.properties`, vous configurez la connexion �
 Avec la dépendance `h2` dans le `pom.xml`, aucune installation de serveur SQL n'est requise :
 
 ```properties title="src/main/resources/application.properties"
-# Active la console H2 accessible dans le navigateur
-spring.h2.console.enabled=true
+spring.datasource.driver-class-name=org.h2.Driver
 # Fixe le nom de la BDD pour ne pas générer une URL aléatoire à chaque démarrage
 spring.datasource.url=jdbc:h2:mem:testdb
 spring.datasource.username=sa
 spring.datasource.password=
-# Désactive la création automatique des tables par Hibernate (on utilise schema.sql)
-spring.jpa.hibernate.ddl-auto=none
-# Précise le schéma par défaut sur lequel les entités Java sont mappées
-spring.jpa.properties.hibernate.default_schema=formation
+# Active la console web H2 accessible dans le navigateur
+spring.h2.console.enabled=true
 ```
 
 Console web H2 disponible après démarrage : [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
@@ -41,7 +38,7 @@ Dans le `pom.xml`, remplacez (ou complétez) la dépendance `h2` par le driver P
 </dependency>
 ```
 
-Puis adaptez `application.properties` :
+Puis adaptez les propriétés de connexion dans `application.properties` :
 
 ```properties title="src/main/resources/application.properties"
 spring.datasource.driver-class-name=org.postgresql.Driver
@@ -52,6 +49,27 @@ spring.datasource.password=***
 
 </TabItem>
 </Tabs>
+
+### Configuration JPA / Hibernate commune (H2 et PostgreSQL)
+
+Ajoutez ensuite les propriétés JPA communes, quel que soit le moteur utilisé :
+
+```properties title="src/main/resources/application.properties"
+# Précise le schéma par défaut sur lequel les entités Java sont mappées
+spring.jpa.properties.hibernate.default_schema=formation
+# Désactive la création automatique des tables par Hibernate (on utilise schema.sql)
+spring.jpa.hibernate.ddl-auto=none
+```
+
+#### Valeurs possibles de `spring.jpa.hibernate.ddl-auto`
+
+| Valeur | Comportement | Quand l'utiliser ? |
+| :--- | :--- | :--- |
+| **`none`** | Hibernate ne crée ni ne modifie aucune table | Quand les tables existent déjà en base ou sont créées par un script SQL (`schema.sql`) — **valeur par défaut** sur une base externe (PostgreSQL) |
+| **`validate`** | Vérifie au démarrage que les tables et colonnes correspondent aux `@Entity` (sinon l'application refuse de démarrer) | Utile pour vérifier que la base et les entités Java restent alignées *(attention : strict sur les types SQL, ex. `Double` vs `DECIMAL`)* |
+| **`update`** | Crée/ajoute les tables et colonnes manquantes d'après les `@Entity` | Prototypage uniquement *(à éviter en prod : ne supprime rien et ne gère pas les renommages/migrations complexes)* |
+| **`create`** | Supprime puis recrée les tables au démarrage | Environnement jetable *(efface toutes les données à chaque redémarrage)* |
+| **`create-drop`** | Comme `create`, puis supprime les tables à l'arrêt de l'application | **Valeur par défaut sur une base embarquée (H2)** si `ddl-auto` est omis *(d'où l'ajout de `none` pour utiliser `schema.sql`)* |
 
 ## Initialisation des tables et des données
 
