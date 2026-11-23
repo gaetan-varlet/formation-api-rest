@@ -35,12 +35,20 @@ public class CalculService {
 }
 
 @RestController
-@RequiredArgsConstructor
 public class CalculController {
-    // Spring détecte CalculService et l'injecte automatiquement ici
+
     private final CalculService calculService;
+
+    // Spring détecte CalculService et l'injecte automatiquement via ce constructeur
+    public CalculController(CalculService calculService) {
+        this.calculService = calculService;
+    }
 }
 ```
+
+:::tip[Et sans écrire ce constructeur à la main ?]
+Avec Lombok (`@RequiredArgsConstructor`), ce constructeur peut être généré automatiquement — nous allons voir cette évolution juste en dessous.
+:::
 
 :::tip[Cycle de vie par défaut : Singleton]
 Par défaut, Spring crée **une seule instance** de chaque bean au démarrage et la partage dans toute l'application.
