@@ -19,6 +19,8 @@ Ce support rassemble un programme complet (**4 à 5 jours** en format animé ave
 | 🗄️ **2. Données, cache & streaming** | **1 jour** | **Accès aux données & SQL** *(Spring Data JPA avancé, JDBC/batching, gros volumes)*, **Fichiers en flux, streaming bout-en-bout et cache applicatif** |
 | 🧪 **3. Tests d'API Spring Boot** | **1 jour** | **Stratégie de tests**, configuration Maven/qualité, **tests unitaires et d'intégration**, **BDD avec Cucumber**, **simulation d'API externes (WireMock)** et **gestion du temps (`Clock`)** |
 
+> 🧰 **Prérequis pour suivre la formation :** consultez la section dédiée sur la [page d'accueil de la documentation](https://gaetan-varlet.github.io/formation-api-rest/#prérequis-pour-la-formation).
+
 ---
 
 ## 💻 Démarrer en local (première fois)
