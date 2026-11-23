@@ -65,6 +65,10 @@ Cet exercice part volontairement de **Java EE / Jakarta EE (Servlets) sans frame
 
 </Steps>
 
+:::tip[Lancer Tomcat depuis IntelliJ IDEA]
+Pour démarrer et déployer facilement l'application sur Tomcat depuis IntelliJ IDEA (y compris en version Community Edition), installez le plugin **Smart Tomcat**, puis créez une configuration *Smart Tomcat* en indiquant le dossier d'installation de **Tomcat 11** et le *Context path* `/` (afin d'accéder aux endpoints directement sur `http://localhost:8080/...`).
+:::
+
 ## Évolution progressive : de la JSP à l'API JSON
 
 Parcourez les 5 étapes ci-dessous pour voir comment on passe d'une page web classique (HTML/JSP) à une véritable API JSON avec Jackson :
@@ -222,7 +226,24 @@ Construire du JSON par concaténation est fastidieux et source d'erreurs. On ajo
 </dependency>
 ```
 
-Jackson transforme un objet JavaBean (ici `Calcul.java` avec `somme`, `produit` et leurs getters/setters) ou une collection en JSON :
+Créez la classe JavaBean `Calcul.java` dans `src/main/java/model/` (ici abrégée avec **Lombok**, ou écrivez les getters et setters manuellement) :
+
+```java title="src/main/java/model/Calcul.java"
+package model;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class Calcul {
+
+    private Integer somme;
+    private Integer produit;
+}
+```
+
+Jackson transforme cet objet JavaBean (ou une collection) en JSON :
 
 ```json
 {"somme":15,"produit":56}
