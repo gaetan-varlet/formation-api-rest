@@ -79,7 +79,15 @@ public class TestController {
 
 ## Logger les requêtes SQL
 
-### Approche simple (intégrée à Hibernate)
+Deux **alternatives indépendantes** existent pour afficher les requêtes SQL en développement. **Choisissez l'une ou l'autre** selon votre besoin (ne configurez pas les deux en même temps, sinon les requêtes seront logguées en double) :
+
+| Approche | Mise en place | Richesse des logs |
+| :--- | :--- | :--- |
+| **Option 1 — Hibernate** | ⚡ **Très rapide** (2 propriétés) | Requêtes générées par Hibernate uniquement, avec des `?` à la place des valeurs |
+| **Option 2 — `p6spy`** | 🔧 **Plus longue** (dépendance + driver + fichier dédié) | **Toutes** les requêtes SQL (Hibernate + JDBC), **avec les valeurs réelles des paramètres** et le temps d'exécution |
+
+<Tabs>
+<TabItem label="Option 1 : Simple (Hibernate)">
 
 ```properties title="src/main/resources/application.properties"
 spring.jpa.show-sql=true
@@ -90,7 +98,8 @@ spring.jpa.properties.hibernate.format_sql=true
 - Les valeurs des paramètres `?` des requêtes préparées ne sont pas affichées directement dans la requête.
 - Les requêtes SQL qui ne passent pas par Hibernate (`JdbcTemplate`, `JdbcClient`, JDBC direct…) ne sont pas logguées.
 
-### Approche détaillée avec p6spy
+</TabItem>
+<TabItem label="Option 2 : Complète (p6spy)">
 
 **p6spy** intercepte le driver JDBC pour afficher **toutes** les requêtes SQL complètes avec leurs **valeurs de paramètres** et le temps d'exécution.
 
@@ -128,6 +137,9 @@ spring.jpa.properties.hibernate.format_sql=true
    ```
 
 </Steps>
+
+</TabItem>
+</Tabs>
 
 :::caution[Usage réservé au développement]
 N'activez pas `p6spy` (ni `show-sql`) en production : l'interception et l'affichage de toutes les requêtes avec leurs données en clair dégradent les performances et peuvent exposer des informations sensibles dans les logs.
