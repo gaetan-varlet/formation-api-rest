@@ -6,7 +6,7 @@ title: "Le protocole HTTP"
 
 HTTP (Hypertext Transfer Protocol) est un protocole de communication client-serveur développé pour le World Wide Web. Il est utilisé pour échanger toute sorte de données entre client HTTP et serveur HTTP.
 
-Il s'agit d'un protocole **sans état**, ce qui signifie que le serveur ne conserve aucune donnée entre deux requêtes.
+HTTP est un protocole **sans état (*stateless*)** : chaque requête est traitée indépendamment des précédentes, sans que le protocole ne conserve de contexte entre deux appels *(les mécanismes de session web via cookies ont justement été ajoutés par-dessus HTTP pour permettre au serveur de conserver des informations d'une requête à l'autre, par exemple l'utilisateur connecté, un panier d'achat ou la progression d'un formulaire multi-étapes)*.
 
 ![Schéma illustrant les échanges entre le client et le serveur](../../../assets/images/client-serveur.svg "Schéma illustrant les échanges entre le client et le serveur")
 

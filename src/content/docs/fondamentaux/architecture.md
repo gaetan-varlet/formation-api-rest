@@ -7,7 +7,9 @@ title: "Architecture"
 Une architecture **REST** (*REpresentational State Transfer*) repose notamment sur les principes suivants :
 
 - **Séparation client-serveur :** le client gère l'interface utilisateur et le serveur expose les données et la logique métier.
-- **Sans état (*stateless*) :** aucune session client n'est conservée en mémoire par le serveur entre deux requêtes. Chaque requête contient toutes les informations nécessaires à son traitement (ex. jeton d'authentification), ce qui facilite la mise à l'échelle sur plusieurs instances.
+- **Sans état (*stateless*) :** contrairement à une application web classique avec session serveur (`HttpSession` via cookie), l'API respecte strictement la nature sans état d'HTTP et ne conserve aucune session client en mémoire entre deux requêtes. Comment s'en passer ?
+  - **Pour l'identité et les droits :** chaque requête est auto-porteuse et fournit elle-même un jeton (ex. JWT dans l'en-tête `Authorization: Bearer ...`), que le serveur valide sans rien garder en mémoire.
+  - **Pour les données métier (panier, filtres, brouillon…) :** l'état reste soit **côté client** (interface front-end, paramètres d'URL), soit **persisté en base de données** en tant que ressource à part entière (ex. `POST /paniers`). N'importe quelle instance du serveur peut ainsi répondre à la requête suivante, ce qui facilite la mise à l'échelle.
 - **Orientation ressources :** les données sont modélisées en ressources identifiées par des URI et manipulées via les méthodes standards du protocole HTTP.
 
 ### Le modèle de maturité de Richardson
