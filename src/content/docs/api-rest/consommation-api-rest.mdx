@@ -239,7 +239,7 @@ Person personBasic = restClient.get()
 
 ### Appels en parallèle (`CompletableFuture`)
 
-`RestClient` est **purement synchrone** (il ne propose pas de méthode `.sendAsync(...)` comme `HttpClient`). Dans une application **Spring MVC**, inutile d'ajouter la dépendance `spring-boot-starter-webflux` *(qui embarque Netty/Reactor et augmente la surface de CVE)* : pour paralléliser plusieurs appels, il suffit d'utiliser **`CompletableFuture.supplyAsync(...)`** avec le `TaskExecutor` déjà fourni par Spring Boot (`applicationTaskExecutor`).
+`RestClient` est **purement synchrone** (il ne propose pas de méthode `.sendAsync(...)` comme `HttpClient`). Dans une application **Spring MVC**, inutile d'ajouter **`WebClient`** (`spring-boot-starter-webflux`, qui embarque Netty/Reactor et augmente la surface de CVE) juste pour faire des appels asynchrones : pour paralléliser plusieurs requêtes, il suffit d'utiliser **`CompletableFuture.supplyAsync(...)`** avec le `TaskExecutor` déjà fourni par Spring Boot (`applicationTaskExecutor`).
 
 ```java title="PersonApiClient.java"
 @Service
