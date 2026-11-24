@@ -52,28 +52,26 @@ curl --form "files=@fichier1.txt" --form "files=@fichier2.txt" http://localhost:
 
 ### Envoyer un fichier accompagné d'un objet JSON (`@RequestPart`)
 
-Pour envoyer à la fois un fichier et des données structurées (un DTO `record`) dans la même requête, utilisez **`@RequestPart`** sur chaque partie :
+Pour envoyer à la fois un fichier et un DTO JSON existant (comme `CreateVinRequest`) dans la même requête, utilisez **`@RequestPart`** sur chaque partie :
 
 ```java
-public record UploadMetadata(String auteur, String commentaire) {}
-
-@PostMapping(value = "/upload-metadata", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public String uploadAvecMetadonnees(
-        @RequestPart("metadata") @Valid UploadMetadata metadata,
+@PostMapping(value = "/upload-vin", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+public String uploadAvecVin(
+        @RequestPart("vin") @Valid CreateVinRequest vin,
         @RequestPart("file") MultipartFile file) {
-    return metadata.auteur() + " -> " + file.getOriginalFilename();
+    return vin.chateau() + " -> " + file.getOriginalFilename();
 }
 ```
 
 ```bash
 curl \
-  --form 'metadata={"auteur":"Gaetan","commentaire":"Import cave"};type=application/json' \
+  --form 'vin={"chateau":"Château Margaux","appellation":"Margaux","prix":500};type=application/json' \
   --form "file=@mon-fichier.txt" \
-  http://localhost:8080/upload-metadata
+  http://localhost:8080/upload-vin
 ```
 
 :::tip[Penser au `;type=application/json` sur la partie JSON]
-Avec `curl`, si vous omettez `;type=application/json` sur la partie `metadata`, Spring ne sait pas qu'il s'agit de JSON et rejette la requête avec une erreur **`415 Unsupported Media Type`**.
+Avec `curl`, si vous omettez `;type=application/json` sur la partie `vin`, Spring ne sait pas qu'il s'agit de JSON et rejette la requête avec une erreur **`415 Unsupported Media Type`**.
 :::
 
 ## Sécurisation des uploads : Pourquoi valider avant d'insérer ?
