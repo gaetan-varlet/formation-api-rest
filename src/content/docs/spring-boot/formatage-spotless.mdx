@@ -1,0 +1,122 @@
+---
+title: "Formatage automatique du code (Spotless)"
+---
+
+## Pourquoi automatiser le formatage ?
+
+Sans règle outillée dans le projet, chaque développeur formate le code selon les réglages de son IDE (espaces vs tabulations, longueur de ligne, ordre des imports, sauts de ligne…). **Spotless** garantit un formatage strictement identique pour toute l'équipe :
+
+- **Relectures de Merge Requests (MR) simplifiées :** les `git diff` ne montrent que les vraies modifications fonctionnelles ou techniques, sans être pollués par des dizaines de lignes reformatées par l'IDE d'un autre développeur.
+- **Zéro débat de style en équipe :** les conventions sont versionnées dans `pom.xml` et appliquées automatiquement par une seule commande Maven.
+- **Cohérence globale :** permet de formater le code Java, l'ordre des imports, le `pom.xml`, et même d'autres fichiers texte du dépôt (`.md`, `.gitignore`…).
+
+## Configuration dans `pom.xml`
+
+Ajoutez les versions dans `<properties>` puis le plugin `spotless-maven-plugin` dans `<build><plugins>` :
+
+```xml title="pom.xml"
+<properties>
+    <spotless-maven-plugin.version>3.11.0</spotless-maven-plugin.version>
+    <googleJavaFormat.version>2.0.0</googleJavaFormat.version>
+</properties>
+```
+
+```xml title="pom.xml"
+<plugin>
+    <groupId>com.diffplug.spotless</groupId>
+    <artifactId>spotless-maven-plugin</artifactId>
+    <version>${spotless-maven-plugin.version}</version>
+    <configuration>
+        <lineEndings>UNIX</lineEndings>
+        <java>
+            <googleJavaFormat>
+                <version>${googleJavaFormat.version}</version>
+                <style>AOSP</style>
+                <reflowLongStrings>true</reflowLongStrings>
+            </googleJavaFormat>
+            <formatAnnotations />
+            <importOrder>
+                <wildcardsLast>false</wildcardsLast>
+                <order>\#fr.insee,\#,java,jakarta,javax,org,com,fr,fr.insee,</order>
+            </importOrder>
+        </java>
+        <pom>
+            <includes>
+                <include>pom.xml</include>
+            </includes>
+            <sortPom>
+                <expandEmptyElements>false</expandEmptyElements>
+                <spaceBeforeCloseEmptyElement>true</spaceBeforeCloseEmptyElement>
+                <nrOfIndentSpace>-1</nrOfIndentSpace>
+            </sortPom>
+        </pom>
+    </configuration>
+</plugin>
+```
+
+- **`<style>AOSP</style>` :** applique une indentation de **4 espaces** (plus familière sur IntelliJ/Eclipse/VS Code que le style `GOOGLE` par défaut à 2 espaces), et `<reflowLongStrings>true</reflowLongStrings>` découpe proprement les chaînes trop longues.
+- **`<formatAnnotations />` :** corrige la mise en forme des annotations de type Java (par exemple `List<@Valid VinRequest>`).
+- **`<importOrder>` :** regroupe et trie les imports de façon déterministe (ici en plaçant les packages `fr.insee` dans un groupe dédié).
+- **`<lineEndings>UNIX</lineEndings>` :** évite les faux écarts entre postes développeurs Windows (`CRLF`) et runners CI Linux (`LF`).
+- **`<pom><sortPom>` :** trie et formate le `pom.xml` (`<nrOfIndentSpace>-1</nrOfIndentSpace>` conserve les tabulations). *(Un bloc `<formats>` permet aussi d'appliquer des règles d'indentation et de saut de ligne final à d'autres fichiers comme `.md` ou `.gitignore`.)*
+
+## Utilisation au quotidien
+
+- **Formater automatiquement le projet avant de commiter :**
+
+```bash
+mvn spotless:apply
+```
+
+- **Vérifier que tout le code respecte les règles (sans modifier les fichiers) :**
+
+```bash
+mvn spotless:check
+```
+
+## Vérification dans la CI GitLab
+
+**Approche recommandée : un job dédié tôt dans le pipeline.**
+Placer `mvn spotless:check` dans une étape dédiée au début du pipeline donne un retour rapide au développeur en cas d'oubli avant même de lancer les tests longs, et permet de voir immédiatement pourquoi le pipeline échoue :
+
+```yaml title=".gitlab-ci.yml"
+job_code_formatting:
+  stage: check
+  script:
+    - mvn spotless:check
+```
+
+### Alternative : rattacher `spotless:check` à `mvn verify`
+
+Il est techniquement possible d'exécuter Spotless automatiquement pendant `mvn verify` en ajoutant `<executions>` dans `pom.xml` :
+
+```xml
+<executions>
+    <execution>
+        <id>spotless-check</id>
+        <phase>verify</phase>
+        <goals>
+            <goal>check</goal>
+        </goals>
+    </execution>
+</executions>
+```
+
+En pratique, cette approche **fait perdre en lisibilité** dans le pipeline : si `mvn verify` échoue, on ne sait pas d'un coup d'œil s'il s'agit d'un test en échec ou d'un simple oubli de formatage, et l'erreur arrive plus tard dans le pipeline.
+
+:::tip[Adopter Spotless sur un projet existant sans polluer `git blame`]
+Si vous ajoutez Spotless sur un projet contenant déjà beaucoup de code, exécutez `mvn spotless:apply` dans **un seul commit dédié** uniquement au reformatage, puis référencez le hash SHA de ce commit dans un fichier **`.git-blame-ignore-revs`** à la racine du dépôt :
+
+```text title=".git-blame-ignore-revs"
+# Reformatage initial Spotless
+a1b2c3d4e5f6...
+```
+
+GitLab/GitHub le prennent en charge automatiquement, et en local il suffit d'exécuter :
+
+```bash
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
+`git blame` continuera ainsi d'afficher les auteurs d'origine plutôt que le commit de reformatage. *(Alternative progressive : l'option `<ratchetFrom>origin/main</ratchetFrom>` dans Spotless ne vérifie et ne formate que les fichiers modifiés par rapport à la branche cible.)*
+:::

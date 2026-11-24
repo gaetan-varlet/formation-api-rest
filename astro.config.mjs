@@ -120,6 +120,7 @@ export default defineConfig({
 						{ slug: 'spring-boot/configuration-bdd' },
 						{ slug: 'spring-boot/configuration-logs' },
 						{ slug: 'spring-boot/configuration-spring-boot' },
+						{ slug: 'spring-boot/formatage-spotless' },
 					],
 				},
 				{
