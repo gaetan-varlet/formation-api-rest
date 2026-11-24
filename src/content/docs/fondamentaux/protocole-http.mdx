@@ -54,15 +54,13 @@ GET https://api.insee.fr/entreprises/sirene/V3/siren/{siren}?date={date}
 
 Les statuts sont regroupés en **5 familles** ([référence MDN](https://developer.mozilla.org/fr/docs/Web/HTTP/Status)) :
 
-| Famille | Signification | Exemples courants |
-| --- | --- | --- |
-| **1xx** | Information | `100 Continue`, `101 Switching Protocols` |
-| **2xx** | Succès | `200 OK`, `201 Created`, `204 No Content` |
-| **3xx** | Redirection | `301 Moved Permanently`, `304 Not Modified` |
-| **4xx** | Erreur du client | `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found` |
-| **5xx** | Erreur du serveur | `500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable` |
+- **`1xx` — Information :** requête reçue, traitement en cours (`100 Continue`…).
+- **`2xx` — Succès :** la requête a été reçue, comprise et acceptée.
+- **`3xx` — Redirection :** le client doit effectuer une action complémentaire ou suivre une autre URL (`301 Moved Permanently`, `304 Not Modified`…).
+- **`4xx` — Erreur du client :** requête invalide, non autorisée ou ressource introuvable.
+- **`5xx` — Erreur du serveur :** défaillance applicative ou d'un équipement intermédiaire (`502 Bad Gateway`, `503 Service Unavailable`…).
 
-### Quel code renvoyer dans votre API ?
+### Les codes à connaître dans votre API
 
 | Situation | Code recommandé | Précision |
 | --- | :---: | --- |
@@ -188,21 +186,23 @@ L'en-tête HTTP **`Content-Type`** indique le format (**type MIME** ou *Media Ty
 
 ### Principaux types MIME
 
-Un type MIME s'écrit `type/sous-type`, éventuellement suivi de paramètres (`; charset=UTF-8`, `; boundary=...` pour `multipart/form-data`) :
+Un type MIME s'écrit `type/sous-type`, parfois suivi d'un paramètre comme `; charset=UTF-8` :
 
 | Type MIME | Usage courant |
 | :--- | :--- |
-| `application/json` | Format standard des API REST (UTF-8 natif selon la RFC 8259) |
+| `application/json` | Format standard des API REST |
 | `application/xml` | Échanges XML (services historiques, flux structurés) |
 | `application/x-www-form-urlencoded` | Formulaire HTML classique (`cle1=val1&cle2=val2`) |
 | `multipart/form-data` | Envoi de fichiers accompagnés de champs de formulaire |
-| `text/plain`, `text/html`, `text/csv` | Contenu textuel (préciser `; charset=UTF-8` pour préserver les accents) |
+| `text/plain`, `text/html`, `text/csv` | Contenu textuel (souvent accompagné de `; charset=UTF-8`) |
 | `application/pdf`, `application/octet-stream` | Fichiers binaires (document PDF, téléchargement générique) |
 
 *(Voir aussi la [liste des types MIME sur MDN](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types).)*
 
-:::tip[Bonne pratique : UTF-8 partout]
-Utilisez systématiquement **UTF-8** pour vos fichiers sources et vos échanges HTTP. En **`application/json`**, UTF-8 est implicite (il est inutile d'ajouter `; charset=UTF-8`). En revanche, pour les formats **`text/*`** (`text/html`, `text/csv`, `text/plain`), précisez explicitement `; charset=UTF-8` afin d'éviter les problèmes d'accents (historiquement *ISO-8859-1* / *Latin-1*).
+:::tip[Quand préciser `; charset=UTF-8` ?]
+- **Inutile** pour `application/json` (UTF-8 implicite), `application/xml` (encodage porté dans le prologue `<?xml ...?>`) et les formats binaires (`application/pdf`, images…).
+- **Utile pour les formats `text/*`** (`text/plain`, `text/html`, `text/csv`) afin que les navigateurs et clients HTTP décodent correctement les accents (au lieu de retomber sur *ISO-8859-1*).
+- **En pratique avec Spring Boot :** Spring Boot gère déjà UTF-8 automatiquement lorsque votre endpoint retourne un objet ou une `String`. Il reste nécessaire de le préciser dès que vous écrivez directement dans `HttpServletResponse` (ex. Servlet Java EE) ou pour un export brut (`byte[]`, flux `StreamingResponseBody` en CSV).
 :::
 
 Côté serveur, Spring Boot renseigne automatiquement `application/json` sur un `@RestController` (et permet de le configurer finement avec `consumes` et `produces`, vus dans [Annotations Spring Web & formats](/formation-api-rest/api-rest/annotations/)). En Java EE (Servlet), on le définit directement sur `HttpServletResponse` :

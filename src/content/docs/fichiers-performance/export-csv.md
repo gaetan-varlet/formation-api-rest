@@ -78,7 +78,7 @@ public class VinService {
 ## 4. Exposition dans le Controller
 
 - Construction type-safe du `Content-Disposition` avec Spring (`StandardCharsets.UTF_8`)
-- Spécification explicite du `MediaType` avec encodage `UTF-8`
+- Spécification du type MIME `text/csv` *(Spring Boot gère déjà UTF-8 automatiquement sur un retour `String`)*
 
 ```java
 @RestController
@@ -88,7 +88,7 @@ public class VinController {
 
     private final VinService vinService;
 
-    @GetMapping(value = "export", produces = "text/csv; charset=UTF-8")
+    @GetMapping(value = "export", produces = "text/csv")
     public ResponseEntity<String> exportCsv() throws IOException {
         ContentDisposition contentDisposition = ContentDisposition.attachment()
                 .filename("vins.csv", StandardCharsets.UTF_8)
