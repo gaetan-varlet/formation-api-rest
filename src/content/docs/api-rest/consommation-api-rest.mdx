@@ -2,7 +2,7 @@
 title: "Consommation d'une API REST"
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
 Au-delà des tests manuels via navigateur, Insomnia, Swagger ou `curl` (vus dans [Le protocole HTTP](/formation-api-rest/fondamentaux/protocole-http/#tester-des-requêtes-http-en-pratique)), une application consomme généralement une API REST directement par code — côté front-end (**JavaScript**) ou côté back-end (**Java**).
 
@@ -113,11 +113,95 @@ public class Person {
 
 `RestClient` propose une API fluide et convertit automatiquement les objets Java en JSON (et inversement) via Jackson, sans avoir à manipuler `ObjectMapper` ou `InputStream` à la main.
 
+#### Configuration du client HTTP
+
+Spring Boot fournit automatiquement un bean **`RestClient.Builder`** (pré-configuré avec Jackson, les timeouts…), mais **pas** directement de bean `RestClient` prêt à l'emploi.
+
+<Steps>
+
+1. **Déclarer un `@Bean RestClient` partagé *(optionnel, utile pour un proxy ou une config commune)***
+
+   Déclarez une classe `@Configuration` lorsque vous voulez centraliser une configuration (proxy, `baseUrl`, en-têtes par défaut) et l'injecter telle quelle dans vos services :
+
+   ```java title="RestClientConfig.java"
+   @Configuration
+   public class RestClientConfig {
+
+       @Bean
+       public RestClient personRestClient(RestClient.Builder builder) {
+           SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+           factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy-rie.http.insee.fr", 8080)));
+
+           return builder
+               .baseUrl("https://mocktarget.apigee.net")
+               .requestFactory(factory) // facultatif si pas de proxy
+               .build();
+       }
+   }
+   ```
+
+2. **Injecter le `RestClient` dans le service**
+
+   ```java title="PersonApiClient.java"
+   @Service
+   @RequiredArgsConstructor
+   public class PersonApiClient {
+
+       private final RestClient personRestClient;
+
+       public Person getPerson() {
+           return personRestClient.get()
+               .uri("/json")
+               .retrieve()
+               .body(Person.class);
+       }
+   }
+   ```
+
+</Steps>
+
+:::tip[Alternative sans étape 1 (sans configuration partagée)]
+Si vous n'avez pas besoin de partager une configuration personnalisée (comme un proxy), injectez directement `RestClient.Builder` dans le constructeur de votre service :
+
+```java title="PersonApiClient.java"
+@Service
+public class PersonApiClient {
+
+    private final RestClient restClient;
+
+    public PersonApiClient(RestClient.Builder builder) {
+        this.restClient = builder
+            .baseUrl("https://mocktarget.apigee.net")
+            .build();
+    }
+
+    public Person getPerson() {
+        return restClient.get()
+            .uri("/json")
+            .retrieve()
+            .body(Person.class);
+    }
+}
+```
+
+*(Ici, on écrit le constructeur à la main plutôt que d'utiliser `@RequiredArgsConstructor`, car Spring injecte `RestClient.Builder` alors que l'attribut conservé est `RestClient` : comme le `@Service` est un singleton, le `RestClient` est ainsi construit une seule fois au démarrage au lieu d'être reconstruit à chaque appel.)*
+:::
+
+:::note[Plusieurs `RestClient` (ex. avec et sans proxy) : comment Spring choisit ?]
+- **Un seul `@Bean RestClient` :** Spring injecte par type — le nom de l'attribut (`restClient`, `personRestClient`…) n'a pas d'importance.
+- **Plusieurs `@Bean RestClient`** (par exemple `externalRestClient` avec proxy et `internalRestClient` sans proxy) : chaque bean porte par défaut **le nom de sa méthode `@Bean`** (ou celui passé à `@Bean("...")`). Pour lever l'ambiguïté :
+  - **Avec `@RequiredArgsConstructor` (le plus simple) :** donnez à l'attribut `private final` **le même nom que la méthode `@Bean`** (`private final RestClient externalRestClient;`).
+  - **Ou avec `@Primary` / `@Qualifier` :** annotez le bean principal avec `@Primary`, ou écrivez le constructeur à la main en plaçant `@Qualifier("externalRestClient")` sur son paramètre.
+:::
+
+#### Exemples de requêtes (`GET`, `POST`, authentification)
+
+Une fois `restClient` injecté dans votre service (via `@Bean RestClient` ou `RestClient.Builder`), les appels s'enchaînent de manière fluide :
+
 <Tabs>
   <TabItem label="GET">
 ```java
-RestClient restClient = RestClient.create("https://mocktarget.apigee.net");
-
+// Sur un RestClient configuré avec baseUrl = "https://mocktarget.apigee.net"
 Person person = restClient.get()
     .uri("/json")
     .accept(MediaType.APPLICATION_JSON)
@@ -127,8 +211,7 @@ Person person = restClient.get()
   </TabItem>
   <TabItem label="POST">
 ```java
-RestClient restClient = RestClient.create("https://jsonplaceholder.typicode.com");
-
+// Sur un RestClient configuré avec baseUrl = "https://jsonplaceholder.typicode.com"
 Person person = new Person();
 person.setFirstName("Jean");
 person.setLastName("Dupont");
@@ -162,41 +245,50 @@ Person personBasic = restClient.get()
   </TabItem>
 </Tabs>
 
-#### Injection et configuration du proxy
+#### Gestion des erreurs et exceptions
 
-Dans un projet Spring Boot, `RestClient.Builder` est fourni automatiquement par Spring (via l'[injection de dépendances](/formation-api-rest/spring-boot/injection-dependances/)). Pour partager une configuration (URL de base, proxy, en-têtes) dans toute l'application, on déclare un `@Bean` dans une classe `@Configuration` :
+Contrairement à `HttpClient` du JDK (`IOException`, `InterruptedException`), **`RestClient` ne lève aucune exception vérifiée** (*checked*) : toutes ses exceptions héritent de `RestClientException` (`RuntimeException`).
+
+On distingue **trois situations** lors d'un appel :
+
+| Situation | Comportement de `RestClient` | Comment la traiter |
+| :--- | :--- | :--- |
+| **1. Code retour OK (`2xx`)** | Désérialise la réponse | `.retrieve().body(Person.class)` *(ou `.toEntity(Person.class)` pour lire aussi le statut et les en-têtes)* |
+| **2. Retour HTTP en erreur (`4xx` / `5xx`)** | Lève `HttpClientErrorException` (`4xx`) ou `HttpServerErrorException` (`5xx`) | `.onStatus(...)` sur `.retrieve()`, ou `catch (RestClientResponseException ex)` |
+| **3. Pas de retour** *(timeout, coupure réseau, DNS, serveur injoignable)* | Lève `ResourceAccessException` *(aucune réponse HTTP reçue)* | `try / catch (ResourceAccessException ex)` *(non capturé par `.onStatus(...)`)* |
+
+Exemple complet combinant un traitement différencié des trois cas :
 
 ```java
-@Configuration
-public class RestClientConfig {
-
-    @Bean
-    public RestClient personRestClient(RestClient.Builder builder) {
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy-rie.http.insee.fr", 8080)));
-
-        return builder
-            .baseUrl("https://mocktarget.apigee.net")
-            .requestFactory(factory) // facultatif si pas de proxy
-            .build();
-    }
-}
-
-@Service
-@RequiredArgsConstructor
-public class PersonApiClient {
-
-    // Spring injecte automatiquement le @Bean RestClient configuré ci-dessus
-    private final RestClient personRestClient;
-
-    public Person getPerson() {
-        return personRestClient.get()
-            .uri("/json")
-            .retrieve()
-            .body(Person.class);
-    }
+try {
+    // 1. Code retour OK (2xx) : désérialisation directe en Person
+    return restClient.get()
+        .uri("/users/{id}", id)
+        .retrieve()
+        // 2. Retour en erreur (4xx / 5xx) : du plus précis au plus général
+        .onStatus(status -> status.value() == 404, (request, response) -> {
+            throw new PersonNotFoundException(id);
+        })
+        // Couvre tous les autres codes 4xx et 5xx (400..599 hors 404)
+        // Alternatives pour séparer les deux cas : HttpStatusCode::is4xxClientError et HttpStatusCode::is5xxServerError
+        .onStatus(HttpStatusCode::isError, (request, response) -> {
+            String body = new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8);
+            log.error("Erreur API externe [statut={}, corps={}]", response.getStatusCode(), body);
+            throw new ExternalApiException("Erreur API externe : HTTP " + response.getStatusCode());
+        })
+        .body(Person.class);
+} catch (ResourceAccessException ex) {
+    // 3. Pas de retour : serveur injoignable, timeout ou erreur I/O
+    throw new ServiceUnavailableException("Service externe temporairement indisponible", ex);
 }
 ```
+
+:::note[Sans `.onStatus(...)` et sans `@RestControllerAdvice`, que se passe-t-il ?]
+- **Sans `.onStatus(...)` :** toute réponse `4xx` ou `5xx` lève par défaut une sous-classe de **`RestClientResponseException`** (`HttpClientErrorException` ou `HttpServerErrorException`), qui permet aussi de lire `ex.getStatusCode()` et `ex.getResponseBodyAsString()` dans un `catch`.
+- **Si l'exception remonte hors du contrôleur sans `@RestControllerAdvice` :**
+  - Si vous avez annoté votre exception avec **`@ResponseStatus(...)`** (voir [Gestion des erreurs](/formation-api-rest/api-rest/gestion-erreurs/)), Spring renvoie le code HTTP correspondant.
+  - À défaut (pour une `RestClientException` brute ou une `RuntimeException` sans `@ResponseStatus`), le gestionnaire d'erreur par défaut de Spring Boot (`/error`) prend le relais, logue la *stacktrace* et renvoie **`500 Internal Server Error`** au client de votre API — même si l'API externe avait répondu `404` ou `400`.
+:::
 
 ### En Java standard (sans framework) : HttpClient
 
