@@ -165,12 +165,18 @@ public Page<Vin> getAllPageable(@ParameterObject Pageable p) {
 }
 ```
 
-*(L'annotation `@ParameterObject` de `springdoc-openapi` permet à Swagger UI d'afficher directement les champs `page`, `size` et `sort` plutôt qu'un objet JSON brut.)*
+:::tip[Swagger UI : l'annotation `@ParameterObject`]
+L'annotation `@ParameterObject` (`org.springdoc.core.annotations.ParameterObject`, fournie par `springdoc-openapi`) indique à Swagger UI d'éclater l'objet `Pageable` en champs de requête distincts (`page`, `size`, `sort`) dans l'interface interactive, plutôt que de proposer un objet JSON brut.
+:::
 
 - Page 0 de 2 éléments triés de manière décroissante par appellation puis prix :  
   [http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC](http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC)
 - Page de 20 éléments triés par appellation croissante puis par prix décroissant :  
   [http://localhost:8080/vin/pageable?sort=appellation&sort=prix,DESC](http://localhost:8080/vin/pageable?sort=appellation&sort=prix,DESC)
+
+:::caution[Convention d'URL : n'utilisez pas `/pageable` en projet réel]
+La route `/vin/pageable` sert uniquement ici à faire cohabiter les deux exemples (`List` et `Page`) dans le TP. En pratique sur une API REST, on ne crée pas un endpoint dédié `/pageable` : on expose directement **`GET /vin`**, qui retourne soit une liste (`List`), soit une page (`Page`) selon le besoin de volumétrie.
+:::
 
 ## Renvoyer une `ResponseEntity`
 
