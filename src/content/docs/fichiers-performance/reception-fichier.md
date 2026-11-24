@@ -47,6 +47,11 @@ public List<String> uploadMultiple(@RequestParam("files") List<MultipartFile> fi
 ```
 
 ```bash
+# 1. Créer deux fichiers de test
+echo "Contenu du fichier 1" > fichier1.txt
+echo "Contenu du fichier 2" > fichier2.txt
+
+# 2. Envoyer les deux fichiers en répétant --form
 curl --form "files=@fichier1.txt" --form "files=@fichier2.txt" http://localhost:8080/upload-multiple
 ```
 
@@ -64,9 +69,13 @@ public String uploadAvecVin(
 ```
 
 ```bash
+# 1. Créer un fichier de test
+echo "Fiche technique du Château Margaux" > fiche-vin.txt
+
+# 2. Envoyer l'objet JSON + le fichier
 curl \
   --form 'vin={"chateau":"Château Margaux","appellation":"Margaux","prix":500};type=application/json' \
-  --form "file=@mon-fichier.txt" \
+  --form "file=@fiche-vin.txt" \
   http://localhost:8080/upload-vin
 ```
 
