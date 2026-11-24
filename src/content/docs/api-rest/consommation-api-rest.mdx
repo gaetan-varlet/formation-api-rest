@@ -4,22 +4,14 @@ title: "Consommation d'une API REST"
 
 import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Au-delà des tests manuels via navigateur, Insomnia, Swagger ou `curl` (vus dans [Le protocole HTTP](/formation-api-rest/fondamentaux/protocole-http/#tester-des-requêtes-http-en-pratique)), une application consomme généralement une API REST directement par code — côté front-end (**JavaScript**) ou côté back-end (**Java**).
+Au-delà des tests manuels via navigateur, Insomnia, Swagger ou `curl` (vus dans [Le protocole HTTP](/formation-api-rest/fondamentaux/protocole-http/#tester-des-requêtes-http-en-pratique)), une application consomme généralement une API REST directement par code :
 
-## En JavaScript
-
-- **Fetch** *(standard actuel, natif dans les navigateurs et Node.js)*
-- **Axios** *(bibliothèque très répandue)*
-- XMLHttpRequest, jQuery *(approches historiques)*
-
-## En Java
-
-Plusieurs approches existent selon le contexte du projet :
-
-1. **Avec Spring Boot (recommandé)** : **`RestClient`** (ou `WebClient` pour du réactif non-bloquant) — gère automatiquement la sérialisation/désérialisation JSON, les en-têtes et la gestion d'erreurs.
-2. **En Java standard sans framework (depuis Java 11)** : `java.net.http.HttpClient` (synchrone et asynchrone, support HTTP/2).
-3. **Autres bibliothèques tierces** : OkHTTP, Jersey Client.
-4. **Approche historique (legacy, à éviter en neuf)** : `HttpURLConnection` avec `InputStream`, **Jackson** (JSON) et **JAXB** (XML).
+- **Côté front-end (JavaScript) :** **`Fetch`** *(standard actuel, natif dans les navigateurs et Node.js)*, **`Axios`** *(bibliothèque très répandue)*, ou historiquement `XMLHttpRequest` / `jQuery`.
+- **Côté back-end (Java, détaillé ci-dessous) :**
+  1. **Avec Spring Boot (recommandé)** : **`RestClient`** — gère automatiquement la sérialisation/désérialisation JSON, les en-têtes et la gestion d'erreurs.
+  2. **En Java standard sans framework (depuis Java 11)** : `java.net.http.HttpClient` (synchrone et asynchrone, support HTTP/2).
+  3. **Autres bibliothèques tierces (à éviter)** : OkHTTP, Jersey Client… *(ajoutent des dépendances à maintenir, exposent à des CVE supplémentaires et n'apportent rien face à `RestClient` ou `HttpClient` du JDK)*.
+  4. **Approche historique (legacy, à éviter en neuf)** : `HttpURLConnection` avec `InputStream`, **Jackson** (JSON) et **JAXB** (XML).
 
 :::tip[Pourquoi privilégier RestClient dans ce cours ?]
 Dans une application Spring Boot, `RestClient` remplace avantageusement `HttpClient` et les appels manuels à `ObjectMapper` : le code est beaucoup plus concis, lisible et s'intègre directement avec l'injection de dépendances Spring.
@@ -29,7 +21,7 @@ Dans une application Spring Boot, `RestClient` remplace avantageusement `HttpCli
 `RestTemplate` est déprécié depuis Spring Boot 4 / Spring 7.0 : privilégiez `RestClient`.
 :::
 
-### Mise en place de l'exemple
+## Mise en place de l'exemple
 
 Lecture du service public `mocktarget.apigee.net` (en JSON ou en XML, sans namespace XML) :
 
@@ -109,11 +101,11 @@ public class Person {
 `mocktarget.apigee.net` est pratique en `GET`, mais ne simule pas une création de ressource en `POST` (`/echo` renvoie une enveloppe technique et `/json` retourne toujours John Doe). Les exemples `POST` s'appuient donc sur **`https://jsonplaceholder.typicode.com/users`**, qui accepte notre objet `Person` en JSON et répond `201 Created` avec l'objet envoyé enrichi d'un `"id"` : on peut ainsi le désérialiser directement dans le même objet `Person`.
 :::
 
-### Avec Spring Boot : RestClient (recommandé)
+## Avec Spring Boot : RestClient (recommandé)
 
 `RestClient` propose une API fluide et convertit automatiquement les objets Java en JSON (et inversement) via Jackson, sans avoir à manipuler `ObjectMapper` ou `InputStream` à la main.
 
-#### Configuration du client HTTP
+### Configuration du client HTTP
 
 Spring Boot fournit automatiquement un bean **`RestClient.Builder`** (pré-configuré avec Jackson, les timeouts…), mais **pas** directement de bean `RestClient` prêt à l'emploi.
 
@@ -194,7 +186,7 @@ public class PersonApiClient {
   - **Ou avec `@Primary` / `@Qualifier` :** annotez le bean principal avec `@Primary`, ou écrivez le constructeur à la main en plaçant `@Qualifier("externalRestClient")` sur son paramètre.
 :::
 
-#### Exemples de requêtes (`GET`, `POST`, authentification)
+### Exemples de requêtes (`GET`, `POST`, authentification)
 
 Une fois `restClient` injecté dans votre service (via `@Bean RestClient` ou `RestClient.Builder`), les appels s'enchaînent de manière fluide :
 
@@ -245,7 +237,45 @@ Person personBasic = restClient.get()
   </TabItem>
 </Tabs>
 
-#### Gestion des erreurs et exceptions
+### Appels en parallèle (`CompletableFuture`)
+
+`RestClient` est **purement synchrone** (il ne propose pas de méthode `.sendAsync(...)` comme `HttpClient`). Dans une application **Spring MVC**, inutile d'ajouter la dépendance `spring-boot-starter-webflux` *(qui embarque Netty/Reactor et augmente la surface de CVE)* : pour paralléliser plusieurs appels, il suffit d'utiliser **`CompletableFuture.supplyAsync(...)`** avec le `TaskExecutor` déjà fourni par Spring Boot (`applicationTaskExecutor`).
+
+```java title="PersonApiClient.java"
+@Service
+@RequiredArgsConstructor
+public class PersonApiClient {
+
+    private final RestClient personRestClient;
+    // Pool de threads fourni automatiquement par Spring Boot (aucune config requise)
+    private final TaskExecutor applicationTaskExecutor;
+
+    public List<Person> getDeuxPersonnesEnParallele() {
+        // 1. La 1re requête part en arrière-plan sans bloquer la suite
+        CompletableFuture<Person> appel1 = CompletableFuture.supplyAsync(
+            () -> personRestClient.get().uri("/persons/1").retrieve().body(Person.class),
+            applicationTaskExecutor
+        );
+
+        // 2. La 2e requête démarre tout de suite, sans attendre la réponse de la 1re
+        CompletableFuture<Person> appel2 = CompletableFuture.supplyAsync(
+            () -> personRestClient.get().uri("/persons/2").retrieve().body(Person.class),
+            applicationTaskExecutor
+        );
+
+        // 3. On attend la fin des deux appels (durée totale ≈ le plus lent des deux, et non la somme)
+        CompletableFuture.allOf(appel1, appel2).join();
+
+        return List.of(appel1.join(), appel2.join());
+    }
+}
+```
+
+- **Qu'est-ce que `TaskExecutor` (`applicationTaskExecutor`) ?** C'est l'interface Spring (extension de `java.util.concurrent.Executor`) qui gère un pool de threads prêt à l'emploi pour exécuter des tâches en arrière-plan. Spring Boot crée automatiquement ce bean sous le nom `applicationTaskExecutor` *(donner ce nom à l'attribut évite toute ambiguïté s'il existe d'autres exécuteurs dans le projet, par ex. avec `@Scheduled`)* : le passer à `CompletableFuture.supplyAsync(...)` évite de créer des threads à la main ou d'occuper le `ForkJoinPool` commun de la JVM.
+- **Pour `N` appels dynamiques** *(à partir d'une liste d'URL)* : appliquez le même principe avec un `.stream().map(url -> CompletableFuture.supplyAsync(..., applicationTaskExecutor)).toList()`, comme illustré plus bas avec `HttpClient`.
+- **Option haute concurrence :** ajouter `spring.threads.virtual.enabled=true` dans `application.properties` bascule automatiquement `applicationTaskExecutor` sur des Virtual Threads Java sans modifier le code.
+
+### Gestion des erreurs et exceptions
 
 Contrairement à `HttpClient` du JDK (`IOException`, `InterruptedException`), **`RestClient` ne lève aucune exception vérifiée** (*checked*) : toutes ses exceptions héritent de `RestClientException` (`RuntimeException`).
 
@@ -290,9 +320,9 @@ try {
   - À défaut (pour une `RestClientException` brute ou une `RuntimeException` sans `@ResponseStatus`), le gestionnaire d'erreur par défaut de Spring Boot (`/error`) prend le relais, logue la *stacktrace* et renvoie **`500 Internal Server Error`** au client de votre API — même si l'API externe avait répondu `404` ou `400`.
 :::
 
-### En Java standard (sans framework) : HttpClient
+## En Java standard (sans framework) : HttpClient
 
-#### Requêtes synchrones (GET et POST)
+### Requêtes synchrones (GET et POST)
 
 <Tabs>
   <TabItem label="GET synchrone">
@@ -359,7 +389,7 @@ try (BufferedReader reader = new BufferedReader(new InputStreamReader(responseSt
   </TabItem>
 </Tabs>
 
-#### Requêtes asynchrones (`sendAsync`)
+### Requêtes asynchrones (`sendAsync`)
 
 <Tabs>
   <TabItem label="GET asynchrone">
@@ -426,7 +456,7 @@ System.out.println(LocalDateTime.now()); // t3 ≈ t2
   </TabItem>
 </Tabs>
 
-#### Authentification (Basic et Bearer)
+### Authentification (Basic et Bearer)
 
 <Tabs>
   <TabItem label="Mode Basic">
@@ -459,7 +489,7 @@ HttpResponse<String> response = httpClient.send(httpRequest, BodyHandlers.ofStri
   </TabItem>
 </Tabs>
 
-### Approche historique : HttpURLConnection
+## Approche historique : HttpURLConnection
 
 :::note[Code legacy]
 `HttpURLConnection` est l'API historique de Java (antérieure à Java 11). **Elle n'est plus recommandée pour de nouveaux développements** : préférez `HttpClient` en Java standard ou `RestClient` dans un projet Spring. Ces exemples sont conservés à titre informatif pour faciliter la lecture d'applications existantes.
