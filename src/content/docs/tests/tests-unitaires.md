@@ -13,7 +13,6 @@ Pour une règle de calcul ou un validateur sans dépendance externe, JUnit 5 et 
 ```java title="TarifCalculateurTest.java"
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 
 class TarifCalculateurTest {
@@ -22,13 +21,13 @@ class TarifCalculateurTest {
 
     @Test
     void appliqueRemiseDe10PourCentDesSixBouteilles() {
-        BigDecimal prixUnitaire = new BigDecimal("20.00");
+        double prixUnitaire = 20.0;
         int quantite = 6;
 
-        BigDecimal total = calculateur.calculerTotal(prixUnitaire, quantite);
+        double total = calculateur.calculerTotal(prixUnitaire, quantite);
 
         // 6 × 20 € = 120 €, avec 10 % de remise -> 108 €
-        assertThat(total).isEqualByComparingTo("108.00");
+        assertThat(total).isEqualTo(108.0);
     }
 }
 ```
