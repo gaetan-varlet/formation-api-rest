@@ -66,8 +66,6 @@ Complétez `VinService` pour gérer les cas d'erreur métier sur le CRUD :
    - Vérifiez que `chateau` et `appellation` contiennent entre **1 et 50 caractères** et que `prix` est positif ou nul (`prix >= 0`), sinon levez `VinInvalideException` <Badge text="400 Bad Request" variant="caution" />
    - En mise à jour, vérifiez aussi que le vin ciblé existe, sinon levez `VinInconnuException` <Badge text="404 Not Found" variant="danger" />
 
-   *(Au chapitre [Contrats d'API](/formation-api-rest/api-rest/contrats-api/), vous verrez comment automatiser ces contrôles de format avec `@Valid`.)*
-
 3. **Tester les cas d'erreur**
 
    Vérifiez les codes retour dans Swagger UI ou Insomnia :
@@ -77,8 +75,10 @@ Complétez `VinService` pour gérer les cas d'erreur métier sur le CRUD :
 
 </Steps>
 
+### Correction du TP
+
 <details>
-<summary>Voir une proposition de correction complète (VinService.java)</summary>
+<summary>✅ Voir une proposition de correction complète (VinService.java)</summary>
 
 ```java title="VinService.java"
 @Service
@@ -141,6 +141,10 @@ public class VinService {
 ```
 
 </details>
+
+:::tip[Automatiser ces contrôles de format avec `@Valid`]
+Ici, la validation est écrite manuellement dans `VinService` pour comprendre le mécanisme. Au chapitre suivant ([Contrats d'API : DTO et validation](/formation-api-rest/api-rest/contrats-api/#valider-les-données-entrantes)), vous verrez comment remplacer ces `if` répétitifs par une validation déclarative automatique avec **`@Valid`** (`@NotBlank`, `@Size`, `@PositiveOrZero`…).
+:::
 
 ## Centralisation et bonnes pratiques de log (`@RestControllerAdvice`)
 
