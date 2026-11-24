@@ -25,7 +25,7 @@ public class VinDaoModern {
 
     private final JdbcClient jdbcClient;
 
-    public List<VinResponse> findVinsAbordables(String appellation, BigDecimal prixMax) {
+    public List<VinResponse> findVinsAbordables(String appellation, Double prixMax) {
         return jdbcClient.sql("""
                     SELECT id, chateau, appellation, annee, prix
                     FROM vin
@@ -46,7 +46,7 @@ public class VinDaoModern {
 
 ```java
 // Retourne le nombre de lignes modifiées
-public int updatePrix(Long id, BigDecimal nouveauPrix) {
+public int updatePrix(Long id, Double nouveauPrix) {
     return jdbcClient.sql("UPDATE vin SET prix = :prix WHERE id = :id")
             .param("prix", nouveauPrix)
             .param("id", id)
@@ -106,7 +106,7 @@ public class VinDaoClassic {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    public List<VinResponse> findVinsAbordables(String appellation, BigDecimal prixMax) {
+    public List<VinResponse> findVinsAbordables(String appellation, Double prixMax) {
         String sql = """
             SELECT id, chateau, appellation, annee, prix
             FROM vin
@@ -120,11 +120,11 @@ public class VinDaoClassic {
 
         // Mapping manuel ligne par ligne depuis le ResultSet JDBC
         return jdbcTemplate.query(sql, params, (rs, rowNum) -> new VinResponse(
-            rs.getInt("id"),
+            rs.getLong("id"),
             rs.getString("chateau"),
             rs.getString("appellation"),
             rs.getInt("annee"),
-            rs.getBigDecimal("prix")
+            rs.getDouble("prix")
         ));
     }
 }

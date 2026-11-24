@@ -91,7 +91,7 @@ public interface VinRepository extends JpaRepository<Vin, Long> {
     List<Vin> findByAppellation(String appellation);
 
     // WHERE prix <= ? ORDER BY annee DESC
-    List<Vin> findByPrixLessThanEqualOrderByAnneeDesc(BigDecimal prixMax);
+    List<Vin> findByPrixLessThanEqualOrderByAnneeDesc(Double prixMax);
 
     // Contrôle d'existence sans ramener l'entité
     boolean existsByChateau(String chateau);
@@ -189,7 +189,7 @@ Nécessaire dès que la requête comporte des agrégations, des sous-requêtes o
 public interface VinRepository extends JpaRepository<Vin, Long> {
 
     @Query("SELECT DISTINCT v.appellation FROM Vin v WHERE v.prix <= :prixMax ORDER BY v.appellation")
-    List<String> findAppellationsAbordables(BigDecimal prixMax);
+    List<String> findAppellationsAbordables(Double prixMax);
 
     @Query(value = "SELECT DISTINCT appellation FROM vin WHERE date_mise_en_bouteille IS NOT NULL", nativeQuery = true)
     List<String> findAppellationsEnBouteille();
@@ -206,7 +206,7 @@ public interface VinRepository extends JpaRepository<Vin, Long> {
 Évite de charger l'entité complète (`Vin`) en projetant directement le résultat vers un **Record** :
 
 ```java title="VinRepository.java"
-public record VinResponse(Long id, String chateau, String appellation, Integer annee, BigDecimal prix) {}
+public record VinResponse(Long id, String chateau, String appellation, Integer annee, Double prix) {}
 
 public interface VinRepository extends JpaRepository<Vin, Long> {
 
@@ -238,7 +238,7 @@ public interface VinRepository extends JpaRepository<Vin, Long> {
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Vin v SET v.prix = :nouveauPrix WHERE v.id = :id")
-    int updatePrix(Long id, BigDecimal nouveauPrix);
+    int updatePrix(Long id, Double nouveauPrix);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Vin v WHERE v.annee < :anneeLimite")
@@ -254,7 +254,7 @@ public class VinService {
     private final VinRepository vinRepository;
 
     @Transactional
-    public int appliquerRemise(Long id, BigDecimal nouveauPrix) {
+    public int appliquerRemise(Long id, Double nouveauPrix) {
         return vinRepository.updatePrix(id, nouveauPrix);
     }
 }
@@ -282,7 +282,7 @@ public class VinService {
         Vin vin = vinRepository.findById(id).orElseThrow();
         vin.setChateau("Château Margaux"); // Modifié en mémoire uniquement (pas encore en base)
 
-        vinRepository.updatePrix(id, new BigDecimal("45.00"));
+        vinRepository.updatePrix(id, 45.0);
         // Sans flushAutomatically = true : clearAutomatically vide le cache L1
         // -> "Château Margaux" est effacé de la mémoire avant même le COMMIT (modif perdue !)
     }

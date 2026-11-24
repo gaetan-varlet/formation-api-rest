@@ -17,10 +17,10 @@ public class Vin {
     private String appellation;
 
     @JsonIgnore
-    private BigDecimal prix;
+    private Double prix;
 
     @XmlTransient
-    public BigDecimal getPrix() {
+    public Double getPrix() {
         return prix;
     }
 }
@@ -55,7 +55,7 @@ En Java moderne, le **`record`** est idéal pour définir un DTO : immuable, con
 public record CreateVinRequest(
     String chateau,
     String appellation,
-    BigDecimal prix
+    Double prix
 ) {}
 ```
 
@@ -66,7 +66,7 @@ public record VinResponse(
     Long id,
     String chateau,
     String appellation,
-    BigDecimal prix
+    Double prix
 ) {}
 ```
 
@@ -89,7 +89,7 @@ Sans validation déclarative, on est tenté de multiplier les `if` dans le servi
 
 ```java
 public VinResponse create(CreateVinRequest request) {
-    if (request.prix().compareTo(BigDecimal.ZERO) <= 0) {
+    if (request.prix() <= 0) {
         throw new IllegalArgumentException("Le prix doit être positif");
     }
     // ... autres contrôles, un par un
@@ -97,7 +97,7 @@ public VinResponse create(CreateVinRequest request) {
 ```
 
 Cette approche présente plusieurs défauts :
-- **Risque d'erreur 500** : si `prix` est absent (`null`), `request.prix().compareTo(...)` déclenche une `NullPointerException` → **500** au lieu d'un `400 Bad Request` (tout comme une `IllegalArgumentException` non interceptée).
+- **Risque d'erreur 500** : un `NullPointerException` au lieu d'un `400 Bad Request`.
 - **Erreur unique** : le traitement s'arrête au **premier** champ invalide ; le client corrige, renvoie la requête, puis découvre l'erreur suivante.
 - **Duplication et couplage** : les règles de format sont enfouies dans le code métier et répétées entre création et mise à jour.
 - **Rejet tardif** : la requête a déjà atteint la couche service (et parfois ouvert une transaction) avant d'être refusée.
@@ -119,7 +119,7 @@ Déclarez les contraintes directement sur le contrat d'entrée :
 public record CreateVinRequest(
     @NotBlank @Size(max = 100) String chateau,
     @NotBlank String appellation,
-    @NotNull @Positive BigDecimal prix
+    @NotNull @Positive Double prix
 ) {}
 ```
 
