@@ -33,7 +33,23 @@ En pratique, la grande majorité des API REST modernes visent le **Niveau 2** (r
 
 ![Architecture traditionnelle vs architecture découplée](../../../assets/images/archi-legacy-vs-api.jpg "Architecture traditionnelle vs architecture découplée")
 
-Une architecture découplée sépare le **front-end** (interface utilisateur servie en fichiers statiques) du **back-end** (API REST exposant uniquement les données) :
+### Fonctionnement interne comparé
+
+- **Architecture classique (monolithique — rendu côté serveur) :**
+  1. Le navigateur demande une page (`GET /etudiants`) au serveur applicatif (Tomcat).
+  2. Le serveur interroge la base de données (`SQL SELECT...`).
+  3. Un moteur de templates côté serveur (JSP, Thymeleaf) assemble les données et le gabarit pour fabriquer la page HTML.
+  4. Le serveur renvoie la **page HTML complète** (structure + données) : le navigateur recharge toute la page à chaque navigation.
+
+- **Architecture découplée (SPA + API REST) :**
+  1. **Chargement initial :** le navigateur télécharge les fichiers statiques de l'interface (bundle JS/CSS React, Vue…) depuis un serveur statique (Apache, Nginx).
+  2. **À chaque interaction :** l'application front-end exécute un appel API asynchrone vers le back-end Spring Boot (`GET /api/etudiants`).
+  3. Le serveur API interroge PostgreSQL, exécute le traitement métier et sérialise les données (`DTO → JSON`), sans produire de HTML.
+  4. Le navigateur reçoit ce **JSON léger** et met à jour dynamiquement uniquement la partie concernée de la page (DOM), sans rechargement complet.
+
+### Les apports de l'architecture découplée
+
+En séparant ainsi le **front-end** (interface utilisateur servie en fichiers statiques) du **back-end** (API REST exposant uniquement les données) :
 
 - **Expérience utilisateur plus fluide et trafic réduit :** après le chargement initial de l'interface, seuls des payloads JSON légers circulent et seule la zone concernée de la page est mise à jour, sans rechargement complet du HTML.
 - **Séparation des responsabilités et réutilisabilité :** le back-end et le front-end évoluent et se déploient indépendamment, et une même API peut alimenter une application web, une application mobile ou d'autres services.
