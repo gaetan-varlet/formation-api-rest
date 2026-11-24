@@ -4,24 +4,34 @@ title: "Réception de fichiers (Upload)"
 
 ## Le controller
 
-Création d'un controller en *POST* qui reçoit un fichier dans la requête grâce au paramètre **MultipartFile**
-
-- `consumes = MediaType.MULTIPART_FORM_DATA_VALUE` permet d'avoir dans le swagger le bouton d'upload
+Cet endpoint `POST /upload` reçoit un fichier en `multipart/form-data` via le paramètre **`MultipartFile`** (nommé `multipartfile`) et retourne ici son contenu sous forme de texte :
 
 ```java
-// création d'un service qui attend un objet multipart/form-data avec comme nom de paramètre multipartfile
-// le service retourne ici le contenu du fichier
 @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public String upload (@RequestParam MultipartFile multipartfile) throws IOException {
-   return new String(multipartfile.getBytes());
+public String upload(@RequestParam MultipartFile multipartfile) throws IOException {
+    return new String(multipartfile.getBytes());
 }
 ```
 
+:::tip[Afficher le bouton d'upload dans Swagger UI]
+Préciser `consumes = MediaType.MULTIPART_FORM_DATA_VALUE` permet à Swagger UI (`springdoc-openapi`) de reconnaître un envoi de fichier et d'afficher directement un bouton d'upload dans l'interface interactive.
+:::
+
 ## Requête côté client
 
-Requête HTTP avec l'en-tête **Content-Type = multipart/form-data**
+Requête HTTP avec l'en-tête **`Content-Type: multipart/form-data`** :
 
 ![Requête multipart/form-data](../../../assets/images/requete-multipart.png "Requête multipart/form-data")
+
+Pour tester rapidement en ligne de commande avec `curl` (en créant un fichier à la volée, et en reprenant le nom du `@RequestParam` `multipartfile`) :
+
+```bash
+# 1. Créer un fichier contenant une phrase de test
+echo "Bonjour depuis un fichier envoyé à l'API !" > mon-fichier.txt
+
+# 2. Envoyer le fichier en multipart/form-data (--form définit automatiquement le Content-Type)
+curl --form "multipartfile=@mon-fichier.txt" http://localhost:8080/upload
+```
 
 ## Sécurisation des uploads : Pourquoi valider avant d'insérer ?
 
