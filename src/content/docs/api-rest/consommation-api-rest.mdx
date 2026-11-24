@@ -183,17 +183,14 @@ public class RestClientConfig {
 }
 
 @Service
+@RequiredArgsConstructor
 public class PersonApiClient {
 
-    private final RestClient restClient;
-
     // Spring injecte automatiquement le @Bean RestClient configuré ci-dessus
-    public PersonApiClient(RestClient personRestClient) {
-        this.restClient = personRestClient;
-    }
+    private final RestClient personRestClient;
 
     public Person getPerson() {
-        return restClient.get()
+        return personRestClient.get()
             .uri("/json")
             .retrieve()
             .body(Person.class);
