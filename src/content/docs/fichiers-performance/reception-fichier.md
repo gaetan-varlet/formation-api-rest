@@ -33,6 +33,49 @@ echo "Bonjour depuis un fichier envoyé à l'API !" > mon-fichier.txt
 curl --form "multipartfile=@mon-fichier.txt" http://localhost:8080/upload
 ```
 
+### Envoyer plusieurs fichiers
+
+Il suffit de remplacer `MultipartFile` par `List<MultipartFile>` (ou `MultipartFile[]`) côté controller, et de répéter `--form` côté `curl` :
+
+```java
+@PostMapping(value = "/upload-multiple", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+public List<String> uploadMultiple(@RequestParam("files") List<MultipartFile> files) {
+    return files.stream()
+            .map(MultipartFile::getOriginalFilename)
+            .toList();
+}
+```
+
+```bash
+curl --form "files=@fichier1.txt" --form "files=@fichier2.txt" http://localhost:8080/upload-multiple
+```
+
+### Envoyer un fichier accompagné d'un objet JSON (`@RequestPart`)
+
+Pour envoyer à la fois un fichier et des données structurées (un DTO `record`) dans la même requête, utilisez **`@RequestPart`** sur chaque partie :
+
+```java
+public record UploadMetadata(String auteur, String commentaire) {}
+
+@PostMapping(value = "/upload-metadata", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+public String uploadAvecMetadonnees(
+        @RequestPart("metadata") @Valid UploadMetadata metadata,
+        @RequestPart("file") MultipartFile file) {
+    return metadata.auteur() + " -> " + file.getOriginalFilename();
+}
+```
+
+```bash
+curl \
+  --form 'metadata={"auteur":"Gaetan","commentaire":"Import cave"};type=application/json' \
+  --form "file=@mon-fichier.txt" \
+  http://localhost:8080/upload-metadata
+```
+
+:::tip[Penser au `;type=application/json` sur la partie JSON]
+Avec `curl`, si vous omettez `;type=application/json` sur la partie `metadata`, Spring ne sait pas qu'il s'agit de JSON et rejette la requête avec une erreur **`415 Unsupported Media Type`**.
+:::
+
 ## Sécurisation des uploads : Pourquoi valider avant d'insérer ?
 
 Chaîne de contrôle requise pour contrer 4 risques majeurs :
@@ -61,7 +104,9 @@ Bloquer les payloads malveillants avant même d'analyser les données métier.
 
 ```yml
 # Bloquer en amont au niveau du serveur
+# Taille max par fichier
 spring.servlet.multipart.max-file-size: 10MB
+# Taille max totale de la requête (utile avec plusieurs fichiers)
 spring.servlet.multipart.max-request-size: 10MB
 ```
 
