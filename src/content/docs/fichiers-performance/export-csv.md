@@ -11,7 +11,7 @@ title: "Export de fichiers CSV"
 <dependency>
     <groupId>com.opencsv</groupId>
     <artifactId>opencsv</artifactId>
-    <version>5.12</version>
+    <version>5.12.0</version>
 </dependency>
 ```
 
