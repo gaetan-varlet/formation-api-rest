@@ -87,6 +87,10 @@ export default defineConfig({
 		starlight({
 			title: 'Formation API REST',
 			customCss: ['./src/styles/custom.css'],
+			lastUpdated: true,
+			editLink: {
+				baseUrl: 'https://github.com/gaetan-varlet/formation-api-rest/edit/main/',
+			},
 			defaultLocale: 'root',
 			locales: {
 				root: {
