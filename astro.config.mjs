@@ -91,6 +91,17 @@ export default defineConfig({
 			editLink: {
 				baseUrl: 'https://github.com/gaetan-varlet/formation-api-rest/edit/main/',
 			},
+			head: [
+				{
+					tag: 'link',
+					attrs: {
+						rel: 'alternate',
+						type: 'application/rss+xml',
+						title: 'Formation API REST — Flux RSS',
+						href: '/formation-api-rest/rss.xml',
+					},
+				},
+			],
 			defaultLocale: 'root',
 			locales: {
 				root: {
@@ -103,6 +114,11 @@ export default defineConfig({
 					icon: 'github',
 					label: 'GitHub',
 					href: 'https://github.com/gaetan-varlet/formation-api-rest',
+				},
+				{
+					icon: 'rss',
+					label: 'Flux RSS',
+					href: '/formation-api-rest/rss.xml',
 				},
 			],
 			sidebar: [
