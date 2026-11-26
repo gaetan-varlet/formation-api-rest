@@ -22,6 +22,8 @@ Concrètement, les échanges suivent deux flux symétriques :
 
 ## Quelle bibliothèque Java choisir ?
 
+Même si S3 repose sur HTTP, l'appeler en direct avec un client classique comme `RestClient` est vite fastidieux et risqué (chaque requête privée doit être signée cryptographiquement, en plus de la gestion des réponses XML, des reprises sur erreur et du découpage des gros fichiers), sauf pour récupérer un simple fichier **public** en lecture seule. On passe donc par un SDK dédié :
+
 ### Recommandation par défaut : AWS SDK for Java v2 (`software.amazon.awssdk:s3`)
 
 Utilisez le client officiel **AWS SDK v2** (licence **Apache 2.0**) comme standard sur les nouveaux projets :
