@@ -168,6 +168,7 @@ export default defineConfig({
 					items: [
 						{ slug: 'fichiers-performance/upload' },
 						{ slug: 'fichiers-performance/download-csv' },
+						{ slug: 'fichiers-performance/download-pdf-excel' },
 						{ slug: 'fichiers-performance/streaming' },
 						{ slug: 'fichiers-performance/cache' },
 					],

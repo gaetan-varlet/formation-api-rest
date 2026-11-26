@@ -57,6 +57,14 @@ Ajout de la bibliothèque **OpenCSV** dans le `pom.xml` pour gérer l'échappeme
 </dependency>
 ```
 
+:::note[Alternatives à OpenCSV]
+OpenCSV est très répandu dans les projets existants, mais il embarque plusieurs dépendances transitives (comme `commons-beanutils`) qu'il faut surveiller vis-à-vis des scanners CVE. Pour un nouveau projet Spring Boot, trois alternatives plus légères méritent d'être considérées :
+
+- **Apache Commons CSV (`org.apache.commons:commons-csv`, Apache 2.0) :** proche d'OpenCSV dans sa philosophie, plus léger et porté par la fondation Apache.
+- **Jackson CSV (`jackson-dataformat-csv`, Apache 2.0) :** directement géré par le BOM Spring Boot, permet de sérialiser des DTO / `Record` sans conversion manuelle en `String[]`.
+- **FastCSV (`de.siegmar:fastcsv`, MIT) :** bibliothèque moderne (Java 17+), très rapide et **sans aucune dépendance transitive** (surface CVE minimale).
+:::
+
 ### 2. Classe utilitaire : CsvUtils
 
 - Encapsule l'écriture du flux dans un `StringWriter`
