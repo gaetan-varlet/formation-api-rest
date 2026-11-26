@@ -2,9 +2,19 @@
 title: "Réception de fichiers (Upload)"
 ---
 
-## Le controller
+## Les différents cas d'upload
+
+En Spring MVC, la réception de fichiers s'appuie sur le type de contenu `multipart/form-data` (`consumes = MediaType.MULTIPART_FORM_DATA_VALUE`) et les annotations `@RequestParam` ou `@RequestPart` selon que la requête transporte un ou plusieurs fichiers, seuls ou accompagnés de données JSON.
+
+:::tip[Afficher le bouton d'upload dans Swagger UI]
+Préciser `consumes = MediaType.MULTIPART_FORM_DATA_VALUE` permet à Swagger UI (`springdoc-openapi`) de reconnaître un envoi de fichier et d'afficher directement un bouton d'upload dans l'interface interactive.
+:::
+
+### 1. Recevoir un fichier unique (`MultipartFile`)
 
 Cet endpoint `POST /upload` reçoit un fichier en `multipart/form-data` via le paramètre **`MultipartFile`** (nommé `multipartfile`) et retourne ici son contenu sous forme de texte :
+
+**Côté controller :**
 
 ```java
 @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -13,17 +23,13 @@ public String upload(@RequestParam MultipartFile multipartfile) throws IOExcepti
 }
 ```
 
-:::tip[Afficher le bouton d'upload dans Swagger UI]
-Préciser `consumes = MediaType.MULTIPART_FORM_DATA_VALUE` permet à Swagger UI (`springdoc-openapi`) de reconnaître un envoi de fichier et d'afficher directement un bouton d'upload dans l'interface interactive.
-:::
+**Requête côté client :**
 
-## Requête côté client
+- **Avec un client HTTP graphique** (Postman, Insomnia, Bruno…) en sélectionnant le type de corps **`multipart/form-data`** :
 
-Requête HTTP avec l'en-tête **`Content-Type: multipart/form-data`** :
+![Requête multipart/form-data dans un client HTTP](../../../assets/images/requete-multipart.png "Requête multipart/form-data")
 
-![Requête multipart/form-data](../../../assets/images/requete-multipart.png "Requête multipart/form-data")
-
-Pour tester rapidement en ligne de commande avec `curl` (en créant un fichier à la volée, et en reprenant le nom du `@RequestParam` `multipartfile`) :
+- **En ligne de commande avec `curl`** (en créant un fichier à la volée, et en reprenant le nom du `@RequestParam` `multipartfile`) :
 
 ```bash
 # 1. Créer un fichier contenant une phrase de test
@@ -33,9 +39,11 @@ echo "Bonjour depuis un fichier envoyé à l'API !" > mon-fichier.txt
 curl --form "multipartfile=@mon-fichier.txt" http://localhost:8080/upload
 ```
 
-### Envoyer plusieurs fichiers
+### 2. Recevoir plusieurs fichiers (`List<MultipartFile>`)
 
 Il suffit de remplacer `MultipartFile` par `List<MultipartFile>` (ou `MultipartFile[]`) côté controller, et de répéter `--form` côté `curl` :
+
+**Côté controller :**
 
 ```java
 @PostMapping(value = "/upload-multiple", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -46,6 +54,8 @@ public List<String> uploadMultiple(@RequestParam("files") List<MultipartFile> fi
 }
 ```
 
+**Requête côté client :**
+
 ```bash
 # 1. Créer deux fichiers de test
 echo "Contenu du fichier 1" > fichier1.txt
@@ -55,9 +65,11 @@ echo "Contenu du fichier 2" > fichier2.txt
 curl --form "files=@fichier1.txt" --form "files=@fichier2.txt" http://localhost:8080/upload-multiple
 ```
 
-### Envoyer un fichier accompagné d'un objet JSON (`@RequestPart`)
+### 3. Recevoir un fichier accompagné d'un objet JSON (`@RequestPart`)
 
 Pour envoyer à la fois un fichier et un DTO JSON existant (comme `CreateVinRequest`) dans la même requête, utilisez **`@RequestPart`** sur chaque partie :
+
+**Côté controller :**
 
 ```java
 @PostMapping(value = "/upload-vin", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -68,44 +80,57 @@ public String uploadAvecVin(
 }
 ```
 
-```bash
-# 1. Créer un fichier de test
-echo "Fiche technique du Château Margaux" > fiche-vin.txt
+**Requête côté client :**
 
-# 2. Envoyer l'objet JSON + le fichier
+```bash
+# 1. Créer les fichiers de test
+echo "Fiche technique du Château Margaux" > fiche-vin.txt
+echo '{"chateau":"Château Margaux","appellation":"Margaux","prix":500}' > vin.json
+
+# 2. Envoyer l'objet JSON (<vin.json) + le fichier (@fiche-vin.txt)
 curl \
-  --form 'vin={"chateau":"Château Margaux","appellation":"Margaux","prix":500};type=application/json' \
+  --form "vin=<vin.json;type=application/json" \
   --form "file=@fiche-vin.txt" \
   http://localhost:8080/upload-vin
 ```
 
 :::tip[Penser au `;type=application/json` sur la partie JSON]
 Avec `curl`, si vous omettez `;type=application/json` sur la partie `vin`, Spring ne sait pas qu'il s'agit de JSON et rejette la requête avec une erreur **`415 Unsupported Media Type`**.
+
+La syntaxe `<vin.json` indique à `curl` de lire le contenu du fichier comme valeur texte du champ (contrairement à `@` qui l'envoie comme un fichier uploadé). Il est aussi possible d'écrire l'objet JSON directement en ligne :
+
+```bash
+--form 'vin={"chateau":"Château Margaux","appellation":"Margaux","prix":500};type=application/json'
+```
+
+Cette forme directe fonctionne sous Linux et macOS, mais peut provoquer des erreurs d'encodage sur les accents (comme `â`) sous Windows, y compris dans Git Bash lorsque `curl.exe` de Windows est invoqué.
 :::
 
-## Sécurisation des uploads : Pourquoi valider avant d'insérer ?
+## Sécurisation et traitement des uploads
 
-Chaîne de contrôle requise pour contrer 4 risques majeurs :
+### Pourquoi valider avant d'insérer ?
 
-- **Déni de service (DoS / OOM) :**  
-  Gros fichier chargé en mémoire (`getBytes`) ou Zip Bomb -> saturation de la JVM et crash du pod.
-- **Path Traversal & écriture arbitraire :**  
-  Nom forgé (`../../tmp/exec.sh`) -> écrasement de fichiers système et risque d'exécution de code (RCE).
-- **Injection XML (XXE / SSRF) :**  
-  Résolution d'entités externes via la DTD -> lecture de fichiers locaux (`/etc/passwd`, secrets) ou pivot réseau.
-- **Injection de formule (CSV / Excel) :**  
-  Cellules piégées stockées telles quelles (`=cmd|...`) -> exécution de commandes à l'ouverture du tableur en interne.
+Un fichier envoyé par un client n'est jamais fiable par défaut : son nom, sa taille, son extension et son contenu peuvent être falsifiés ou malveillants. Si l'application le charge en mémoire, l'écrit sur disque ou insère ses données en base **avant** de le contrôler, l'impact a déjà lieu :
 
-## Ordre chronologique des contrôles
+- **Saturer la mémoire et faire tomber le serveur :**  
+  Un fichier volumineux chargé d'un bloc avec `file.getBytes()`, ou une archive compressée piégée qui se décompresse en gigaoctets de données, peut provoquer une `OutOfMemoryError` et arrêter l'application.
+- **Écrire au mauvais endroit sur le serveur :**  
+  Un nom de fichier forgé comme `../../tmp/script.sh` permet de sortir du dossier prévu et d'écraser des fichiers existants (*Path Traversal*).
+- **Exposer des fichiers internes via un XML piégé :**  
+  Un parseur XML mal configuré peut résoudre des références externes contenues dans le fichier pour lire des fichiers sensibles du serveur (`/etc/passwd`, secrets) ou appeler des services internes.
+- **Piéger les utilisateurs internes avec un CSV ou un fichier Excel :**  
+  Des cellules commençant par `=`, `+`, `-` ou `@` (par exemple `=cmd|...`) stockées telles quelles seront interprétées comme des formules et exécutées lorsque le fichier exporté sera ouvert dans un tableur.
+
+### Ordre chronologique des contrôles
 
 Valider de l'extérieur vers l'intérieur (du moins coûteux au plus coûteux) :
 
 1. **Rejet précoce :** Quotas HTTP et validation de présence (zéro CPU consommé).
-2. **Contrôle du contenant :** Nom sécurisé (`UUID`) et signature binaire (*Magic Bytes*).
-3. **Parsing en flux (Streaming) :** Désactivation DTD (XML) et assainissement des formules (CSV).
+2. **Contrôle du contenant :** Nom sécurisé (`UUID`) et vérification du contenu réel du fichier (signature binaire).
+3. **Lecture en flux (*streaming*) :** Désactivation des entités externes (XML) et neutralisation des formules (CSV).
 4. **Persistance maîtrisée :** Découpage en lots pour préserver la RAM et libérer le cache JPA.
 
-## Quotas, Nom et Signature binaire
+### Quotas, nom et signature binaire
 
 Bloquer les payloads malveillants avant même d'analyser les données métier.
 
@@ -131,7 +156,7 @@ if (!List.of("text/csv", "text/plain").contains(mime)) {
 }
 ```
 
-## Traitement en flux & Transaction atomique
+### Traitement en flux & Transaction atomique
 
 La transaction garantit l'annulation totale (*Rollback*) en cas d'erreur
 
@@ -139,7 +164,7 @@ La transaction garantit l'annulation totale (*Rollback*) en cas d'erreur
 @Transactional(rollbackFor = Exception.class)
 public void process(MultipartFile file) throws IOException {
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-        List<Client> batch = new ArrayList<>(500);
+        List<Vin> batch = new ArrayList<>(500);
         reader.lines().forEach(line -> {
             String[] cols = line.split(";");
             String safeNom = sanitize(cols[0]); // Neutralise =, +, -, @
