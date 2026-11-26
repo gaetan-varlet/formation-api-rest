@@ -143,3 +143,28 @@ En pratique, mettre `final` sur vos dépendances injectées vous évite surtout 
 - **Indispensable avec Lombok (`@RequiredArgsConstructor`) :** Lombok n'ajoute au constructeur généré **que les champs `final`**. Si vous oubliez `final` sur un service, il reste `null` au démarrage → **`NullPointerException`** dès la première requête.
 - **Détection des oublis dès la compilation :** dans un test unitaire ou une création manuelle (`new MonController(...)`), `final` garantit qu'aucune dépendance obligatoire n'a été oubliée dans le constructeur.
 - **Contrat clair pour l'équipe :** en lisant la classe, on sait immédiatement que cette dépendance est requise au démarrage et ne changera pas en cours de route (un bean Spring étant partagé par toute l'application).
+
+## Bean Spring (`@Component`) ou classe utilitaire (`static`) ?
+
+On hésite souvent entre déclarer une classe utilitaire avec des méthodes `static` ou en faire un `@Component` injecté.
+
+D'abord, une idée reçue à écarter : **un `@Component` n'est pas réinstancié à chaque appel.** Comme rappelé plus haut, Spring crée **une seule instance (Singleton)** au démarrage — il n'y a donc aucun surcoût d'instanciation par rapport au `static`.
+
+Le vrai critère de choix porte sur les **dépendances**, les **proxies Spring** et la **testabilité** :
+
+| Critère | Classe utilitaire (`static`) | Bean Spring (`@Component` / `@Service`) |
+| :--- | :--- | :--- |
+| **Structure** | `public final class ...Utils` + constructeur `private` | Classe annotée `@Component`, `@Service`… |
+| **Dépendances & config** | **Aucune** (reçoit tout en paramètre) | Injecte d'autres beans ou des propriétés de configuration |
+| **Évolutivité** | Comportement figé | Peut être remplacé par une autre implémentation d'une interface (ex. `MethodePaiement`) |
+| **Fonctionnalités Spring** | Non disponibles | Supportées (transactions, cache… vues plus loin dans la formation) |
+| **Tests** | **Fonction pure** appelée directement, sans avoir besoin de la remplacer | Facile à remplacer ou simuler dans vos tests |
+| **Exemples** | Formatage de texte, conversions, calculs (`Math`, `DateUtils`…) | Services métier (`CalculService`, `GestionPaiement`), accès aux données |
+
+**En pratique :**
+- Gardez une classe **`static`** tant que ses méthodes sont des transformations pures sans dépendance ni configuration.
+- Passez en **bean Spring (`@Component` / `@Service`)** dès que la classe a besoin d'une dépendance, d'une configuration, ou que vous souhaitez pouvoir changer son implémentation (en production ou dans vos tests).
+
+:::tip[Piège classique : la date courante est aussi une dépendance]
+On pense naturellement aux bases de données ou aux API externes comme des dépendances, mais **`LocalDateTime.now()`** (ou `LocalDate.now()`) en est une aussi : elle dépend de l'horloge système. Si une règle métier repose sur la date ou l'heure courante et doit être testée à date figée, évitez le `static` : faites-en un bean Spring qui injecte un `Clock` (voir [Horloge et gestion du temps](/formation-api-rest/tests/horloge-temps/) plus loin dans la formation).
+:::
