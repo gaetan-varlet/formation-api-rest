@@ -138,7 +138,7 @@ Valider de l'extérieur vers l'intérieur (du moins coûteux au plus coûteux) :
 
 1. **Rejet précoce :** Quotas HTTP et validation de présence (zéro CPU consommé).
 2. **Contrôle du contenant :** Nom sécurisé (`UUID`) et vérification du contenu réel du fichier (signature binaire).
-3. **Lecture en flux (*streaming*) :** Désactivation des entités externes (XML) et neutralisation des formules (CSV).
+3. **Lecture en flux (*streaming*) :** Désactivation des entités externes (XML) et validation des cellules métier (rejet des valeurs invalides ou suspectes).
 4. **Persistance maîtrisée :** Découpage en lots pour préserver la RAM et libérer le cache JPA.
 
 ### Quotas, nom et signature binaire
@@ -185,20 +185,22 @@ if (!List.of("text/csv", "text/plain").contains(mime)) {
 Une fois le fichier validé, l'exemple ci-dessous combine quatre mécanismes pour traiter un import CSV sans risque pour l'application ni pour les données :
 
 - **Lecture ligne par ligne (`BufferedReader` sur `getInputStream()`) :** évite de charger tout le fichier en mémoire comme le ferait `file.getBytes()`.
-- **Neutralisation des formules CSV (`sanitize`) :** ajoute une apostrophe devant les cellules commençant par `=`, `+`, `-` ou `@` afin qu'Excel ou Calc les affiche comme du texte simple.
+- **Validation de chaque ligne (`validerCellule`) :** dès qu'une valeur est vide ou suspecte (comme une formule commençant par `=`, `+`, `-` ou `@`), une exception est levée, ce qui interrompt l'import et rejette tout le fichier (via le *rollback*) sans altérer les données métier stockées en base.
 - **Enregistrement par lots (`flush()` puis `clear()`) :** envoie les insertions par paquets de 500 lignes puis vide le cache Hibernate pour garder une empreinte mémoire constante.
 - **Transaction atomique (`@Transactional(rollbackFor = Exception.class)`) :** en cas d'erreur en cours de lecture (par exemple une valeur invalide à la 1200e ligne), toutes les insertions déjà envoyées sont annulées (*rollback*) pour ne pas laisser la base à moitié remplie.
 
 ```java
+private static final String FORMULA_PREFIXES = "=+-@\t\r";
+
 @Transactional(rollbackFor = Exception.class)
 public void process(MultipartFile file) throws IOException {
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
         List<Vin> batch = new ArrayList<>(500);
         reader.lines().forEach(line -> {
             String[] cols = line.split(";");
-            String safeNom = sanitize(cols[0]); // Neutralise =, +, -, @
+            String nom = validerCellule(cols[0]);
             int millesime = Integer.parseInt(cols[1].trim());
-            batch.add(new Vin(safeNom, millesime));
+            batch.add(new Vin(nom, millesime));
             if (batch.size() >= 500) {
                 repository.saveAll(batch);
                 entityManager.flush(); // Envoie les requêtes SQL en attente
@@ -209,7 +211,19 @@ public void process(MultipartFile file) throws IOException {
         if (!batch.isEmpty()) { repository.saveAll(batch); }
     }
 }
-private String sanitize(String val) {
-    return (val != null && val.matches("^[=+\\-@\\t\\r].*")) ? "'" + val : val;
+
+private String validerCellule(String val) {
+    if (val == null || val.isBlank()) {
+        throw new IllegalArgumentException("Valeur obligatoire manquante");
+    }
+    String trimmed = val.trim();
+    if (FORMULA_PREFIXES.indexOf(trimmed.charAt(0)) >= 0) {
+        throw new IllegalArgumentException("Valeur suspecte rejetée : " + trimmed);
+    }
+    return trimmed;
 }
 ```
+
+:::note[Valider à l'entrée, neutraliser à la sortie]
+On applique ici le même principe que dans [Neutralisation des entrées utilisateur](/formation-api-rest/securite/neutralisation-entrees/) : à l'import, on **valide** les données et on rejette le fichier dès qu'une ligne invalide ou suspecte est détectée, sans modifier les valeurs stockées en base *(selon le besoin métier, une autre stratégie consiste à faire un import partiel avec un rapport d'erreurs ligne par ligne)*. Si des champs texte libres peuvent légitimement commencer par `+` ou `-` (par exemple un numéro `+33 6...`), la neutralisation par apostrophe pour Excel/Calc se fait au moment de l'[export CSV](/formation-api-rest/fichiers-performance/download-csv/).
+:::

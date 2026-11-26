@@ -118,5 +118,5 @@ String message = "Statut : VALIDÉ<br/>Commentaire : " + commentaireSecurise + "
 N'appliquez **pas** `HtmlUtils.htmlEscape` systématiquement sur les champs stockés en base ou renvoyés en JSON : vous corrompriez les données pour les autres consommateurs (application mobile, export CSV, front-end React/Angular qui échappent déjà l'affichage par défaut).
 
 - **À l'entrée de l'API :** validez le format et la taille des données avec Bean Validation (voir [Contrats d'API](/formation-api-rest/api-rest/contrats-api/)).
-- **À la sortie / au rendu :** échappez ou assainissez au moment précis où la donnée est injectée dans un contexte interprété (e-mail HTML, template serveur, export PDF/HTML).
+- **À la sortie / au rendu :** échappez ou assainissez au moment précis où la donnée est injectée dans un contexte interprété (e-mail HTML, template serveur, export CSV/PDF/HTML).
 :::

@@ -117,6 +117,23 @@ public class VinService {
 }
 ```
 
+:::tip[Sécurité : neutraliser les formules tableur à l'export]
+Si votre export contient des champs texte libres saisis par des utilisateurs, c'est **au moment de générer le CSV** (et non lors du stockage en base) qu'il faut neutraliser les valeurs commençant par `=`, `+`, `-`, `@`, `\t` ou `\r` afin qu'Excel ou Calc ne les exécute pas comme des formules :
+
+```java
+private static final String FORMULA_PREFIXES = "=+-@\t\r";
+
+private String neutraliserFormuleCsv(String val) {
+    if (val == null || val.isEmpty()) {
+        return val;
+    }
+    return FORMULA_PREFIXES.indexOf(val.charAt(0)) >= 0 ? "'" + val : val;
+}
+```
+
+Cette séparation suit la même règle que pour le HTML : on valide les données à l'entrée sans les altérer en base, et on neutralise à la sortie selon le format cible (voir [Neutralisation des entrées utilisateur](/formation-api-rest/securite/neutralisation-entrees/)).
+:::
+
 ### 4. Exposition dans le Controller
 
 - Construction type-safe du `Content-Disposition` avec Spring (`StandardCharsets.UTF_8`)
