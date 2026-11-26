@@ -9,7 +9,7 @@ title: "Téléchargement PDF, Excel et Calc (Download)"
 Selon la provenance et la taille du fichier, Spring MVC propose trois types de retour :
 
 - **`ResponseEntity<byte[]>` :** adapté aux petits fichiers générés à la volée en mémoire (facture PDF, export Excel de quelques centaines de lignes).
-- **`ResponseEntity<Resource>` (`FileSystemResource`, `InputStreamResource`…) :** recommandé pour renvoyer un fichier déjà existant sur disque, dans le *classpath* ou depuis un stockage objet (type S3) sans tout charger dans un `byte[]`.
+- **`ResponseEntity<Resource>` (`FileSystemResource`, `InputStreamResource`…) :** recommandé pour renvoyer un fichier déjà existant sur disque, dans le *classpath* ou depuis un [stockage objet (type S3)](/formation-api-rest/fichiers-performance/stockage-s3/) sans tout charger dans un `byte[]`.
 - **`ResponseEntity<StreamingResponseBody>` :** indispensable pour les fichiers très volumineux générés au fil de l'eau (voir [Le streaming](/formation-api-rest/fichiers-performance/streaming/)).
 
 | Format | Extension | `Content-Type` (`MediaType`) | `Content-Disposition` habituel |
