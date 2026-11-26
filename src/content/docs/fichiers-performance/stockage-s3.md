@@ -8,10 +8,17 @@ Lorsque les fichiers reçus ou servis par l'API sont volumineux ou nombreux, les
 
 Contrairement à une idée reçue, S3 n'est pas propre au cloud Amazon : c'est un **protocole standard** utilisé par la grande majorité des solutions de stockage objet (MinIO, Ceph, OVH, Scaleway, AWS S3…).
 
+Surtout, un serveur S3 **n'est pas un système de fichiers classique** : on n'y accède pas avec `java.io.File`, `Files` ou `FileReader`. Votre application dialogue avec lui **à travers une API HTTP(S)** via un client dédié (le SDK S3), ce qui permet aussi à plusieurs instances de l'API (par exemple plusieurs pods Kubernetes) de partager facilement le même stockage sans disque réseau partagé.
+
 La séparation des responsabilités est simple :
 
 - **Sur le serveur S3 :** le contenu binaire du fichier, rangé dans un **bucket** (équivalent d'un conteneur logique) sous une **clé unique** (idéalement générée avec un `UUID` côté serveur pour éviter les collisions et les noms forgés).
 - **En base de données (ex. PostgreSQL) :** uniquement les **métadonnées métier** (nom d'origine, type MIME, taille, date, entité liée et clé S3).
+
+Concrètement, les échanges suivent deux flux symétriques :
+
+- **À l'upload (ou après génération d'un PDF ou d'un rapport côté serveur) :** l'API dépose le fichier binaire sur S3 sous une clé unique (`UUID`), puis enregistre ses métadonnées et cette clé en base de données.
+- **Au téléchargement :** l'API retrouve la clé et les métadonnées (nom d'origine, `Content-Type`) en base, récupère le flux binaire depuis S3 et le renvoie au client HTTP.
 
 ## Quelle bibliothèque Java choisir ?
 
