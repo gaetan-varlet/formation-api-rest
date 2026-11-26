@@ -2,6 +2,17 @@
 title: "Réception de fichiers (Upload)"
 ---
 
+## Types de fichiers et traitements courants
+
+Le mécanisme d'upload HTTP (`multipart/form-data` avec `MultipartFile`) est identique quel que soit le format envoyé : il permet de recevoir aussi bien des **fichiers texte / structurés** (`CSV`, `JSON`, `XML`…) que des **fichiers binaires** (photos, `PDF`, documents LibreOffice Writer/Calc, Word/Excel…).
+
+Une fois le fichier reçu et validé côté API, le traitement dépend de sa nature :
+
+- **Fichiers structurés (`CSV`, `JSON`, `XML`) :** le plus souvent parsés (en flux / *streaming* si le volume est important) afin d'extraire les données et de les enregistrer en base de données.
+- **Fichiers binaires (photos, `PDF`, documents Writer/Calc…) :**
+  - **Enregistrement tel quel en base de données (ex. PostgreSQL)** si le volume reste limité : cela permet de rester **dans la même transaction** que les données métier associées (cohérence garantie en cas de *rollback* et sauvegardes centralisées) tout en évitant d'avoir à gérer un second système de stockage (ce qui limite la complexité du SI).
+  - **Stockage sur un serveur de fichiers ou un stockage objet (type S3)** dès que les fichiers sont volumineux ou nombreux : on ne conserve alors en base que les métadonnées et la référence vers le fichier, pour éviter d'alourdir la base de données.
+
 ## Les différents cas d'upload
 
 En Spring MVC, la réception de fichiers s'appuie sur le type de contenu `multipart/form-data` (`consumes = MediaType.MULTIPART_FORM_DATA_VALUE`) et les annotations `@RequestParam` ou `@RequestPart` selon que la requête transporte un ou plusieurs fichiers, seuls ou accompagnés de données JSON.

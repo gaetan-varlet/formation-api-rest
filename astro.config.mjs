@@ -166,8 +166,8 @@ export default defineConfig({
 				{
 					label: 'Fichiers, Streaming & Cache',
 					items: [
-						{ slug: 'fichiers-performance/reception-fichier' },
-						{ slug: 'fichiers-performance/export-csv' },
+						{ slug: 'fichiers-performance/upload' },
+						{ slug: 'fichiers-performance/download-csv' },
 						{ slug: 'fichiers-performance/streaming' },
 						{ slug: 'fichiers-performance/cache' },
 					],
