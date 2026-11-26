@@ -143,24 +143,37 @@ Valider de l'extérieur vers l'intérieur (du moins coûteux au plus coûteux) :
 
 ### Quotas, nom et signature binaire
 
-Bloquer les payloads malveillants avant même d'analyser les données métier.
+Ces premiers contrôles bloquent les fichiers suspects ou trop volumineux avant même d'en analyser le contenu métier :
+
+**1. Limiter la taille dès l'entrée (quotas HTTP)**
+
+Pour éviter qu'un fichier trop volumineux ne sature la mémoire, Spring Boot permet de fixer une limite dans `application.properties` (ou `application.yml`). Tout dépassement est rejeté directement par le serveur avant même d'entrer dans votre controller :
 
 ```yml
-# Bloquer en amont au niveau du serveur
 # Taille max par fichier
 spring.servlet.multipart.max-file-size: 10MB
 # Taille max totale de la requête (utile avec plusieurs fichiers)
 spring.servlet.multipart.max-request-size: 10MB
 ```
 
+**2. Nettoyer et renommer le fichier (si écriture sur disque ou S3)**
+
+Pour éviter qu'un nom de fichier forgé (`../../tmp/script.sh`) n'écrive au mauvais endroit sur le serveur ou n'écrase un fichier existant, `Paths.get(name).getFileName()` ne conserve que le nom final sans aucun dossier parent, et un préfixe aléatoire (`UUID`) garantit l'unicité :
+
 ```java
-// Anti-Path Traversal (si écriture disque/S3) : nom technique aléatoire
+// Supprime tout chemin relatif et ajoute un identifiant unique
 String original = Optional.ofNullable(file.getOriginalFilename())
     .map(name -> Paths.get(name).getFileName().toString())
     .orElse("upload");
 String safeName = UUID.randomUUID() + "-" + original;
+```
 
-// Anti-Spoofing : vérification des octets réels (Apache Tika)
+**3. Vérifier le contenu réel du fichier (et pas seulement son extension)**
+
+Un utilisateur peut renommer n'importe quel fichier en `.csv` ou falsifier l'en-tête `Content-Type` de la requête. La bibliothèque **Apache Tika** lit les premiers octets réels du fichier (sa *signature binaire*) pour vérifier qu'il correspond bien à un format autorisé :
+
+```java
+// Détecte le vrai type MIME à partir des octets du fichier
 String mime = new Tika().detect(file.getInputStream());
 if (!List.of("text/csv", "text/plain").contains(mime)) {
     throw new SecurityException("Format illégitime : " + mime);
@@ -169,7 +182,12 @@ if (!List.of("text/csv", "text/plain").contains(mime)) {
 
 ### Traitement en flux & Transaction atomique
 
-La transaction garantit l'annulation totale (*Rollback*) en cas d'erreur
+Une fois le fichier validé, l'exemple ci-dessous combine quatre mécanismes pour traiter un import CSV sans risque pour l'application ni pour les données :
+
+- **Lecture ligne par ligne (`BufferedReader` sur `getInputStream()`) :** évite de charger tout le fichier en mémoire comme le ferait `file.getBytes()`.
+- **Neutralisation des formules CSV (`sanitize`) :** ajoute une apostrophe devant les cellules commençant par `=`, `+`, `-` ou `@` afin qu'Excel ou Calc les affiche comme du texte simple.
+- **Enregistrement par lots (`flush()` puis `clear()`) :** envoie les insertions par paquets de 500 lignes puis vide le cache Hibernate pour garder une empreinte mémoire constante.
+- **Transaction atomique (`@Transactional(rollbackFor = Exception.class)`) :** en cas d'erreur en cours de lecture (par exemple une valeur invalide à la 1200e ligne), toutes les insertions déjà envoyées sont annulées (*rollback*) pour ne pas laisser la base à moitié remplie.
 
 ```java
 @Transactional(rollbackFor = Exception.class)
@@ -184,7 +202,7 @@ public void process(MultipartFile file) throws IOException {
             if (batch.size() >= 500) {
                 repository.saveAll(batch);
                 entityManager.flush(); // Envoie les requêtes SQL en attente
-                entityManager.clear(); // VIDE le cache Hibernate (évite l'OOM)
+                entityManager.clear(); // Vide le cache Hibernate (évite de saturer la mémoire)
                 batch.clear();         // Vide la liste Java
             }
         });
