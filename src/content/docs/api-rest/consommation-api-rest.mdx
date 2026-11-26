@@ -107,7 +107,16 @@ public class Person {
 
 ### Configuration du client HTTP
 
-Spring Boot fournit automatiquement un bean **`RestClient.Builder`** (pré-configuré avec Jackson, les timeouts…), mais **pas** directement de bean `RestClient` prêt à l'emploi.
+Ajoutez d'abord le starter dédié dans votre `pom.xml` *(en Spring Boot 4, `spring-boot-starter-webmvc` seul ne suffit plus pour auto-configurer `RestClient.Builder` et les propriétés `spring.http.clients.*`)* :
+
+```xml title="pom.xml"
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-restclient</artifactId>
+</dependency>
+```
+
+Spring Boot fournit alors automatiquement un bean **`RestClient.Builder`** (pré-configuré avec Jackson, les timeouts, l'observabilité…), mais **pas** directement de bean `RestClient` prêt à l'emploi.
 
 <Steps>
 
@@ -185,6 +194,33 @@ public class PersonApiClient {
   - **Avec `@RequiredArgsConstructor` (le plus simple) :** donnez à l'attribut `private final` **le même nom que la méthode `@Bean`** (`private final RestClient externalRestClient;`).
   - **Ou avec `@Primary` / `@Qualifier` :** annotez le bean principal avec `@Primary`, ou écrivez le constructeur à la main en plaçant `@Qualifier("externalRestClient")` sur son paramètre.
 :::
+
+### Configuration des timeouts
+
+Par défaut, `RestClient` n'impose aucun `read-timeout` : si un service externe accepte la connexion mais ne répond jamais, le thread Tomcat reste bloqué indéfiniment (jusqu'à saturation du serveur). Définissez donc systématiquement des timeouts explicites.
+
+**Cas général (recommandé) :** configurez les timeouts globalement dans `application.properties` :
+
+```properties title="application.properties"
+spring.http.clients.connect-timeout=5s
+spring.http.clients.read-timeout=10s
+```
+
+- **`connect-timeout`** : délai maximal pour établir la connexion TCP (*fail-fast* si le serveur est injoignable ou bloqué par un pare-feu).
+- **`read-timeout`** : délai maximal d'attente de la réponse HTTP.
+
+**Cas particulier (un seul client plus lent, ex. 30 s) :** surchargez la `ClientHttpRequestFactory` uniquement sur ce `RestClient` — construite **une seule fois** dans le constructeur du `@Service` ou dans un `@Bean RestClient` *(jamais dans la méthode appelée à chaque requête)* :
+
+```java
+ClientHttpRequestFactory requestFactory = ClientHttpRequestFactoryBuilder.jdk()
+    .build(HttpClientSettings.defaults()
+        .withTimeouts(Duration.ofSeconds(5), Duration.ofSeconds(30)));
+
+RestClient slowRestClient = builder
+    .baseUrl("https://api-lente.exemple.fr")
+    .requestFactory(requestFactory)
+    .build();
+```
 
 ### Exemples de requêtes (`GET`, `POST`, authentification)
 

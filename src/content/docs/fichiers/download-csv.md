@@ -83,6 +83,7 @@ OpenCSV est très répandu dans les projets existants, mais il embarque plusieur
 
 - Encapsule l'écriture en mémoire (`StringWriter`) ou en flux (`OutputStream`), la configuration explicite du séparateur (`;`) et des guillemets, ainsi que la conversion `List<String>` → `String[]` attendue par OpenCSV.
 - **Bonne pratique d'isolation :** `CsvUtils` est la **seule classe du projet qui importe OpenCSV** ; si vous changez un jour de bibliothèque CSV (vers Apache Commons CSV ou FastCSV), aucun Service ni aucun Controller n'est impacté.
+- **Pas de `throws IOException` en mémoire :** `StringWriter` travaille uniquement en RAM et ne lève jamais d'`IOException` en pratique — encapsuler le `catch (IOException e)` dans `UncheckedIOException` évite de propager une exception vérifiée inutile dans les `Service` et `Controller` *(à l'inverse, `writeCsv` conserve `throws IOException` pour le streaming réseau, absorbé naturellement par `StreamingResponseBody`)*.
 
 ```java
 package fr.insee.formationapirest.util;
@@ -91,13 +92,15 @@ public final class CsvUtils {
     private CsvUtils() {}
 
     // Pour petits volumes (en mémoire)
-    public static String convertDataToString(List<String> titres, List<List<String>> donnees) throws IOException {
+    public static String convertDataToString(List<String> titres, List<List<String>> donnees) {
         StringWriter stringWriter = new StringWriter();
         try (ICSVWriter writer = createCsvWriter(stringWriter)) {
             writer.writeNext(titres.toArray(String[]::new));
             for (List<String> ligne : donnees) {
                 writer.writeNext(ligne.toArray(String[]::new));
             }
+        } catch (IOException e) {
+            throw new UncheckedIOException("Erreur lors de la génération du CSV", e);
         }
         return stringWriter.toString();
     }
@@ -203,7 +206,7 @@ public class VinService {
     private static final List<String> EN_TETES = List.of("id", "chateau", "appellation", "prix");
     private final VinRepository vinRepository;
 
-    public String exportCsv() throws IOException {
+    public String exportCsv() {
         List<Vin> vins = vinRepository.findAll();
         List<List<String>> lignes = vins.stream()
                 .map(this::toCsvRow)
@@ -234,7 +237,7 @@ public class VinController {
     private final ExportFileUtils exportFileUtils;
 
     @GetMapping(value = "/export", produces = "text/csv")
-    public ResponseEntity<String> exportCsv() throws IOException {
+    public ResponseEntity<String> exportCsv() {
         return ResponseEntity.ok()
                 .headers(exportFileUtils.buildCsvHeaders("vins"))
                 .body(vinService.exportCsv());
