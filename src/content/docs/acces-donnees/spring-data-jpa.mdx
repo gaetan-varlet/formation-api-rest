@@ -53,11 +53,11 @@ Avant d'écrire la moindre requête personnalisée, hériter de `JpaRepository<T
 
 - **Comment le vider en pratique :**
   - **Automatiquement :** à la fin de la transaction (`COMMIT` ou `rollback`), ou après une requête directe annotée `@Modifying(clearAutomatically = true)`.
-  - **Manuellement en cours de traitement :** lors d'un import par lots, découpez en paquets et appelez **`flush()` puis `clear()`** dans cet ordre *(exemple dans [Réception de fichiers (Upload)](/formation-api-rest/fichiers-performance/upload/#traitement-en-flux--transaction-atomique))*.
+  - **Manuellement en cours de traitement :** lors d'un import par lots, découpez en paquets et appelez **`flush()` puis `clear()`** dans cet ordre *(exemple dans [Réception de fichiers (Upload)](/formation-api-rest/fichiers/upload/#traitement-en-flux--transaction-atomique))*.
 - **Alternatives abordées plus loin pour contourner le cache L1 :**
   - **Lecture seule sur colonnes ciblées :** [Projections légères (`Record`)](#projections-légères--requêter-sans-charger-lentité) *(plus bas)* — aucun objet n'entre dans le cache L1.
   - **Mises à jour / suppressions directes :** [`@Modifying`](#requêtes-décriture--modifying) *(plus bas)* ou [Batch JDBC (`batchUpdate`)](/formation-api-rest/acces-donnees/jdbc-et-batching/#écritures-massives--saveall-vs-batch-jdbc) *(page suivante)*.
-  - **Lecture / export de gros volumes :** [Stratégies d'extraction et gros volumes](/formation-api-rest/acces-donnees/extraction-gros-volumes/) et [Le streaming](/formation-api-rest/fichiers-performance/streaming/).
+  - **Lecture / export de gros volumes :** [Stratégies d'extraction et gros volumes](/formation-api-rest/acces-donnees/extraction-gros-volumes/) et [Streaming de gros volumes (SQL → JSON)](/formation-api-rest/acces-donnees/streaming/).
 
 :::tip[Bon réflexe en lecture : `@Transactional(readOnly = true)` sur le `@Service`]
 Par défaut, Spring Data JPA applique `@Transactional(readOnly = true)` sur les méthodes de lecture **héritées** de `JpaRepository` (`findAll`, `findById`…), mais **pas sur les méthodes que vous déclarez** (*Query Methods*, `@Query`) :

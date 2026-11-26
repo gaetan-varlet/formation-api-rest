@@ -1,5 +1,5 @@
 ---
-title: "Le streaming"
+title: "Streaming de gros volumes (SQL → JSON)"
 ---
 
 ## Le problème du modèle classique (`List<T>`)
@@ -80,7 +80,7 @@ public class VinService {
     private final ObjectMapper objectMapper;
     @Transactional(readOnly = true) // Obligatoire pour maintenir le curseur JDBC ouvert
     public void streamVinsAsJson(OutputStream outputStream) throws IOException {
-        // try-with-resources obligatoire : libère le curseur DB et la connexion du ppol
+        // try-with-resources obligatoire : libère le curseur DB et la connexion du pool
         try (Stream<VinResponse> vinStream = vinRepository.streamAllDtos();
              SequenceWriter seqWriter = objectMapper.writerFor(VinResponse.class).writeValuesAsArray(outputStream)) {
             Iterator<VinResponse> iterator = vinStream.iterator();
@@ -129,107 +129,6 @@ public class VinController {
 | **Latence (TTFB)** | Dégradée (attend la fin de la requête) | **Instantanée dès le 1er lot** |
 | **Connexion DB (HikariCP)** | Empruntée brièvement | **Mobilisée pendant tout l'envoi réseau** |
 
-## Variante — Le Service pour l'export CSV (1)
-
-```java
-@Service
-@RequiredArgsConstructor
-public class VinService {
-    private final VinRepository vinRepository;
-    private static final String[] EN_TETES = {"ID", "CHATEAU", "APPELLATION", "ANNEE", "PRIX"};
-
-    @Transactional(readOnly = true)
-    public void streamVinsAsCsv(OutputStream outputStream) throws IOException {
-        // Curseur JDBC et writer CSV dans le try-with-resources
-        try (Stream<VinResponse> vinStream = vinRepository.streamAllDtos();
-             ICSVWriter csvWriter = CsvUtils.createCsvWriter(outputStream)) {
-
-            csvWriter.writeNext(EN_TETES);
-
-            Iterator<VinResponse> iterator = vinStream.iterator();
-            while (iterator.hasNext()) {
-                csvWriter.writeNext(toCsvRow(iterator.next()));
-            }
-            csvWriter.flush();
-        }
-    }
-```
-
-## Variante — Le Service pour l'export CSV (2)
-
-```java
-    private String[] toCsvRow(VinResponse vin) {
-        return new String[] {
-            Objects.toString(vin.id(), ""),
-            Objects.toString(vin.chateau(), ""),
-            Objects.toString(vin.appellation(), ""),
-            Objects.toString(vin.annee(), ""),
-            Objects.toString(vin.prix(), "")
-        };
-    }
-}
-```
-
-```java
-public final class CsvUtils {
-    private CsvUtils() {}
-    public static ICSVWriter createCsvWriter(OutputStream outputStream) {
-        Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
-        return new CSVWriterBuilder(writer)
-                .withSeparator(';')
-                .withQuoteChar(ICSVWriter.DEFAULT_QUOTE_CHARACTER)
-                .build();
-    }
-}
-```
-
-## Le contrôleur CSV
-
-```java
-@RestController
-@RequestMapping("/vins")
-@RequiredArgsConstructor
-public class VinController {
-
-    private final VinService vinService;
-    private final ExportFileUtils exportFileUtils;
-
-    @Operation(summary = "Export de tous les vins au format CSV")
-    @GetMapping(value = "/export", produces = "text/csv")
-    public ResponseEntity<StreamingResponseBody> exportVinsCsv() {
-        StreamingResponseBody responseBody = outputStream -> vinService.streamVinsAsCsv(outputStream);
-        return ResponseEntity.ok()
-                // Content-Type: text/csv; charset=UTF-8
-                // Content-Disposition: attachment; filename="vins_20261001.csv"
-                .headers(exportFileUtils.buildCsvHeaders("vins"))
-                .body(responseBody);
-    }
-}
-```
-
-## Outillage HTTP
-
-```java
-@Component
-public class ExportFileUtils {
-    private static final DateTimeFormatter DATE_SUFFIX = DateTimeFormatter.ofPattern("yyyyMMdd");
-    private static final MediaType CSV_MEDIA_TYPE = new MediaType("text", "csv", StandardCharsets.UTF_8);
-
-    // Génère les en-têtes HTTP standards pour forcer le téléchargement côté client
-    public HttpHeaders buildCsvHeaders(String nomFichierBase) {
-        String horodatage = LocalDate.now().format(DATE_SUFFIX);
-        String nomFichierComplet = String.format("%s_%s.csv", nomFichierBase, horodatage);
-        ContentDisposition contentDisposition = ContentDisposition.attachment()
-                .filename(nomFichierComplet, StandardCharsets.UTF_8)
-                .build();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(CSV_MEDIA_TYPE);
-        headers.setContentDisposition(contentDisposition);
-        return headers;
-    }
-}
-```
-
-- **`Content-Disposition: attachment`** : Indique au navigateur de télécharger le fichier au lieu de l'afficher dans l'onglet.
-- **Horodatage du fichier** : Évite les collisions de nom lors des téléchargements successifs (ex. `vins_20261001.csv`).
+:::tip[Appliquer le même principe à un export CSV]
+Cette mécanique (`Stream<VinResponse>` + `StreamingResponseBody`) s'applique de manière identique à la génération d'un fichier CSV volumineux : voir [Passer à l'échelle : export CSV en streaming](/formation-api-rest/fichiers/download-csv/#passer-à-léchelle--export-csv-en-streaming).
+:::

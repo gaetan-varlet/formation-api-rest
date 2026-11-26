@@ -4,13 +4,13 @@ title: "Téléchargement PDF, Excel et Calc (Download)"
 
 ## Fichiers binaires : ce qui change par rapport au CSV
 
-À la différence d'un [export CSV](/formation-api-rest/fichiers-performance/download-csv/) qui renvoie du texte brut (`ResponseEntity<String>`), un `PDF`, un classeur Excel (`.xlsx`) ou LibreOffice Calc (`.ods`) est un **fichier binaire**.
+À la différence d'un [export CSV](/formation-api-rest/fichiers/download-csv/) qui renvoie du texte brut (`ResponseEntity<String>`), un `PDF`, un classeur Excel (`.xlsx`) ou LibreOffice Calc (`.ods`) est un **fichier binaire**.
 
 Selon la provenance et la taille du fichier, Spring MVC propose trois types de retour :
 
 - **`ResponseEntity<byte[]>` :** adapté aux petits fichiers générés à la volée en mémoire (facture PDF, export Excel de quelques centaines de lignes).
-- **`ResponseEntity<Resource>` (`FileSystemResource`, `InputStreamResource`…) :** recommandé pour renvoyer un fichier déjà existant sur disque, dans le *classpath* ou depuis un [stockage objet (type S3)](/formation-api-rest/fichiers-performance/stockage-s3/) sans tout charger dans un `byte[]`.
-- **`ResponseEntity<StreamingResponseBody>` :** indispensable pour les fichiers très volumineux générés au fil de l'eau (voir [Le streaming](/formation-api-rest/fichiers-performance/streaming/)).
+- **`ResponseEntity<Resource>` (`FileSystemResource`, `InputStreamResource`…) :** recommandé pour renvoyer un fichier déjà existant sur disque, dans le *classpath* ou depuis un [stockage objet (type S3)](/formation-api-rest/fichiers/stockage-s3/) sans tout charger dans un `byte[]`.
+- **`ResponseEntity<StreamingResponseBody>` :** indispensable pour les fichiers très volumineux générés au fil de l'eau (voir [Streaming de gros volumes (SQL → JSON)](/formation-api-rest/acces-donnees/streaming/)).
 
 | Format | Extension | `Content-Type` (`MediaType`) | `Content-Disposition` habituel |
 | :--- | :--- | :--- | :--- |
@@ -68,7 +68,7 @@ public class VinController {
 
 En pratique, le format **`.xlsx`** (Office Open XML) s'est imposé comme standard d'échange : il est lu et édité nativement aussi bien par **Microsoft Excel** que par **LibreOffice Calc**.
 
-- **Besoin de données brutes sans mise en forme :** privilégiez le [CSV](/formation-api-rest/fichiers-performance/download-csv/), beaucoup plus léger et rapide.
+- **Besoin de données brutes sans mise en forme :** privilégiez le [CSV](/formation-api-rest/fichiers/download-csv/), beaucoup plus léger et rapide.
 - **Besoin d'un classeur `.xlsx` (onglets, largeurs de colonnes, styles, formules) :**
   - **Apache POI (`org.apache.poi:poi-ooxml`, licence Apache 2.0) :** bibliothèque de référence la plus complète en Java pour lire, créer et modifier des fichiers Excel (`XSSFWorkbook` pour des classeurs petits à moyens ; `SXSSFWorkbook` en mode *streaming* pour éviter de saturer la mémoire sur gros volumes — pensez à appeler `dispose()` à la fin).
   - **FastExcel (`org.dhatim:fastexcel`, licence Apache 2.0) :** bibliothèque **indépendante d'Apache POI**, plus légère et rapide pour créer ou lire de gros exports `.xlsx` en flux *(elle ne permet en revanche pas d'ouvrir un fichier existant pour le modifier)*.
@@ -103,7 +103,7 @@ Dès que la mise en page devient riche (facture, rapport multi-pages, en-têtes/
 
 | Besoin | Format recommandé | Outil adapté |
 | :--- | :--- | :--- |
-| Export de données brutes vers tableur | **CSV** (`.csv`) | Voir [Téléchargement et export CSV](/formation-api-rest/fichiers-performance/download-csv/) |
+| Export de données brutes vers tableur | **CSV** (`.csv`) | Voir [Téléchargement et export CSV](/formation-api-rest/fichiers/download-csv/) |
 | Tableur avec mise en forme, onglets ou types | **Excel** (`.xlsx`) | **Apache POI** (`XSSFWorkbook` / `SXSSFWorkbook`) ou **FastExcel** *(Apache 2.0)* |
 | Format OpenDocument strictement imposé | **Calc** (`.ods`) | Conversion depuis `.xlsx` via **LibreOffice** |
 | PDF simple ou manipulation de PDF en Java pur | **PDF** (`.pdf`) | **OpenPDF** *(création)* ou **Apache PDFBox** *(manipulation)* |

@@ -13,7 +13,7 @@ title: "Stratégies d'extraction et gros volumes"
 | **JDBC Stream (`JdbcClient`)** | O(1) | Max | Export brut massif (CSV / JSON) |
 
 :::caution[Piège du `Stream` d'entités JPA]
-La session Hibernate garde chaque entité en mémoire (cache L1). Pour streamer de gros volumes, utilisez obligatoirement une **projection DTO Record** ou **`JdbcClient`** (voir aussi la mise en place HTTP dans [Le streaming](/formation-api-rest/fichiers-performance/streaming/)).
+La session Hibernate garde chaque entité en mémoire (cache L1). Pour streamer de gros volumes, utilisez obligatoirement une **projection DTO Record** ou **`JdbcClient`** (voir aussi la mise en place HTTP dans [Streaming de gros volumes (SQL → JSON)](/formation-api-rest/acces-donnees/streaming/)).
 :::
 
 ## 2. Les 3 règles critiques d'infrastructure

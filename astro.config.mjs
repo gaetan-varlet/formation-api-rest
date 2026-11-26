@@ -155,23 +155,23 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Accès aux données & SQL',
+					label: 'Accès aux données SQL & Performance',
 					items: [
 						{ slug: 'acces-donnees/rappels-jpa' },
 						{ slug: 'acces-donnees/spring-data-jpa' },
 						{ slug: 'acces-donnees/jdbc-et-batching' },
 						{ slug: 'acces-donnees/extraction-gros-volumes' },
+						{ slug: 'acces-donnees/streaming' },
+						{ slug: 'acces-donnees/cache' },
 					],
 				},
 				{
-					label: 'Fichiers, Streaming & Cache',
+					label: 'Gestion des fichiers',
 					items: [
-						{ slug: 'fichiers-performance/upload' },
-						{ slug: 'fichiers-performance/download-csv' },
-						{ slug: 'fichiers-performance/download-pdf-excel' },
-						{ slug: 'fichiers-performance/stockage-s3' },
-						{ slug: 'fichiers-performance/streaming' },
-						{ slug: 'fichiers-performance/cache' },
+						{ slug: 'fichiers/upload' },
+						{ slug: 'fichiers/download-csv' },
+						{ slug: 'fichiers/download-pdf-excel' },
+						{ slug: 'fichiers/stockage-s3' },
 					],
 				},
 				{

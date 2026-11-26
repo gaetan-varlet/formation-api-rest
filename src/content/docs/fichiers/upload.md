@@ -11,7 +11,7 @@ Une fois le fichier reçu et validé côté API, le traitement dépend de sa nat
 - **Fichiers structurés (`CSV`, `JSON`, `XML`) :** le plus souvent parsés (en flux / *streaming* si le volume est important) afin d'extraire les données et de les enregistrer en base de données.
 - **Fichiers binaires (photos, `PDF`, documents Writer/Calc…) :**
   - **Enregistrement tel quel en base de données (ex. PostgreSQL)** si le volume reste limité : cela permet de rester **dans la même transaction** que les données métier associées (cohérence garantie en cas de *rollback* et sauvegardes centralisées) tout en évitant d'avoir à gérer un second système de stockage (ce qui limite la complexité du SI).
-  - **Stockage sur un serveur de fichiers ou un [stockage objet (type S3)](/formation-api-rest/fichiers-performance/stockage-s3/)** dès que les fichiers sont volumineux ou nombreux : on ne conserve alors en base que les métadonnées et la référence vers le fichier, pour éviter d'alourdir la base de données.
+  - **Stockage sur un serveur de fichiers ou un [stockage objet (type S3)](/formation-api-rest/fichiers/stockage-s3/)** dès que les fichiers sont volumineux ou nombreux : on ne conserve alors en base que les métadonnées et la référence vers le fichier, pour éviter d'alourdir la base de données.
 
 ## Les différents cas d'upload
 
@@ -225,5 +225,5 @@ private String validerCellule(String val) {
 ```
 
 :::note[Valider à l'entrée, neutraliser à la sortie]
-On applique ici le même principe que dans [Neutralisation des entrées utilisateur](/formation-api-rest/securite/neutralisation-entrees/) : à l'import, on **valide** les données et on rejette le fichier dès qu'une ligne invalide ou suspecte est détectée, sans modifier les valeurs stockées en base *(selon le besoin métier, une autre stratégie consiste à faire un import partiel avec un rapport d'erreurs ligne par ligne)*. Si des champs texte libres peuvent légitimement commencer par `+` ou `-` (par exemple un numéro `+33 6...`), la neutralisation par apostrophe pour Excel/Calc se fait au moment de l'[export CSV](/formation-api-rest/fichiers-performance/download-csv/).
+On applique ici le même principe que dans [Neutralisation des entrées utilisateur](/formation-api-rest/securite/neutralisation-entrees/) : à l'import, on **valide** les données et on rejette le fichier dès qu'une ligne invalide ou suspecte est détectée, sans modifier les valeurs stockées en base *(selon le besoin métier, une autre stratégie consiste à faire un import partiel avec un rapport d'erreurs ligne par ligne)*. Si des champs texte libres peuvent légitimement commencer par `+` ou `-` (par exemple un numéro `+33 6...`), la neutralisation par apostrophe pour Excel/Calc se fait au moment de l'[export CSV](/formation-api-rest/fichiers/download-csv/).
 :::
