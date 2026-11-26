@@ -58,7 +58,7 @@ public interface VinRepository extends JpaRepository<Vin, Long> {
     })
     @Query("""
         SELECT new fr.insee.formationapirest.dto.VinResponse(
-            v.id, v.chateau, v.prix
+            v.id, v.chateau, v.appellation, v.prix
         )
         FROM Vin v
     """)

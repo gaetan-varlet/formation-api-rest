@@ -44,7 +44,7 @@ public class SimpleFilter implements Filter {
 
 ### Restreindre un filtre à certaines URLs (`FilterRegistrationBean`)
 
-Pour n'appliquer un filtre qu'à un motif d'URL précis (par exemple `/vin/*`), **retirez `@Component`** de la classe du filtre et déclarez un `FilterRegistrationBean` dans une classe `@Configuration` :
+Pour n'appliquer un filtre qu'à un motif d'URL précis (par exemple `/vins/*`), **retirez `@Component`** de la classe du filtre et déclarez un `FilterRegistrationBean` dans une classe `@Configuration` :
 
 ```java title="PartialFilter.java"
 @Slf4j
@@ -57,9 +57,9 @@ public class PartialFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        log.info("Requête sur /vin : {} {}", req.getMethod(), req.getRequestURI());
+        log.info("Requête sur /vins : {} {}", req.getMethod(), req.getRequestURI());
         chain.doFilter(request, response);
-        log.info("Réponse /vin (Content-Type) : {}", res.getContentType());
+        log.info("Réponse /vins (Content-Type) : {}", res.getContentType());
     }
 }
 ```
@@ -72,7 +72,7 @@ public class FilterConfig {
     public FilterRegistrationBean<PartialFilter> loggingFilter() {
         FilterRegistrationBean<PartialFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new PartialFilter());
-        registrationBean.addUrlPatterns("/vin/*");
+        registrationBean.addUrlPatterns("/vins/*");
         registrationBean.setOrder(3);
         return registrationBean;
     }

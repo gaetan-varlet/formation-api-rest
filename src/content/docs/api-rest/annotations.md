@@ -7,25 +7,25 @@ title: "Annotations Spring Web & formats"
 - **`value`** (ou **`path`**) permet de spécifier le ou les chemin(s) de l'URL, et **`method`** la ou les méthode(s) HTTP autorisées. Si `method` n'est pas précisé, **toutes les méthodes HTTP** (`GET`, `POST`, `PUT`, `DELETE`…) sont acceptées.
 
 ```java
-@RequestMapping(value = "/vin", method = RequestMethod.GET)
-@RequestMapping(value = { "/vin", "/vins" }, method = { RequestMethod.PUT, RequestMethod.POST })
+@RequestMapping(value = "/vins", method = RequestMethod.GET)
+@RequestMapping(value = { "/vins", "/catalogue" }, method = { RequestMethod.PUT, RequestMethod.POST })
 ```
 
 - Le mapping peut encore être restreint en imposant un ou plusieurs en-têtes dans la requête avec **`headers`** :
 
 ```java
-@RequestMapping(value = "/vin", headers = "key=val", method = RequestMethod.GET)
-@RequestMapping(value = "/vin", headers = { "key1=val1", "key2=val2" }, method = RequestMethod.GET)
+@RequestMapping(value = "/vins", headers = "key=val", method = RequestMethod.GET)
+@RequestMapping(value = "/vins", headers = { "key1=val1", "key2=val2" }, method = RequestMethod.GET)
 ```
 
 - Il existe un raccourci dédié pour chaque méthode HTTP (à privilégier au quotidien) :
 
 ```java
-@GetMapping("/vin")     // équivalent à @RequestMapping(value = "/vin", method = RequestMethod.GET)
-@PostMapping("/vin")    // équivalent à @RequestMapping(value = "/vin", method = RequestMethod.POST)
-@PutMapping("/vin")     // équivalent à @RequestMapping(value = "/vin", method = RequestMethod.PUT)
-@PatchMapping("/vin")   // équivalent à @RequestMapping(value = "/vin", method = RequestMethod.PATCH)
-@DeleteMapping("/vin")  // équivalent à @RequestMapping(value = "/vin", method = RequestMethod.DELETE)
+@GetMapping("/vins")     // équivalent à @RequestMapping(value = "/vins", method = RequestMethod.GET)
+@PostMapping("/vins")    // équivalent à @RequestMapping(value = "/vins", method = RequestMethod.POST)
+@PutMapping("/vins")     // équivalent à @RequestMapping(value = "/vins", method = RequestMethod.PUT)
+@PatchMapping("/vins")   // équivalent à @RequestMapping(value = "/vins", method = RequestMethod.PATCH)
+@DeleteMapping("/vins")  // équivalent à @RequestMapping(value = "/vins", method = RequestMethod.DELETE)
 ```
 
 :::caution[Conflit de routes = échec au démarrage]

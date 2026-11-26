@@ -100,7 +100,7 @@ Pour récupérer un jeton de test manuellement : [outil de récupération de jet
        ) {
            authorize
                .requestMatchers(HttpMethod.GET, "/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-               .requestMatchers(HttpMethod.GET, "/vin", "/vin/**").permitAll()
+               .requestMatchers(HttpMethod.GET, "/vins", "/vins/**").permitAll()
                .requestMatchers("/mon-nom").authenticated()
                .requestMatchers("/environnement").hasRole("ADMIN_XXX");
 
@@ -214,7 +214,7 @@ public class SecurityConfigurationInMemoryImpl {
             .requestMatchers("/h2-console/**").permitAll()
             .requestMatchers(HttpMethod.OPTIONS).permitAll()
             .requestMatchers("/url1", "/url2").permitAll()
-            .requestMatchers("/vin", "/vin/**").permitAll()
+            .requestMatchers("/vins", "/vins/**").permitAll()
             .requestMatchers("/mon-nom").authenticated()
             .requestMatchers("/environnement").hasRole("ADMIN_TOUCAN")
             .anyRequest().denyAll());

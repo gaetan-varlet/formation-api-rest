@@ -4,8 +4,8 @@ title: "Création d'une API CRUD"
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-:::note[Point de départ : `VinController` (`GET /vin`)]
-Nous complétons ici le contrôleur `VinController` déjà mis en place avec `GET /vin` dans [Configuration de la BDD](/formation-api-rest/spring-boot/configuration-bdd/#tester-le-bon-fonctionnement-avec-un-premier-endpoint).
+:::note[Point de départ : `VinController` (`GET /vins`)]
+Nous complétons ici le contrôleur `VinController` déjà mis en place avec `GET /vins` dans [Configuration de la BDD](/formation-api-rest/spring-boot/configuration-bdd/#tester-le-bon-fonctionnement-avec-un-premier-endpoint).
 :::
 
 ## Opérations CRUD par identifiant et création
@@ -24,7 +24,7 @@ public Vin getById(@PathVariable Long id) {
 }
 ```
 
-Test : [http://localhost:8080/vin/1](http://localhost:8080/vin/1)
+Test : [http://localhost:8080/vins/1](http://localhost:8080/vins/1)
 
 </TabItem>
 <TabItem label="POST (création)">
@@ -41,7 +41,7 @@ public Vin add(@RequestBody Vin vin) {
 }
 ```
 
-Requête `POST` sur `http://localhost:8080/vin` avec un corps JSON :
+Requête `POST` sur `http://localhost:8080/vins` avec un corps JSON :
 
 ```json
 {
@@ -107,8 +107,8 @@ public List<Vin> getAll(@RequestParam(required = false) String appellation) {
 }
 ```
 
-- Tous les vins : [http://localhost:8080/vin](http://localhost:8080/vin)
-- Filtré sur Margaux : [http://localhost:8080/vin?appellation=Margaux](http://localhost:8080/vin?appellation=Margaux)
+- Tous les vins : [http://localhost:8080/vins](http://localhost:8080/vins)
+- Filtré sur Margaux : [http://localhost:8080/vins?appellation=Margaux](http://localhost:8080/vins?appellation=Margaux)
 
 ## Refactoring : mise en place d'une couche `@Service`
 
@@ -129,7 +129,7 @@ public class VinService {
 
 ```java title="VinController.java"
 @RestController
-@RequestMapping("/vin")
+@RequestMapping("/vins")
 @RequiredArgsConstructor
 public class VinController {
 
@@ -170,12 +170,12 @@ L'annotation `@ParameterObject` (`org.springdoc.core.annotations.ParameterObject
 :::
 
 - Page 0 de 2 éléments triés de manière décroissante par appellation puis prix :  
-  [http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC](http://localhost:8080/vin/pageable?page=0&size=2&sort=appellation,prix,DESC)
+  [http://localhost:8080/vins/pageable?page=0&size=2&sort=appellation,prix,DESC](http://localhost:8080/vins/pageable?page=0&size=2&sort=appellation,prix,DESC)
 - Page de 20 éléments triés par appellation croissante puis par prix décroissant :  
-  [http://localhost:8080/vin/pageable?sort=appellation&sort=prix,DESC](http://localhost:8080/vin/pageable?sort=appellation&sort=prix,DESC)
+  [http://localhost:8080/vins/pageable?sort=appellation&sort=prix,DESC](http://localhost:8080/vins/pageable?sort=appellation&sort=prix,DESC)
 
 :::caution[Convention d'URL : n'utilisez pas `/pageable` en projet réel]
-La route `/vin/pageable` sert uniquement ici à faire cohabiter les deux exemples (`List` et `Page`) dans le TP. En pratique sur une API REST, on ne crée pas un endpoint dédié `/pageable` : on expose directement **`GET /vin`**, qui retourne soit une liste (`List`), soit une page (`Page`) selon le besoin de volumétrie.
+La route `/vins/pageable` sert uniquement ici à faire cohabiter les deux exemples (`List` et `Page`) dans le TP. En pratique sur une API REST, on ne crée pas un endpoint dédié `/pageable` : on expose directement **`GET /vins`**, qui retourne soit une liste (`List`), soit une page (`Page`) selon le besoin de volumétrie.
 :::
 
 ## Renvoyer une `ResponseEntity`
@@ -198,4 +198,4 @@ public ResponseEntity<Void> add(@RequestBody Vin vin) {
 ```
 
 - Code HTTP renvoyé : **`201 Created`**.
-- En-tête ajouté à la réponse : `Location: http://localhost:8080/vin/5`.
+- En-tête ajouté à la réponse : `Location: http://localhost:8080/vins/5`.

@@ -24,7 +24,7 @@ Le contrôleur reste identique dans son principe à celui du CSV : on construit 
 
 ```java
 @RestController
-@RequestMapping("vin")
+@RequestMapping("/vins")
 @RequiredArgsConstructor
 public class VinController {
 
@@ -33,7 +33,7 @@ public class VinController {
 
     private final VinExportService vinExportService;
 
-    @GetMapping(value = "export/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @GetMapping(value = "/export/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> exportPdf() throws IOException {
         byte[] pdf = vinExportService.genererCataloguePdf();
         ContentDisposition disposition = ContentDisposition.inline()
@@ -46,7 +46,7 @@ public class VinController {
                 .body(pdf);
     }
 
-    @GetMapping("export/excel")
+    @GetMapping("/export/excel")
     public ResponseEntity<byte[]> exportExcel() throws IOException {
         byte[] xlsx = vinExportService.genererExcel();
         ContentDisposition disposition = ContentDisposition.attachment()

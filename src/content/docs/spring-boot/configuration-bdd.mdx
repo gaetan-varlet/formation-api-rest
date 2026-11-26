@@ -150,7 +150,7 @@ public interface VinRepository extends JpaRepository<Vin, Long> {
 
 ## Tester le bon fonctionnement avec un premier endpoint
 
-Pour vérifier dès maintenant que les scripts SQL, l'entité `Vin` et `VinRepository` fonctionnent ensemble, créez un contrôleur minimal exposant `GET /vin` :
+Pour vérifier dès maintenant que les scripts SQL, l'entité `Vin` et `VinRepository` fonctionnent ensemble, créez un contrôleur minimal exposant `GET /vins` :
 
 ```java title="src/main/java/fr/insee/formationapirest/controller/VinController.java"
 package fr.insee.formationapirest.controller;
@@ -164,7 +164,7 @@ import fr.insee.formationapirest.repository.VinRepository;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/vin")
+@RequestMapping("/vins")
 @RequiredArgsConstructor
 public class VinController {
 
@@ -177,7 +177,7 @@ public class VinController {
 }
 ```
 
-Démarrez l'application et accédez à [http://localhost:8080/vin](http://localhost:8080/vin) : vous devez obtenir la liste des 4 vins de `data.sql` au format JSON. *(Nous complèterons ce contrôleur avec le reste du CRUD dans [Création d'une API CRUD](/formation-api-rest/api-rest/creation-crud/).)*
+Démarrez l'application et accédez à [http://localhost:8080/vins](http://localhost:8080/vins) : vous devez obtenir la liste des 4 vins de `data.sql` au format JSON. *(Nous complèterons ce contrôleur avec le reste du CRUD dans [Création d'une API CRUD](/formation-api-rest/api-rest/creation-crud/).)*
 
 :::note[En projet (hors formation) : exclure H2 du JAR]
 Si H2 reste présent dans le `pom.xml` pour le développement local, pensez à l'exclure lors du packaging du `.jar` de production :

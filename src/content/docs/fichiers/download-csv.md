@@ -41,9 +41,23 @@ Un besoin fréquent consiste à exporter les données de l'application (tables d
 
 Plutôt que de concaténer manuellement des valeurs séparées par `;` (ce qui casse dès qu'une donnée contient un `;`, des guillemets `"` ou un retour à la ligne), on s'appuie sur une bibliothèque pour produire un fichier conforme.
 
-L'approche présentée ici génère le CSV simplement en mémoire : elle convient très bien aux **petits volumes** (jusqu'à quelques milliers de lignes). Pour des extractions volumineuses, il faudra basculer vers le [streaming](#passer-à-léchelle--export-csv-en-streaming).
+## En mémoire ou en streaming ?
 
-## Export CSV en mémoire (petits volumes)
+Selon la volumétrie attendue, deux approches existent pour générer le CSV :
+
+**En mémoire (petits volumes) :**
+
+- **Avantages :** logique simple, synchrone et facile à tester ; bien adaptée aux volumes petits et bornés (ordre de grandeur : quelques Mo générés, soit de **quelques milliers à quelques dizaines de milliers de lignes selon le nombre de colonnes**), comme une table de référence ou une liste filtrée.
+- **Limites :** charge en même temps en RAM les entités JPA (plus le cache Hibernate), le buffer `StringWriter` et la `String` finale — soit facilement **5 à 10 fois** la taille du fichier. Risque d'`OutOfMemoryError` dès que le volume grossit ou en cas de téléchargements simultanés.
+
+**En streaming (gros volumes) :**
+
+- **Avantages :** lit les données au fil de l'eau via un curseur SQL et écrit directement dans le flux HTTP (`StreamingResponseBody`) avec une empreinte mémoire constante (**O(1)**). Indispensable dès que l'export peut atteindre plusieurs dizaines de Mo, que la table grossit dans le temps (volume non borné) ou que plusieurs utilisateurs exportent en parallèle.
+- **Contraintes :** mise en œuvre un peu plus technique (projection DTO en `Stream`, transaction `@Transactional(readOnly = true)` et connexion BDD maintenues ouvertes pendant toute la durée du téléchargement).
+
+## Socle commun aux deux approches
+
+Quelle que soit l'approche retenue (en mémoire ou en streaming), la dépendance CSV, le formatage et la construction des en-têtes HTTP sont partagés.
 
 ### 1. Dépendance OpenCSV
 
@@ -65,9 +79,9 @@ OpenCSV est très répandu dans les projets existants, mais il embarque plusieur
 - **FastCSV (`de.siegmar:fastcsv`, MIT) :** bibliothèque moderne (Java 17+), très rapide et **sans aucune dépendance transitive** (surface CVE minimale).
 :::
 
-### 2. Classe utilitaire : CsvUtils
+### 2. Génération CSV : `CsvUtils`
 
-- Encapsule l'écriture du flux dans un `StringWriter` et la configuration explicite du séparateur (`;`) et des guillemets d'échappement.
+- Encapsule l'écriture en mémoire (`StringWriter`) ou en flux (`OutputStream`), la configuration explicite du séparateur (`;`) et des guillemets, ainsi que la conversion `List<String>` → `String[]` attendue par OpenCSV.
 - **Bonne pratique d'isolation :** `CsvUtils` est la **seule classe du projet qui importe OpenCSV** ; si vous changez un jour de bibliothèque CSV (vers Apache Commons CSV ou FastCSV), aucun Service ni aucun Controller n'est impacté.
 
 ```java
@@ -76,15 +90,31 @@ package fr.insee.formationapirest.util;
 public final class CsvUtils {
     private CsvUtils() {}
 
-    public static String convertDataToString(String[] titres, List<String[]> donnees) throws IOException {
+    // Pour petits volumes (en mémoire)
+    public static String convertDataToString(List<String> titres, List<List<String>> donnees) throws IOException {
         StringWriter stringWriter = new StringWriter();
         try (ICSVWriter writer = createCsvWriter(stringWriter)) {
-            writer.writeNext(titres);
-            writer.writeAll(donnees);
+            writer.writeNext(titres.toArray(String[]::new));
+            for (List<String> ligne : donnees) {
+                writer.writeNext(ligne.toArray(String[]::new));
+            }
         }
         return stringWriter.toString();
     }
 
+    // Pour gros volumes (en streaming)
+    public static void writeCsv(OutputStream outputStream, List<String> titres, Stream<List<String>> lignes)
+            throws IOException {
+        try (ICSVWriter csvWriter = createCsvWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
+            csvWriter.writeNext(titres.toArray(String[]::new));
+            Iterator<List<String>> iterator = lignes.iterator();
+            while (iterator.hasNext()) {
+                csvWriter.writeNext(iterator.next().toArray(String[]::new));
+            }
+        }
+    }
+
+    // Configuration commune du format CSV (partagée entre mémoire et streaming)
     private static ICSVWriter createCsvWriter(Writer writer) {
         return new CSVWriterBuilder(writer)
                 // séparateur point-virgule (virgule par défaut)
@@ -96,123 +126,138 @@ public final class CsvUtils {
 }
 ```
 
-### 3. Implémentation du Service
+:::tip[Sécurité : neutraliser les formules tableur à l'export]
+Si votre export contient des champs texte libres saisis par des utilisateurs et est destiné à être ouvert dans un tableur (Excel, Calc), neutralisez les valeurs commençant par `=`, `+`, `-`, `@`, `\t` ou `\r` afin qu'elles ne soient pas interprétées comme des formules. Placez cette logique dans une classe utilitaire dédiée (`ExportSecurityUtils`) pour pouvoir la réutiliser aussi bien pour vos exports CSV qu'Excel ou Calc :
 
-- Récupération des entités et transformation en tableau de chaînes (`String[]`)
-- Sécurisation des valeurs nulles avec `Objects.toString()`
+```java
+public final class ExportSecurityUtils {
+    private static final String FORMULA_PREFIXES = "=+-@\t\r";
+
+    private ExportSecurityUtils() {}
+
+    public static String neutraliserFormule(String val) {
+        if (val == null || val.isEmpty()) {
+            return val;
+        }
+        return FORMULA_PREFIXES.indexOf(val.charAt(0)) >= 0 ? "'" + val : val;
+    }
+}
+```
+
+Appelez-la **dans le `Service`** (dans `toCsvRow`), **uniquement sur les colonnes de texte libre** (ex. `ExportSecurityUtils.neutraliserFormule(Objects.toString(vin.getChateau(), ""))`). On ne l'applique pas automatiquement à toutes les cellules dans `CsvUtils` pour ne pas transformer les nombres négatifs (`-12.50` → `'-12.50`) en texte dans Excel/Calc, ni altérer les CSV consommés par un autre programme plutôt que par un tableur.
+
+Cette séparation suit la même règle que pour le HTML : on valide les données à l'entrée sans les altérer en base, et on neutralise à la sortie selon le format cible (voir [Neutralisation des entrées utilisateur](/formation-api-rest/securite/neutralisation-entrees/)).
+:::
+
+### 3. En-têtes HTTP : `ExportFileUtils`
+
+Plutôt que de dupliquer la construction des en-têtes HTTP dans chaque contrôleur d'export, on centralise les bonnes pratiques dans un composant dédié (`ExportFileUtils`) :
+
+```java
+import java.time.Clock;
+
+@Component
+@RequiredArgsConstructor
+public class ExportFileUtils {
+    private static final DateTimeFormatter DATE_TIME_SUFFIX = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+    private static final MediaType CSV_MEDIA_TYPE = new MediaType("text", "csv", StandardCharsets.UTF_8);
+
+    private final Clock clock;
+
+    public HttpHeaders buildCsvHeaders(String nomFichierBase) {
+        return buildAttachmentHeaders(nomFichierBase, "csv", CSV_MEDIA_TYPE);
+    }
+
+    public HttpHeaders buildAttachmentHeaders(String nomFichierBase, String extension, MediaType mediaType) {
+        String horodatage = LocalDateTime.now(clock).format(DATE_TIME_SUFFIX);
+        String nomFichierComplet = String.format("%s_%s.%s", nomFichierBase, horodatage, extension);
+        ContentDisposition contentDisposition = ContentDisposition.attachment()
+                .filename(nomFichierComplet, StandardCharsets.UTF_8)
+                .build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(mediaType);
+        headers.setContentDisposition(contentDisposition);
+        return headers;
+    }
+}
+```
+
+- **Réutilisable multi-formats (`buildAttachmentHeaders`) :** la même méthode sert aussi bien pour un CSV que pour un PDF ou un fichier Excel (`.xlsx`).
+- **`Content-Disposition: attachment` via `ContentDisposition` :** force le téléchargement avec gestion propre de l'UTF-8 (`filename` + `filename*`).
+- **Horodatage à la seconde (`yyyyMMdd_HHmmss`) :** évite les collisions de nom même lors de plusieurs exports successifs dans la même journée (ex. `vins_20261001_143025.csv`).
+- **Pourquoi `@Component` ici (et pas `static` comme `CsvUtils`) ?** `CsvUtils` effectue une transformation pure sans dépendance externe : il reste `static`. À l'inverse, `ExportFileUtils` dépend de l'heure courante (`Clock`) : en faire un bean `@Component` permet d'injecter `Clock` et de figer la date dans les tests (cf. [L'injection de dépendances](/formation-api-rest/spring-boot/injection-dependances/#bean-spring-component-ou-classe-utilitaire-static-) et [Horloge et gestion du temps](/formation-api-rest/tests/horloge-temps/)). Il suffit d'exposer un bean `@Bean Clock clock() { return Clock.systemDefaultZone(); }` dans une classe `@Configuration`.
+
+## Export CSV en mémoire (petits volumes)
+
+### 1. Service
+
+- Récupération des entités et transformation en liste de colonnes (`List<String>`)
+- Sécurisation des valeurs nulles avec `Objects.toString()` (indispensable avec `List.of(...)` qui interdit `null`)
 
 ```java
 @Service
 @RequiredArgsConstructor
 public class VinService {
+
+    private static final List<String> EN_TETES = List.of("id", "chateau", "appellation", "prix");
     private final VinRepository vinRepository;
 
     public String exportCsv() throws IOException {
         List<Vin> vins = vinRepository.findAll();
-        String[] titres = {"id", "chateau", "appellation", "prix"};
-        List<String[]> lignes = vins.stream()
-                .map(this::convertVinToString)
+        List<List<String>> lignes = vins.stream()
+                .map(this::toCsvRow)
                 .toList();
-        return CsvUtils.convertDataToString(titres, lignes);
+        return CsvUtils.convertDataToString(EN_TETES, lignes);
     }
-    private String[] convertVinToString(Vin vin) {
-        return new String[] {
+
+    private List<String> toCsvRow(Vin vin) {
+        return List.of(
             Objects.toString(vin.getId(), ""),
             Objects.toString(vin.getChateau(), ""),
             Objects.toString(vin.getAppellation(), ""),
             Objects.toString(vin.getPrix(), "")
-        };
+        );
     }
 }
 ```
 
-:::tip[Sécurité : neutraliser les formules tableur à l'export]
-Si votre export contient des champs texte libres saisis par des utilisateurs, c'est **au moment de générer le CSV** (et non lors du stockage en base) qu'il faut neutraliser les valeurs commençant par `=`, `+`, `-`, `@`, `\t` ou `\r` afin qu'Excel ou Calc ne les exécute pas comme des formules :
-
-```java
-private static final String FORMULA_PREFIXES = "=+-@\t\r";
-
-private String neutraliserFormuleCsv(String val) {
-    if (val == null || val.isEmpty()) {
-        return val;
-    }
-    return FORMULA_PREFIXES.indexOf(val.charAt(0)) >= 0 ? "'" + val : val;
-}
-```
-
-Cette séparation suit la même règle que pour le HTML : on valide les données à l'entrée sans les altérer en base, et on neutralise à la sortie selon le format cible (voir [Neutralisation des entrées utilisateur](/formation-api-rest/securite/neutralisation-entrees/)).
-:::
-
-### 4. Exposition dans le Controller
-
-- Construction type-safe du `Content-Disposition` avec Spring (`StandardCharsets.UTF_8`)
-- Spécification du type MIME `text/csv` *(Spring Boot gère déjà UTF-8 automatiquement sur un retour `String`)*
+### 2. Controller
 
 ```java
 @RestController
-@RequestMapping("vin")
+@RequestMapping("/vins")
 @RequiredArgsConstructor
 public class VinController {
 
     private final VinService vinService;
+    private final ExportFileUtils exportFileUtils;
 
-    @GetMapping(value = "export", produces = "text/csv")
+    @GetMapping(value = "/export", produces = "text/csv")
     public ResponseEntity<String> exportCsv() throws IOException {
-        ContentDisposition contentDisposition = ContentDisposition.attachment()
-                .filename("vins.csv", StandardCharsets.UTF_8)
-                .build();
-
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+                .headers(exportFileUtils.buildCsvHeaders("vins"))
                 .body(vinService.exportCsv());
     }
 }
 ```
 
-Test dans un navigateur : [http://localhost:8080/vin/export](http://localhost:8080/vin/export) déclenche directement le téléchargement du fichier `vins.csv`.
-
-## Quand passer au streaming ?
-
-**✅ Quand l'approche en mémoire suffit :**
-
-- **Simple et lisible :** logique synchrone minimale, facile à tester.
-- **Adaptée au quotidien :** idéale pour des tables de référence ou des listes filtrées (jusqu'à quelques milliers de lignes).
-
-**⚠️ Ses limites sur gros volumes :**
-
-- **Cumul en mémoire :** la requête charge toutes les entités JPA, le buffer `StringWriter` et la `String` finale en même temps en RAM.
-- **Risque de saturation mémoire :** sur de gros volumes ou en cas de téléchargements simultanés, l'application peut déclencher une `OutOfMemoryError` et s'arrêter.
+Test dans un navigateur : [http://localhost:8080/vins/export](http://localhost:8080/vins/export) déclenche directement le téléchargement d'un fichier horodaté (ex. `vins_20261001_143025.csv`).
 
 ## Passer à l'échelle : export CSV en streaming
 
-Pour contourner cette limite sur les gros volumes, on s'appuie sur le mécanisme présenté dans [Streaming de gros volumes (SQL → JSON)](/formation-api-rest/acces-donnees/streaming/) : un curseur PostgreSQL projeté en `Stream<VinResponse>` écrit directement dans l'`OutputStream` HTTP via `StreamingResponseBody`.
+Pour contourner les limites mémoire sur les gros volumes, on s'appuie sur le mécanisme présenté dans [Streaming de gros volumes (SQL → JSON)](/formation-api-rest/acces-donnees/streaming/) : un curseur PostgreSQL projeté en `Stream<VinResponse>` écrit directement dans l'`OutputStream` HTTP via `StreamingResponseBody`.
 
-### 1. Adapter `CsvUtils` pour écrire dans un `OutputStream`
+### 1. Service transactionnel en flux
 
-On ajoute une méthode `writeCsv` dans `CsvUtils` qui réutilise la même configuration (`createCsvWriter(Writer)`) et encapsule la boucle d'écriture dans l'`OutputStream` :
-
-```java
-// Méthode à ajouter dans CsvUtils (seule classe qui importe OpenCSV)
-public static void writeCsv(OutputStream outputStream, String[] titres, Stream<String[]> lignes) throws IOException {
-    try (ICSVWriter csvWriter = createCsvWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-        csvWriter.writeNext(titres);
-        Iterator<String[]> iterator = lignes.iterator();
-        while (iterator.hasNext()) {
-            csvWriter.writeNext(iterator.next());
-        }
-        csvWriter.flush();
-    }
-}
-```
-
-### 2. Service transactionnel en flux
+Par rapport à la version en mémoire, la principale différence est l'utilisation d'une **projection DTO en flux** (`Stream<VinResponse>` via `vinRepository.streamAllDtos()`) au lieu de charger des entités JPA (`List<Vin>`), afin d'éviter de saturer le cache Hibernate. La transformation en ligne CSV (`toCsvRow`) reste quasi identique :
 
 ```java
 @Service
 @RequiredArgsConstructor
 public class VinService {
 
-    private static final String[] EN_TETES = {"ID", "CHATEAU", "APPELLATION", "ANNEE", "PRIX"};
+    private static final List<String> EN_TETES = List.of("id", "chateau", "appellation", "prix");
     private final VinRepository vinRepository;
 
     @Transactional(readOnly = true)
@@ -223,22 +268,23 @@ public class VinService {
         }
     }
 
-    private String[] toCsvRow(VinResponse vin) {
-        return new String[] {
+    private List<String> toCsvRow(VinResponse vin) {
+        return List.of(
             Objects.toString(vin.id(), ""),
             Objects.toString(vin.chateau(), ""),
             Objects.toString(vin.appellation(), ""),
-            Objects.toString(vin.annee(), ""),
             Objects.toString(vin.prix(), "")
-        };
+        );
     }
 }
 ```
 
-- **Aucun import OpenCSV dans `VinService` :** le service reste focalisé sur la transaction et le mapping métier (`toCsvRow` transforme chaque `VinResponse` en tableau de colonnes `String[]`).
+- **Aucun import OpenCSV ni tableau `String[]` dans `VinService` :** le service reste focalisé sur la transaction et le mapping métier (`toCsvRow` transforme chaque `VinResponse` en `List<String>`).
 - **Évaluation paresseuse :** `vinStream.map(this::toCsvRow)` ne charge rien en RAM ; chaque ligne est convertie et écrite une par une au fil de l'eau en **O(1)**.
 
-### 3. Controller avec `StreamingResponseBody` et en-têtes horodatés
+### 2. Controller avec `StreamingResponseBody`
+
+Le contrôleur réutilise directement `ExportFileUtils` : la seule différence avec la version en mémoire est le retour `StreamingResponseBody` qui branche le service sur le flux HTTP.
 
 ```java
 @RestController
@@ -254,35 +300,8 @@ public class VinController {
     public ResponseEntity<StreamingResponseBody> exportVinsCsv() {
         StreamingResponseBody responseBody = outputStream -> vinService.streamVinsAsCsv(outputStream);
         return ResponseEntity.ok()
-                // Content-Type: text/csv; charset=UTF-8
-                // Content-Disposition: attachment; filename="vins_20261001.csv"
                 .headers(exportFileUtils.buildCsvHeaders("vins"))
                 .body(responseBody);
     }
 }
 ```
-
-```java
-@Component
-public class ExportFileUtils {
-    private static final DateTimeFormatter DATE_SUFFIX = DateTimeFormatter.ofPattern("yyyyMMdd");
-    private static final MediaType CSV_MEDIA_TYPE = new MediaType("text", "csv", StandardCharsets.UTF_8);
-
-    // Génère les en-têtes HTTP standards pour forcer le téléchargement côté client
-    public HttpHeaders buildCsvHeaders(String nomFichierBase) {
-        String horodatage = LocalDate.now().format(DATE_SUFFIX);
-        String nomFichierComplet = String.format("%s_%s.csv", nomFichierBase, horodatage);
-        ContentDisposition contentDisposition = ContentDisposition.attachment()
-                .filename(nomFichierComplet, StandardCharsets.UTF_8)
-                .build();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(CSV_MEDIA_TYPE);
-        headers.setContentDisposition(contentDisposition);
-        return headers;
-    }
-}
-```
-
-- **`Content-Disposition: attachment`** : indique au navigateur de télécharger le fichier au lieu de l'afficher dans l'onglet.
-- **Horodatage du fichier** : évite les collisions de nom lors des téléchargements successifs (ex. `vins_20261001.csv`).

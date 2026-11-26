@@ -36,8 +36,8 @@
   <line x1="689" y1="108" x2="689" y2="284" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5"/>
 
   <!-- 1. Preflight OPTIONS -->
-  <text x="410" y="126" text-anchor="middle" class="step" fill="#4338ca">1. OPTIONS /vin  (requête préliminaire automatique du navigateur)</text>
-  <text x="410" y="141" text-anchor="middle" class="mono">« Puis-je appeler POST /vin depuis https://mon-front.insee.fr ? »</text>
+  <text x="410" y="126" text-anchor="middle" class="step" fill="#4338ca">1. OPTIONS /vins  (requête préliminaire automatique du navigateur)</text>
+  <text x="410" y="141" text-anchor="middle" class="mono">« Puis-je appeler POST /vins depuis https://mon-front.insee.fr ? »</text>
   <line x1="138" y1="150" x2="678" y2="150" stroke="#6366f1" stroke-width="2.3" marker-end="url(#arr-pre)"/>
 
   <!-- 2. Réponse Preflight -->
@@ -46,7 +46,7 @@
   <line x1="682" y1="198" x2="142" y2="198" stroke="#6366f1" stroke-width="2.3" stroke-dasharray="6 4" marker-end="url(#arr-pre)"/>
 
   <!-- 3. Requête réelle -->
-  <text x="410" y="224" text-anchor="middle" class="step" fill="#0369a1">3. POST /vin  (requête réelle envoyée après accord)</text>
+  <text x="410" y="224" text-anchor="middle" class="step" fill="#0369a1">3. POST /vins  (requête réelle envoyée après accord)</text>
   <line x1="138" y1="234" x2="678" y2="234" stroke="#0284c7" stroke-width="2.3" marker-end="url(#arr-req)"/>
 
   <!-- 4. Réponse réelle -->
