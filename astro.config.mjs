@@ -3,8 +3,12 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 /**
- * Plugin rehype minimaliste : ouvre les liens externes (http/https) dans un nouvel onglet
- * tout en restant accessible (icône visuelle masquée aux lecteurs d'écran + mention sr-only).
+ * Plugin rehype exécuté au build sur chaque page Markdown/MDX :
+ * il parcourt l'AST HTML (HAST) généré pour détecter les liens externes (`http://` ou `https://`)
+ * sans `target` explicite, les ouvrir dans un nouvel onglet de façon sécurisée
+ * (`target="_blank"`, `rel="noopener noreferrer"`), puis y ajouter :
+ * 1. une icône SVG Lucide (`external-link`) purement visuelle (`aria-hidden="true"`) ;
+ * 2. un libellé `.sr-only` (« (nouvel onglet) ») annoncé par les lecteurs d'écran.
  */
 function rehypeExternalLinks() {
 	/** @param {any} node */
@@ -76,21 +80,33 @@ function rehypeExternalLinks() {
 	return visit;
 }
 
-// https://astro.build/config
+// Configuration principale d'Astro (https://docs.astro.build/en/reference/configuration-reference/)
 export default defineConfig({
+	// URL publique racine et sous-chemin GitHub Pages (utilisés pour les URLs canoniques, le sitemap et le RSS)
 	site: 'https://gaetan-varlet.github.io',
 	base: '/formation-api-rest',
+
+	// Branchement du plugin rehypeExternalLinks sur toutes les pages .md et .mdx
 	markdown: {
 		rehypePlugins: [rehypeExternalLinks],
 	},
+
 	integrations: [
 		starlight({
 			title: 'Formation API REST',
+
+			// Feuille de style globale chargée en complément du thème natif Starlight
 			customCss: ['./src/styles/custom.css'],
+
+			// Affiche automatiquement en bas de page la date du dernier commit Git
 			lastUpdated: true,
+
+			// Ajoute un lien « Modifier cette page » pointant directement vers l'éditeur GitHub
 			editLink: {
 				baseUrl: 'https://github.com/gaetan-varlet/formation-api-rest/edit/main/',
 			},
+
+			// Balise <link rel="alternate"> pour permettre aux lecteurs/agrégateurs de découvrir le flux RSS
 			head: [
 				{
 					tag: 'link',
@@ -102,6 +118,8 @@ export default defineConfig({
 					},
 				},
 			],
+
+			// Langue par défaut du site : traduit l'interface Starlight en français et pose lang="fr" sur <html>
 			defaultLocale: 'root',
 			locales: {
 				root: {
@@ -109,6 +127,8 @@ export default defineConfig({
 					lang: 'fr',
 				},
 			},
+
+			// Icônes de liens externes/flux affichées dans l'en-tête en haut à droite
 			social: [
 				{
 					icon: 'github',
@@ -121,6 +141,9 @@ export default defineConfig({
 					href: '/formation-api-rest/rss.xml',
 				},
 			],
+
+			// Ordre explicite des 8 modules et des liens Précédent / Suivant (prioritaire sur l'ordre alphabétique des fichiers)
+			// Les badges `variant: 'caution'` signalent les fiches encore à compléter, actualiser ou marquées obsolètes.
 			sidebar: [
 				{
 					label: 'Fondamentaux',

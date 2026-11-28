@@ -94,6 +94,22 @@ Pensez à commiter `pnpm-lock.yaml` (et `package.json` si modifié) après une m
 
 ---
 
+## 🧩 Configuration Astro et code spécifique
+
+Le site s'appuie au maximum sur les comportements natifs d'**Astro** et **Starlight**. Les quelques fichiers hors contenu Markdown ont chacun un rôle précis :
+
+| Fichier | Rôle |
+| --- | --- |
+| `astro.config.mjs` | Configuration principale Astro / Starlight (`base`, `site`, langue française, barre latérale, liens GitHub/RSS) et plugin `rehypeExternalLinks` ouvrant les liens externes dans un nouvel onglet de façon accessible. |
+| `src/content.config.ts` | Déclaration standard de la collection `docs` (`docsLoader` + `docsSchema` Starlight). |
+| `src/pages/rss.xml.ts` | Génération du flux RSS (`/formation-api-rest/rss.xml`) trié selon `lastUpdated` ou l'historique Git (Starlight ne fournit pas de flux RSS natif). |
+| `src/utils/tech-icons.ts` | Résolveur local des icônes `@iconify-json/devicon` et `@iconify-json/lucide` au moment du build (ces paquets ne contenant que des JSON bruts de SVG). |
+| `src/components/TechIcon.astro` | Composant inline minimal rendant un SVG résolu par `tech-icons.ts` dans les textes, listes et tableaux MDX. |
+| `src/components/Card.astro` | Wrapper minimal autour du `<Card>` natif Starlight permettant d'utiliser les icônes Devicon/Lucide tout en conservant le style natif. |
+| `src/styles/custom.css` | Ajustements CSS minimaux par-dessus le thème Starlight (centrage des schémas, grille 3 colonnes `.card-grid-3`, comparatifs, aperçu e-mail, blocs `<details>` et icônes SVG). |
+
+---
+
 ## 🌐 Déploiement
 
 Le déploiement sur GitHub Pages est **automatique** via le workflow `.github/workflows/deploy.yml` :

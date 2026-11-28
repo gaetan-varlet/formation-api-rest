@@ -1,3 +1,10 @@
+/**
+ * Endpoint statique générant le flux RSS (`dist/rss.xml`) au moment du build.
+ *
+ * Pourquoi ce fichier existe : Starlight ne génère pas de flux RSS nativement.
+ * Ce script liste toutes les pages publiées (hors `draft: true`) triées de la plus
+ * récente à la plus ancienne pour alimenter le bouton RSS de l'en-tête.
+ */
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import rss from '@astrojs/rss';
@@ -67,7 +74,9 @@ export async function GET(context: APIContext) {
 	const items = docs
 		.map((doc) => {
 			const gitDate = doc.filePath ? commitDates.get(resolve(doc.filePath)) : undefined;
+			// Ordre de priorité pour la date de publication : frontmatter `lastUpdated` -> dernier commit Git -> date du build
 			const pubDate = doc.data.lastUpdated instanceof Date ? doc.data.lastUpdated : (gitDate ?? fallbackDate);
+			// La page d'accueil (`index.mdx`) est servie directement à la racine du `baseUrl`
 			const slug = doc.id === 'index' ? '' : `${doc.id}/`;
 
 			return {
