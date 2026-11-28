@@ -1,0 +1,35 @@
+---
+/**
+ * Wrapper minimal autour du `<Card>` natif de Starlight.
+ *
+ * Pourquoi ce composant existe : `<Card>` de `@astrojs/starlight/components` n'accepte qu'une liste
+ * fermée d'icônes intégrées et ne propose pas de slot pour l'icône. Ce wrapper résout une icône
+ * locale Devicon/Lucide via `resolveTechIcon` et l'injecte dans la prop `title`, tout en conservant
+ * intégralement le balisage, les couleurs alternées et les styles par défaut de Starlight.
+ */
+import { Card as StarlightCard } from '@astrojs/starlight/components';
+import { resolveTechIcon } from '../utils/tech-icons';
+
+interface Props {
+	title: string;
+	icon?: string;
+}
+
+// Indispensable car Starlight injecte `title` via `set:html` : protège les caractères spéciaux (ex. `&`)
+function escapeHtml(text: string): string {
+	return text
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;');
+}
+
+const { title, icon } = Astro.props;
+const resolved = resolveTechIcon(icon);
+const safeTitle = escapeHtml(title);
+const renderedTitle = resolved
+	? `<span class="card-tech-icon" aria-hidden="true"><svg viewBox="${resolved.viewBox}" focusable="false">${resolved.body}</svg></span><span>${safeTitle}</span>`
+	: safeTitle;
+---
+
+<StarlightCard title={renderedTitle}><slot /></StarlightCard>

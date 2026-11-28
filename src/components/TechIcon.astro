@@ -1,0 +1,24 @@
+---
+/**
+ * Affiche une icône SVG locale (Lucide ou Devicon) inline dans du texte, une liste ou un tableau MDX
+ * via `<TechIcon name="..." />`. Le SVG est injecté statiquement au build (`set:html`), sans JS client.
+ * `aria-hidden="true"` et `focusable="false"` garantissent que cette icône décorative est ignorée
+ * des lecteurs d'écran et de la navigation clavier.
+ */
+import { resolveTechIcon } from '../utils/tech-icons';
+
+interface Props {
+	name: string;
+}
+
+const { name } = Astro.props;
+const icon = resolveTechIcon(name);
+---
+
+{
+	icon && (
+		<span class="tech-icon-inline" aria-hidden="true">
+			<svg viewBox={icon.viewBox} focusable="false" set:html={icon.body} />
+		</span>
+	)
+}

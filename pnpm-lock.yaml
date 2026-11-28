@@ -23,6 +23,13 @@ importers:
       sharp:
         specifier: ^0.35.3
         version: 0.35.5(@types/node@26.6.6)
+    devDependencies:
+      '@iconify-json/devicon':
+        specifier: ^1.2.85
+        version: 1.2.85
+      '@iconify-json/lucide':
+        specifier: ^1.2.160
+        version: 1.2.160
 
 packages:
 
@@ -327,6 +334,15 @@ packages:
 
   '@expressive-code/plugin-text-markers@0.44.4':
     resolution: {integrity: sha512-cfjqsNh4oYikxFeylXKhZ0BxvrwIIztu+g5JFFObYMO3YTmHwv66DrHCh91wTgTGz0q4+Tj/iTIYkngqCpX0Cg==}
+
+  '@iconify-json/devicon@1.2.85':
+    resolution: {integrity: sha512-tNO4QxKU9fd68Q9EkGuKQ3TKc302Q/WBbbAV+h7jQxwWztDUnjn0AaViD+KXzm93rRidJ9zemE209zuvTKkvdg==}
+
+  '@iconify-json/lucide@1.2.160':
+    resolution: {integrity: sha512-811QWUxsgfjFZewGJG45+TG62TNaeGMhsQr6XGiheTJpoe9Dc/vY2RHPLjOE1EuZ6vt70060MBkqz0whJG9I3w==}
+
+  '@iconify/types@2.0.0':
+    resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -2393,6 +2409,16 @@ snapshots:
   '@expressive-code/plugin-text-markers@0.44.4':
     dependencies:
       '@expressive-code/core': 0.44.4
+
+  '@iconify-json/devicon@1.2.85':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/lucide@1.2.160':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify/types@2.0.0': {}
 
   '@img/colour@1.1.0': {}
 

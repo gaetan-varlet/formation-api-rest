@@ -125,3 +125,50 @@
 .sl-markdown-content details:not(:where(.not-content *)):hover {
 	border-color: var(--sl-color-accent);
 }
+
+/*
+ * Icônes SVG locales (Devicon / Lucide) alignées sur les composants natifs Starlight.
+ * - `.tech-icon-inline` : icônes intégrées dans le texte/tableaux via <TechIcon />.
+ * - `.card .title > span:has(> .card-tech-icon)` : Starlight enveloppe `title` dans un <span> ;
+ *   le passage en inline-flex permet d'aligner notre icône et le libellé comme dans <Card> natif.
+ * - `.card-tech-icon` : réutilise `--sl-card-border` et `--sl-card-bg` pour conserver la
+ *   coloration alternée automatique appliquée par Starlight à chaque carte.
+ */
+.sl-markdown-content .tech-icon-inline {
+	display: inline-flex;
+	align-items: center;
+	vertical-align: -0.15em;
+	color: var(--sl-color-text-accent);
+	margin-inline-end: 0.2rem;
+}
+
+.sl-markdown-content .tech-icon-inline svg {
+	width: 1.05em;
+	height: 1.05em;
+}
+
+.card .title > span:has(> .card-tech-icon) {
+	display: inline-flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.card-grid-3 .card .title > span:has(> .card-tech-icon) {
+	gap: 0.65rem;
+}
+
+.card .card-tech-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid var(--sl-card-border);
+	background-color: var(--sl-card-bg);
+	padding: 0.2em;
+	border-radius: 0.25rem;
+	flex-shrink: 0;
+}
+
+.card .card-tech-icon svg {
+	width: 1.333em;
+	height: 1.333em;
+}

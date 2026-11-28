@@ -3,6 +3,7 @@ title: "Le protocole HTTP"
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
+import TechIcon from '../../../components/TechIcon.astro';
 
 ## Définition
 
@@ -217,11 +218,11 @@ response.setContentType("text/html; charset=UTF-8");
 
 Pour appeler une URL ou tester une API sans écrire de code applicatif :
 
-- 🌐 **Navigateur web :** pratique directement depuis la barre d'adresse, mais limité aux requêtes `GET` (pensez à ouvrir `F12` → onglet **Réseau** pour inspecter statut et en-têtes).
-- 🧪 **Client REST dédié (`Insomnia`, `Postman`) :** indispensable pour envoyer des requêtes `POST`, `PUT`, `PATCH` ou `DELETE`, configurer des en-têtes (`Content-Type`, `Authorization`…) et inspecter le statut et le corps de réponse.
-- 📘 **Documentation interactive Swagger :** lorsque l'API en expose une, elle permet d'exécuter des requêtes directement dans l'interface (par exemple [FakeRestAPI](http://fakerestapi.azurewebsites.net/)).
-- 💻 **Ligne de commande (`curl` + `jq`) :** idéal pour reproduire ou scripter un appel depuis un terminal (**`jq`** indente/colore le JSON avec `jq .` et permet aussi de filtrer des champs dans un script, ex. `| jq '.title'`).
-- 📊 **Autres outils :** `LibreOffice`, `R`, `Python`, etc. — tout logiciel capable d'émettre une requête HTTP peut interroger une API.
+- <TechIcon name="lucide:globe" /> **Navigateur web :** pratique directement depuis la barre d'adresse, mais limité aux requêtes `GET` (pensez à ouvrir `F12` → onglet **Réseau** pour inspecter statut et en-têtes).
+- <TechIcon name="tests" /> **Client REST dédié (`Insomnia`, `Postman`) :** indispensable pour envoyer des requêtes `POST`, `PUT`, `PATCH` ou `DELETE`, configurer des en-têtes (`Content-Type`, `Authorization`…) et inspecter le statut et le corps de réponse.
+- <TechIcon name="book" /> **Documentation interactive Swagger :** lorsque l'API en expose une, elle permet d'exécuter des requêtes directement dans l'interface (par exemple [FakeRestAPI](http://fakerestapi.azurewebsites.net/)).
+- <TechIcon name="bash" /> **Ligne de commande (`curl` + `jq`) :** idéal pour reproduire ou scripter un appel depuis un terminal (**`jq`** indente/colore le JSON avec `jq .` et permet aussi de filtrer des champs dans un script, ex. `| jq '.title'`).
+- <TechIcon name="lucide:bar-chart-3" /> **Autres outils :** `LibreOffice`, `R`, `Python`, etc. — tout logiciel capable d'émettre une requête HTTP peut interroger une API.
 
 ### Mini-atelier : 3 requêtes à tester sur JSONPlaceholder
 

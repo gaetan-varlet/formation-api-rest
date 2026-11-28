@@ -3,6 +3,7 @@ title: "Configuration des logs"
 ---
 
 import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import TechIcon from '../../../components/TechIcon.astro';
 
 ## Configuration de Logback
 
@@ -104,8 +105,8 @@ Deux **alternatives indépendantes** existent pour afficher les requêtes SQL en
 
 | Approche | Mise en place | Richesse des logs |
 | :--- | :--- | :--- |
-| **Option 1 — Hibernate** | ⚡ **Très rapide** (2 propriétés) | Requêtes générées par Hibernate uniquement, avec des `?` à la place des valeurs |
-| **Option 2 — `p6spy`** | 🔧 **Plus longue** (dépendance + driver + fichier dédié) | **Toutes** les requêtes SQL (Hibernate + JDBC), **avec les valeurs réelles des paramètres** et le temps d'exécution |
+| **Option 1 — Hibernate** | <TechIcon name="lucide:zap" /> **Très rapide** (2 propriétés) | Requêtes générées par Hibernate uniquement, avec des `?` à la place des valeurs |
+| **Option 2 — `p6spy`** | <TechIcon name="wrench" /> **Plus longue** (dépendance + driver + fichier dédié) | **Toutes** les requêtes SQL (Hibernate + JDBC), **avec les valeurs réelles des paramètres** et le temps d'exécution |
 
 <Tabs>
 <TabItem label="Option 1 : Simple (Hibernate)">

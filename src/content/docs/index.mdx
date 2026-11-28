@@ -21,40 +21,41 @@ hero:
         rel: noopener noreferrer
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { CardGrid } from '@astrojs/starlight/components';
+import Card from '../../components/Card.astro';
 
 ## Parcours de la formation
 
 <CardGrid stagger>
-	<Card title="1. Fondamentaux" icon="open-book">
+	<Card title="1. Fondamentaux" icon="book">
 		Services web, protocole HTTP, architecture REST et exemple d'application web Java EE.
 		[Accéder au module](/formation-api-rest/fondamentaux/introduction/)
 	</Card>
-	<Card title="2. Démarrer avec Spring Boot" icon="rocket">
+	<Card title="2. Démarrer avec Spring Boot" icon="springboot">
 		Présentation de Spring, injection de dépendances, premier Hello World, base de données, logs, configuration de base et formatage (Spotless).
 		[Accéder au module](/formation-api-rest/spring-boot/presentation-spring/)
 	</Card>
-	<Card title="3. Développement d'API REST" icon="laptop">
+	<Card title="3. Développement d'API REST" icon="api">
 		Création de CRUD, annotations Spring Web, gestion des erreurs, contrats d'API, Swagger et consommation d'API.
 		[Accéder au module](/formation-api-rest/api-rest/creation-crud/)
 	</Card>
-	<Card title="4. Accès aux données SQL & Performance" icon="list-format">
+	<Card title="4. Accès aux données SQL & Performance" icon="storage">
 		Rappels JPA, Spring Data JPA (requêtes, cache L1, N+1, projections, Specifications), JDBC/JdbcClient, batching, streaming SQL → JSON et cache applicatif.
 		[Accéder au module](/formation-api-rest/acces-donnees/rappels-jpa/)
 	</Card>
-	<Card title="5. Gestion des fichiers" icon="setting">
+	<Card title="5. Gestion des fichiers" icon="files">
 		Réception de fichiers (Upload), export CSV (en mémoire et en streaming), PDF et tableurs (Excel/Calc) et stockage objet S3.
 		[Accéder au module](/formation-api-rest/fichiers/upload/)
 	</Card>
-	<Card title="6. Sécurité & Filtres" icon="approve-check">
+	<Card title="6. Sécurité & Filtres" icon="security">
 		Spring Security et Keycloak, chaîne de filtres, CORS et neutralisation des entrées utilisateur.
 		[Accéder au module](/formation-api-rest/securite/spring-security-keycloak/)
 	</Card>
-	<Card title="7. Tests" icon="puzzle">
+	<Card title="7. Tests" icon="tests">
 		Stratégie de test, tests unitaires, tests Spring, Cucumber, WireMock et intégration CI/CD.
 		[Accéder au module](/formation-api-rest/tests/strategie-tests/)
 	</Card>
-	<Card title="8. Production & Déploiement" icon="up-caret">
+	<Card title="8. Production & Déploiement" icon="deploy">
 		Supervision avec Actuator, tâches planifiées, packaging multi-environnements et déploiement sur Kubernetes ou VM.
 		[Accéder au module](/formation-api-rest/deploiement/actuator/)
 	</Card>
@@ -63,14 +64,14 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 ## Prérequis pour la formation
 
 <CardGrid>
-	<Card title="Outils nécessaires" icon="laptop">
+	<Card title="Outils nécessaires" icon="wrench">
 		- **JDK**
 		- **Maven**
 		- **IDE Java** *(IntelliJ IDEA, VS Code, Eclipse…)*
 		- **Client HTTP** *(Insomnia, Postman ou `curl`)*
 		- **Apache Tomcat** *(optionnel : uniquement pour l'[exemple Java EE](/formation-api-rest/fondamentaux/exemple-java-ee/) ; Spring Boot embarque déjà Tomcat)*
 	</Card>
-	<Card title="Connaissances recommandées" icon="open-book">
+	<Card title="Connaissances recommandées" icon="graduation-cap">
 		- **Indispensable :** connaître les **bases de Java**.
 		- **Un plus :** connaître les bases d'**Hibernate / JPA**.
 		- **Un plus :** avoir une **première expérience d'application web** *(quelle que soit la technologie)*.

@@ -45,7 +45,9 @@ public interface VinRepository extends JpaRepository<Vin, Long> {
 ```
 
 - **Le piège PostgreSQL (`fetch_size`)** : Par défaut (`fetchSize = 0`), le driver JDBC télécharge 100 % du résultat en RAM avant de rendre la main. Définir un lot (ex. 2000) active le curseur côté base.
-⚠️ **La limite des entités JPA :** Hibernate garde en mémoire chaque objet lu pour surveiller d'éventuelles modifications. Sur un gros volume, cette mémoire interne grossit jusqu'au crash (OutOfMemoryError) → d'où le recours indispensable au DTO (section suivante).
+:::caution[La limite des entités JPA]
+Hibernate garde en mémoire chaque objet lu pour surveiller d'éventuelles modifications. Sur un gros volume, cette mémoire interne grossit jusqu'au crash (`OutOfMemoryError`) → d'où le recours indispensable au DTO (section suivante).
+:::
 
 ## Étape 1 bis — Le pattern de production : Stream de Records
 

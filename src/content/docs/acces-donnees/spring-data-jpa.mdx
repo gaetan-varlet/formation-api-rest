@@ -3,6 +3,7 @@ title: "Spring Data JPA : requêtes et optimisation"
 ---
 
 import { Steps } from '@astrojs/starlight/components';
+import TechIcon from '../../../components/TechIcon.astro';
 
 ## Méthodes fournies nativement par `JpaRepository`
 
@@ -225,7 +226,7 @@ public interface VinRepository extends JpaRepository<Vin, Long> {
 - **Approche 1 — *Query Method* (`findByAppellation`) :** Spring Data déduit automatiquement les colonnes à sélectionner à partir des champs du `Record`.
 - **Approche 2 — `@Query` JPQL (`findResumeByAnnee`) :** utile pour les requêtes plus complexes ; l'expression `SELECT new ...` instancie directement le `Record` (en précisant son nom complet avec le package).
 
-:::tip[⚡ Gains]
+:::tip[Gains]
 Seules les colonnes utiles sont lues en base (pas de `SELECT *`) et aucun objet n'est conservé dans le cache L1 Hibernate (empreinte mémoire réduite et aucun suivi d'état).
 :::
 
@@ -380,12 +381,12 @@ Indispensable quand la requête doit être construite **dynamiquement** avec des
 
 Pour les écrans de recherche complexes (nombreux filtres optionnels combinables) :
 
-- 🎯 **Principe :** le Repository étend l'interface standard `JpaSpecificationExecutor<Vin>`.
-- 🧩 **Fonctionnement :** découpe chaque filtre dans une fonction réutilisable (`Specification<T>`), puis les assemble dynamiquement à la volée avec `.and()` et `.or()`.
-- ✨ **Atouts majeurs :**
+- <TechIcon name="lucide:target" /> **Principe :** le Repository étend l'interface standard `JpaSpecificationExecutor<Vin>`.
+- <TechIcon name="lucide:puzzle" /> **Fonctionnement :** découpe chaque filtre dans une fonction réutilisable (`Specification<T>`), puis les assemble dynamiquement à la volée avec `.and()` et `.or()`.
+- <TechIcon name="lucide:sparkles" /> **Atouts majeurs :**
   - standard officiel Spring Data basé sur la Criteria API de Jakarta ;
   - gestion native et automatique de la pagination (`Pageable` + calcul du `COUNT`).
-- ⚠️ **Pourquoi pas Querydsl ?** Bibliothèque peu maintenue sous Jakarta EE / Spring Boot 3+ ; `Specifications` est le standard intégré sans dépendance ni plugin externe.
+- <TechIcon name="warning" /> **Pourquoi pas Querydsl ?** Bibliothèque peu maintenue sous Jakarta EE / Spring Boot 3+ ; `Specifications` est le standard intégré sans dépendance ni plugin externe.
 
 Voir la [documentation Spring Data Specifications](https://docs.spring.io/spring-data/jpa/reference/jpa/specifications.html).
 

@@ -44,7 +44,9 @@ public class Vin {
 | **`AUTO`** *(défaut si `strategy` omis)* | Selon le SGBD | Laisse Hibernate choisir la stratégie selon la base : à éviter si vous voulez maîtriser le comportement exact en base. |
 | *(aucun `@GeneratedValue`)* | `String` ou `Long` | L'identifiant est fourni manuellement par votre code avant le `save()`. Réservé aux vraies clés naturelles immuables (code pays ISO, code commune, SIRET…). |
 
-> 💡 **Pourquoi `Long` plutôt qu'`Integer` ?** Contrairement à `Integer` (limité à ~2,14 milliards), `Long` évite tout risque de saturation sur les tables volumineuses et suit les conventions Spring Data JPA.
+:::tip[Pourquoi `Long` plutôt qu'`Integer` ?]
+Contrairement à `Integer` (limité à ~2,14 milliards), `Long` évite tout risque de saturation sur les tables volumineuses et suit les conventions Spring Data JPA.
+:::
 
 :::caution[Toujours un type objet (`Long`), jamais un primitif (`long`)]
 Avant insertion en base, un nouvel objet a un identifiant à `null` (`0L` pour un primitif `long`), ce qui permet à Spring Data JPA de distinguer une création (`INSERT`) d'une mise à jour (`UPDATE`).

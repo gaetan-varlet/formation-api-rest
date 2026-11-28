@@ -2,7 +2,8 @@
 title: "Présentation de l'univers Spring"
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { CardGrid } from '@astrojs/starlight/components';
+import Card from '../../../components/Card.astro';
 
 ## L'univers Spring
 
@@ -15,19 +16,19 @@ Plutôt qu'un bloc monolithique, Spring est un **écosystème modulaire** compos
   <Card title="Spring Core" icon="puzzle">
     Le cœur du framework : gère la création et le cycle de vie des objets (*beans*) via l'injection de dépendances (`@Autowired`, `@Service`, `@Repository`, `@Controller`…).
   </Card>
-  <Card title="Spring MVC" icon="laptop">
+  <Card title="Spring MVC" icon="api">
     La couche web : permet de construire des applications web et des API REST basées sur l'API Servlet.
   </Card>
-  <Card title="Spring Data" icon="setting">
+  <Card title="Spring Data" icon="storage">
     La couche d'accès aux données : simplifie et unifie les échanges avec les bases de données (SQL/JPA, NoSQL…).
   </Card>
-  <Card title="Spring Security" icon="approve-check">
+  <Card title="Spring Security" icon="security">
     La sécurité applicative : fournit l'authentification, la gestion des rôles/autorisations et la protection des requêtes HTTP.
   </Card>
-  <Card title="Spring Boot" icon="rocket">
+  <Card title="Spring Boot" icon="springboot">
     Le point d'entrée moderne : assemble et auto-configure les briques précédentes pour démarrer une application rapidement, avec un serveur Tomcat embarqué par défaut.
   </Card>
-  <Card title="Spring Batch" icon="list-format">
+  <Card title="Spring Batch" icon="layers">
     Les traitements par lots (*batchs*) : lecture, transformation et écriture de gros volumes de données de manière robuste.
   </Card>
 </CardGrid>

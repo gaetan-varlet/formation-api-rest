@@ -3,6 +3,7 @@ title: "Tests d'intégration avec JUnit"
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
+import TechIcon from '../../../components/TechIcon.astro';
 
 ## Principes
 
@@ -318,7 +319,7 @@ void doitUploaderDepuisTestResources() throws Exception {
 - **Injection par constructeur avec JUnit 5 :** contrairement à un `@Service`, JUnit 5 gère lui-même le constructeur des classes de test et exige de le marquer avec `@Autowired` *(ou d'ajouter `@TestConstructor(autowireMode = AutowireMode.ALL)` si vous souhaitez utiliser `@RequiredArgsConstructor` directement)*.
 - `@SpringBootTest` inclut déjà `@ExtendWith(SpringExtension.class)` : inutile de la répéter.
 - **Évitez `@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)` :** cette annotation détruit et redémarre tout le contexte Spring avant chaque méthode de test, ce qui ralentit énormément l'exécution. Pour garder des tests indépendants, réinitialisez plutôt les données entre deux tests (ex. `@Sql` ou nettoyage explicite en `@BeforeEach` / fin de test).
-- **Passer sur un vrai serveur Tomcat :** ajoutez `webEnvironment = WebEnvironment.RANDOM_PORT` sur `@SpringBootTest` *(votre code `RestTestClient` reste inchangé)*. ⚠️ **Attention :** ce mode démarre Tomcat et, si vous panachez des classes en `MOCK` et d'autres en `RANDOM_PORT`, Spring crée un **second contexte en cache** distinct, ce qui allonge le temps de démarrage global.
+- **Passer sur un vrai serveur Tomcat :** ajoutez `webEnvironment = WebEnvironment.RANDOM_PORT` sur `@SpringBootTest` *(votre code `RestTestClient` reste inchangé)*. <TechIcon name="warning" /> **Attention :** ce mode démarre Tomcat et, si vous panachez des classes en `MOCK` et d'autres en `RANDOM_PORT`, Spring crée un **second contexte en cache** distinct, ce qui allonge le temps de démarrage global.
 :::
 
 ## Tester des endpoints sécurisés (`spring-security-test`)
